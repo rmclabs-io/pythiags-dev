@@ -46,6 +46,7 @@
   </p>
   </details>
 
+* deepstream5
 * python 3.6 (venv recommended)
 * wheel
   
@@ -53,16 +54,6 @@
 
   ```bash
   pip install wheel
-  ```
-
-* Install Deepstream python bindings:
-
-  ```bash
-  $ pip install /opt/nvidia/deepstream/deepstream/lib/
-  Processing /opt/nvidia/deepstream/deepstream/lib
-  Installing collected packages: pyds
-    Running setup.py install for pyds ... done
-  Successfully installed pyds-1.0
   ```
 
 * Other- jetson info for mwe:
@@ -120,7 +111,7 @@ Should take around 13 [min] ( `jetson_clocks` enabled and nvpmodel at `MAXN`), w
   pythia prod
   ```
 
-* Run customizable production application (N cameras, `nvinfer`, `nvmultistreamtiler`):
+* Run customizable production application (N cameras, with `nvinfer` and `nvmultistreamtiler`):
 
   Create a file named `pythia.json` and configure it using
   `pythia.pipeline.build_pipeline`'s parameters as kwargs:
@@ -175,8 +166,10 @@ Should take around 13 [min] ( `jetson_clocks` enabled and nvpmodel at `MAXN`), w
 
 * Build the full deepstream pipeline:
 
-  NOTE: the pipeline constructs a multistreamtiler with shape 2x2, regardless of the
-  number of cameras
+  NOTE1: the pipeline constructs a multistreamtiler with shape 2x2, regardless of the
+  number of cameras.
+
+  NOTE2: By default, the pipeline contains an element named "observer", located after the `nvinfer`. If this is the case, `pythia` enables reporting detections from `nvinfer` to stdout and a queue
 
   <details><summary>[Click here to expand]</summary>
   <p>
@@ -200,7 +193,7 @@ Should take around 13 [min] ( `jetson_clocks` enabled and nvpmodel at `MAXN`), w
       height=720
       rows=2
       columns=2
-      name=tiler
+      name=observer
   ! nvvideoconvert
   ! nvdsosd display-text=false
   ! nvvideoconvert name=decoder
@@ -233,8 +226,3 @@ Should take around 13 [min] ( `jetson_clocks` enabled and nvpmodel at `MAXN`), w
 
   </p>
   </details>
-
-
-## TODO:
-
-* equip image saver
