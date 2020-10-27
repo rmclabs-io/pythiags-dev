@@ -12,11 +12,16 @@ Taken from kivy camera example https://kivy.org/doc/stable/examples/gen__camera_
 Modified by RMCLabs @ Q4 2020 for demonstration purposes.
 
 """
+from datetime import datetime
 
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.uix.floatlayout import FloatLayout
 from kivy.properties import StringProperty
+from kivy.uix.floatlayout import FloatLayout
+
+from pythia.detections import DetectionLogger
+from pythia.detections import Storage
+
 
 Builder.load_string(
     """
@@ -50,16 +55,26 @@ class Box(FloatLayout):
     pipeline_string = StringProperty()
     """Pipeline_string to build Gstreamer Pipeline."""
 
-    # def __init__(self, gstreamer_pipeline, **kwargs):
-    #     self.gstreamer_pipeline = gstreamer_pipeline
-    #     super().__init__(**kwargs)
-
 
 class PythiaApp(App):
     def __init__(self, pipeline_string, **kwargs):
+        self.running_since = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
         self.pipeline_string = pipeline_string
+        self.storage = Storage(self.running_since)
+        self.detection_logger = DetectionLogger()
         super().__init__(**kwargs)
 
     def build(self):
         box = Box(pipeline_string=self.pipeline_string)
         return box
+
+    def monitor_detections(self, element):
+        from pythia.detections import DetectionsHandler
+
+        self.handler = DetectionsHandler(
+            element,
+            [
+                self.storage,
+                self.detection_logger,
+            ],
+        )

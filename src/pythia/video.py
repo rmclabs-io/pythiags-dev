@@ -2,15 +2,14 @@
 """"""
 
 
-import gi
-gi.require_version("Gst", "1.0")
-from gi.repository import Gst
 from kivy.app import App
-from kivy.logger import Logger
 from kivy.properties import StringProperty
 from kivy.core.camera.camera_gi import CameraGi
 from kivy.uix.camera import Camera
 from kivy.uix.image import Image
+
+from pythia import logger
+from pythia import Gst
 
 
 def parse_launch(pipeline: str) -> str:
@@ -19,14 +18,16 @@ def parse_launch(pipeline: str) -> str:
         raise RuntimeError
     return pipeline
 
+
 def on_eos(_, __, app):
-    Logger.info("Gstreamer: End-of-stream\n")
+    logger.info("Gstreamer: End-of-stream\n")
     app.stop()
     return True
 
+
 def on_error(_, message, app):
     err, debug = message.parse_error()
-    Logger.error("Gstreamer: %s: %s\n" % (err, debug))
+    logger.error("Gstreamer: %s: %s\n" % (err, debug))
     app.stop()
     return True
 
@@ -50,9 +51,13 @@ class DeepstreamCamera(CameraGi):
           s = pad.get_current_caps().get_structure(0)
           return (s.get_value('width'), s.get_value('height'))
       ```
+
+    Additionally, if the pipeline contains an element named "observer".
+    It will be used to ectract deepstream metadata
     """
 
     def __init__(self, *largs, **kwargs):
+        self.app = App.get_running_app()
         self.pipeline_string = kwargs.pop("pipeline_string")
         super().__init__(*largs, **kwargs)
         if any(
@@ -78,8 +83,12 @@ class DeepstreamCamera(CameraGi):
 
         bus = self._pipeline.get_bus()
         bus.add_signal_watch()
-        bus.connect("message::eos", on_eos, App.get_running_app())
-        bus.connect("message::error", on_error, App.get_running_app())
+        bus.connect("message::eos", on_eos, self.app)
+        bus.connect("message::error", on_error, self.app)
+
+        self._observer = self._pipeline.get_by_name("observer")
+        if self._observer:
+            self.app.monitor_detections(self._observer)
 
         if self._camerasink and not self.stopped:
             self.start()

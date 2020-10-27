@@ -3,3 +3,6 @@
 *.pyc
 typings/
 pythia.json
+.vscode/
+.python-version
+*.jsonl

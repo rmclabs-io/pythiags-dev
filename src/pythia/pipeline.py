@@ -227,14 +227,14 @@ def build_pipeline(
             batched-push-timeout={batched_push_timeout}
             enable-padding=1
         ! nvinfer
-            config-file-path={nvinfer_file} 
+            config-file-path={nvinfer_file}
         ! queue
         ! nvmultistreamtiler
             width={output_width}
             height={output_height}
             rows=2
             columns=2
-            name=tiler
+            name=observer
         ! nvvideoconvert
         ! nvdsosd display-text=false
         ! nvvideoconvert name=decoder

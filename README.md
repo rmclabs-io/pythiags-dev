@@ -55,6 +55,16 @@
   pip install wheel
   ```
 
+* Install Deepstream python bindings:
+
+  ```bash
+  $ pip install /opt/nvidia/deepstream/deepstream/lib/
+  Processing /opt/nvidia/deepstream/deepstream/lib
+  Installing collected packages: pyds
+    Running setup.py install for pyds ... done
+  Successfully installed pyds-1.0
+  ```
+
 * Other- jetson info for mwe:
 
   <details><summary>[printenv | grep JETSON - Click here to expand]</summary>
@@ -223,3 +233,8 @@ Should take around 13 [min] ( `jetson_clocks` enabled and nvpmodel at `MAXN`), w
 
   </p>
   </details>
+
+
+## TODO:
+
+* equip image saver

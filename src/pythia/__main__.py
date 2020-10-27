@@ -6,8 +6,8 @@ from sys import exit
 from pathlib import Path
 from typing import List
 
-from kivy.logger import Logger
 
+from pythia import logger
 from pythia.app import PythiaApp
 from pythia.pipeline import build_pipeline
 
@@ -31,9 +31,9 @@ PROD_PIPELINE = build_pipeline(
 )
 
 
-def build_pipeline_string(mode:List[str]):
+def build_pipeline_string(mode: List[str]):
     if not mode:
-        Logger.error(
+        logger.error(
             "A Gst pipeline with gstlaunch syntax is required. Alternatively, pass `demo` or `prod`"
         )
         exit(1)
@@ -45,6 +45,7 @@ def build_pipeline_string(mode:List[str]):
 
     if mode[0] == "json":
         from json import load
+
         with open(Path.cwd() / "pythia.json", "r") as cfg:
             data = load(cfg)
         return build_pipeline(**data)
