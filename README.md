@@ -107,7 +107,7 @@ Should take around 13 [min] ( `jetson_clocks` enabled and nvpmodel at `MAXN`), w
 
 * Run production application (3 cameras, `nvinfer`, `nvmultistreamtiler`):
 
-  This demo captures detections produced bn deepstream and (1) outputs to stdout, and (2) appends elements to a `collections.deque`. On program exit, the `deque` is dumpled to a jsonlines file, but in production this should be consumed in realtime by another thread/process.
+  This demo captures detections produced by deepstream and (1) outputs to stdout, and (2) appends elements to a `collections.deque`. On program exit, the `deque` is dumpled to a jsonlines file, but in production this should be consumed in realtime by another thread/process.
 
   ```bash
   pythia prod
