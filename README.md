@@ -94,7 +94,7 @@
 Should take around 13 [min] ( `jetson_clocks` enabled and nvpmodel at `MAXN`), we need to compile kivy for arm. see <https://github.com/kivy/kivy/issues/6518#issuecomment-531849262>
 
   ```bash
-  pip install git+https://github.com/rmclabs-cl/pythia.git@master
+  pip install git+https://github.com/rmclabs-cl/pythia.git@main
   ```
 
 ## Usage
@@ -106,6 +106,8 @@ Should take around 13 [min] ( `jetson_clocks` enabled and nvpmodel at `MAXN`), w
   ```
 
 * Run production application (3 cameras, `nvinfer`, `nvmultistreamtiler`):
+
+  This demo captures detections produced bn deepstream and (1) outputs to stdout, and (2) appends elements to a `collections.deque`. On program exit, the `deque` is dumpled to a jsonlines file, but in production this should be consumed in realtime by another thread/process.
 
   ```bash
   pythia prod
