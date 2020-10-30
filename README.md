@@ -1,4 +1,4 @@
-# pythia - Deepstream + Kivy
+# pythia - A Minimal app to run Deepstream+Kivy on Jetson
 
 ## Setup
 
