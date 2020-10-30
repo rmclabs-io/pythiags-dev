@@ -1,4 +1,4 @@
-# pythia - deepstream object detection
+# pythia - Deepstream + Kivy
 
 ## Setup
 
