@@ -94,7 +94,7 @@
 Should take around 13 [min] ( `jetson_clocks` enabled and nvpmodel at `MAXN`), we need to compile kivy for arm. see <https://github.com/kivy/kivy/issues/6518#issuecomment-531849262>
 
   ```bash
-  pip install git+https://github.com/rmclabs-cl/pythia.git@main
+  $ pip install git+https://github.com/rmclabs-cl/pythia.git@main
   ```
 
 ## Usage
@@ -102,7 +102,7 @@ Should take around 13 [min] ( `jetson_clocks` enabled and nvpmodel at `MAXN`), w
 * Run demo application (only `videotestsrc`):
 
   ```bash
-  pythia demo
+  $ pythia demo
   ```
 
 * Run production application (3 cameras, `nvinfer`, `nvmultistreamtiler`):
@@ -110,7 +110,7 @@ Should take around 13 [min] ( `jetson_clocks` enabled and nvpmodel at `MAXN`), w
   This demo captures detections produced by deepstream and (1) outputs to stdout, and (2) appends elements to a `collections.deque`. On program exit, the `deque` is dumpled to a jsonlines file, but in production this should be consumed in realtime by another thread/process.
 
   ```bash
-  pythia prod
+  $ pythia prod
   ```
 
 * Run customizable production application (N cameras, with `nvinfer` and `nvmultistreamtiler`):
@@ -135,23 +135,23 @@ Should take around 13 [min] ( `jetson_clocks` enabled and nvpmodel at `MAXN`), w
   ```
 
   ```bash
-  pythia json
+  $ pythia json
   ```
 
 * Test with arbitrary pipeline:
 
   ```bash
-  pythia videotestsrc pattern=ball \
-    ! decodebin name=decoder \
-    ! videoconvert \
-    ! appsink name=camerasink emit-signals=true caps=video/x-raw,format=RGB
+  $ pythia videotestsrc pattern=ball \
+      ! decodebin name=decoder \
+      ! videoconvert \
+      ! appsink name=camerasink emit-signals=true caps=video/x-raw,format=RGB
   ```
 
 * Build a camera string for the deepstream pipeline:
 
   ```python
-  from pythia.pipeline import build_camera
-  build_camera(0, 2, 640, 480, "30/1")
+  >>> from pythia.pipeline import build_camera
+  >>> build_camera(0, 2, 640, 480, "30/1")
   ```
 
 * Build three cameras (string) for the deepstream pipeline:
@@ -162,8 +162,8 @@ Should take around 13 [min] ( `jetson_clocks` enabled and nvpmodel at `MAXN`), w
   ```
 
   ```python
-  from pythia.pipeline import build_cameras
-  build_cameras(640, 480, "30/1", [2, 5, 8])
+  >>> from pythia.pipeline import build_cameras
+  >>> build_cameras(640, 480, "30/1", [2, 5, 8])
   ```
 
 * Build the full deepstream pipeline:
@@ -177,8 +177,15 @@ Should take around 13 [min] ( `jetson_clocks` enabled and nvpmodel at `MAXN`), w
   <p>
 
   ```python
-  from pythia.pipeline import build_pipeline
-  print(build_pipeline(640,480, 960,544, 1280,720, 30, "/opt/nvidia/deepstream/deepstream/samples/configs/deepstream-app/config_infer_primary.txt", [2,5,8]))
+  >>> from pythia.pipeline import build_pipeline
+  >>> print(build_pipeline(
+  ...   input_width=640,input_height=480,
+  ...   muxer_width=960, muxer_height=544,
+  ...   output_width=1280, output_height=720
+  ...   fps=30, 
+  ...   nvinfer_config_file="/opt/nvidia/deepstream/deepstream/samples/configs/deepstream-app/config_infer_primary.txt",
+  ...   dev_video_ids=[2,5,8]
+  ... ))
   nvstreammux
       name=muxer
       batch-size=3
