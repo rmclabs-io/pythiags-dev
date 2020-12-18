@@ -6,3 +6,6 @@ pythia.json
 .vscode/
 .python-version
 *.jsonl
+.eggs
+assets/
+**/*.log

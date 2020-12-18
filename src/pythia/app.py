@@ -72,9 +72,5 @@ class PythiaApp(App):
         from pythia.detections import DetectionsHandler
 
         self.handler = DetectionsHandler(
-            element,
-            [
-                self.storage,
-                self.detection_logger,
-            ],
+            element, [self.storage, self.detection_logger,],
         )

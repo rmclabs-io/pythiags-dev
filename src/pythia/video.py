@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """"""
 
+import os
 
 from kivy.app import App
 from kivy.properties import StringProperty
@@ -12,8 +13,11 @@ from pythia import logger
 from pythia import Gst
 
 
-def parse_launch(pipeline: str) -> str:
-    pipeline = Gst.parse_launch(pipeline)
+def parse_launch(gstlaunch_pipeline: str) -> str:
+    if "DISPLAY" not in os.environ:
+        logger.error("DISPLAY env var not set! This will cause errors")
+        raise RuntimeError
+    pipeline = Gst.parse_launch(gstlaunch_pipeline)
     if not pipeline:
         raise RuntimeError
     return pipeline
