@@ -45,7 +45,7 @@ class EggInfo(egg_info):
 
 setup(
     name="pythia",
-    version="0.3.0",
+    version="0.3.1",
     url="https://github.com/rmclabs-cl/pythia.git",
     author="Pablo Woolvett",
     author_email="pwoolvett@rmc.cl",
@@ -58,7 +58,7 @@ setup(
         "Cython >= 0.29.9",
         "PyGObject >= 3.36.0",
         "kivy >= 1.11.1",
-        "pyds >= 1.0",
+        "pyds >= 1.0.1",
         "tqdm >= 4.54.1",
     ],
     setup_requires=[

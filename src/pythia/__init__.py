@@ -12,5 +12,5 @@ import gi
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 __all__ = ["logger", "__version__", "Gst", "GObject"]
