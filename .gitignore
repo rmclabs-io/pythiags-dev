@@ -9,3 +9,4 @@ pythia.json
 .eggs
 assets/
 **/*.log
+.eggs/
