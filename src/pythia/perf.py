@@ -17,10 +17,10 @@ import threading
 import sys
 
 from gi.repository import GObject
-from tqdm import tqdm
 
 from pythia import Gst
 from pythia import logger
+from pythia.deepstream_config_parsing import classname_mapper_from_pipeline
 from pythia.detections import Detections
 from pythia.detections import DetectionsObserver
 from pythia.detections import DetectionsHandler
@@ -63,7 +63,7 @@ class DeepstreamRunner(DetectionsObserver):
             else (Path.cwd() / f"{self.running_since}/labels")
         )
         self.detections_folder.mkdir(exist_ok=False, parents=True)
-        self.classname_mapper = self.init_classname_mapper(self.pipeline, classname_mapper)
+        self.classname_mapper = classname_mapper_from_pipeline(self.pipeline, classname_mapper)
         self.total_frames = total_frames
 
     def __call__(
@@ -81,9 +81,6 @@ class DeepstreamRunner(DetectionsObserver):
         
         self.observer, self.handler = self.attach_detections_monitor()
         self.attach_timing_monitor()
-        # self.attach_buffer_counter(
-        #     skip=not count_buffers, report_progress_every_sec=report_progress_every_sec
-        # )
 
         queue_workers = self.start_queue_workers()
 
@@ -101,27 +98,6 @@ class DeepstreamRunner(DetectionsObserver):
                 workers=queue_workers,
             )
         return self.detections_q
-
-
-    @classmethod
-    def init_classname_mapper(cls, pipeline, classname_mapper):
-        if not classname_mapper:
-            return {}
-        if isinstance(classname_mapper, str):
-            it = pipeline.iterate_elements()
-            while True:
-                result, el = it.next()
-                if result != Gst.IteratorResult.OK:
-                    msg = f"Completed searching the pipeline but found no nvinfer containing {classname_mapper}"
-                    raise ValueError(msg)
-                if type(el).__name__ != "GstNvInfer":
-                    continue
-                path = el.get_property("config-file-path")
-                if path.endswith(classname_mapper):
-                    return cls.gen_classname_mapper(path)
-        if isinstance(classname_mapper, dict):
-            return classname_mapper
-        raise ValueError(f"Invalid classname_mapper=`{classname_mapper}`")
 
 
     def start_queue_workers(self):
@@ -165,14 +141,6 @@ class DeepstreamRunner(DetectionsObserver):
         timings_th = threading.Thread(target=timings_worker, daemon=True).start()
         return detections_th, timings_th
 
-        def parse_kitti(detection_dict):
-            detections = []
-            for detection in json.loads(detection_dict["detection_list"]):
-                detections.append(
-                    f"{CLASS_MAPPING[detection['class']]} {detection['confidence']} {detection['bbox']['x_min']} {detection['bbox']['y_min']} {detection['bbox']['x_max']} {detection['bbox']['y_max']}\n"
-                )
-            return detections
-
     def attach_detections_monitor(self):
         observer = self.pipeline.get_by_name(self.observer_name)
         if not observer:
@@ -196,63 +164,6 @@ class DeepstreamRunner(DetectionsObserver):
             pad.add_probe(
                 Gst.PadProbeType.BUFFER, buffer_counter, name
             )
-
-    def attach_buffer_counter(self, skip, report_progress_every_sec):
-        if skip:
-            return
-
-        self.ctr = defaultdict(int)
-        atexit.register(lambda: logger.info(f"BufferCounter: {dict(self.ctr)}"))
-
-        self.pbar = tqdm(total=self.total_frames)
-        self.pbar.update(1)
-
-        self.last_progress_report = datetime.now()
-        first = None
-        def buffer_counter(pad, __, loc):
-            # import pdb; pdb.set_trace()
-            nonlocal first
-            if not first:
-                first = datetime.now()
-            self.ctr[loc] += 1
-            if loc != "src":
-                return Gst.PadProbeReturn.OK
-
-            # percent = self.ctr[loc] / total
-            # if int(percent) != last:
-            # last = int(percent)
-            percent = self.ctr[loc] / self.total_frames
-            now = datetime.now()
-            if (
-                now - self.last_progress_report
-            ).total_seconds() > report_progress_every_sec:
-                self.last_progress_report = now
-                frameno = pad.parent.get_property("index")
-                elapsed=((now-first).total_seconds())
-                fps = frameno/elapsed
-                info = " | ".join([
-                    "PipelineProgress: {percent:<7}",
-                    "Current Frame={frameno:<5}",
-                    "Time Elapsed={elapsed:<10}",
-                    "Average FPS={fps:<15}"
-                ]).format(
-                    percent=f"{percent:.2%}", frameno=frameno, elapsed=elapsed, fps=fps
-                )
-                logger.info(info)
-            return Gst.PadProbeReturn.OK
-
-        self.pipeline.get_by_name(
-            "src"
-        ).get_static_pad(
-            "src"
-        ).add_probe(
-            Gst.PadProbeType.BUFFER, buffer_counter, "src"
-        )
-
-        self.observer.get_static_pad("sink").add_probe(
-            Gst.PadProbeType.BUFFER, buffer_counter, self.observer_name
-        )
-        return self.pbar
 
     def connect_bus(self):
         bus = self.pipeline.get_bus()
@@ -418,7 +329,7 @@ class DeepstreamRunner(DetectionsObserver):
             """
 
         height, width = cls.guess_resolution(filesrc_pattern)
-        classname_mapper = cls.gen_classname_mapper(config_file_path)
+
 
         _path = Path(filesrc_pattern)
         stop_index = (
@@ -452,7 +363,6 @@ class DeepstreamRunner(DetectionsObserver):
         runner = cls(
             pipeline_str,
             observer_name=observer_name,
-            classname_mapper=classname_mapper,
             total_frames=stop_index - start_index,
         )
         return runner
