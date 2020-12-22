@@ -45,7 +45,7 @@ class EggInfo(egg_info):
 
 setup(
     name="pythia",
-    version="0.3.2",
+    version="0.4.0",
     url="https://github.com/rmclabs-cl/pythia.git",
     author="Pablo Woolvett",
     author_email="pwoolvett@rmc.cl",
