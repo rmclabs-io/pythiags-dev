@@ -131,12 +131,11 @@ jobs:
           echo "::set-output name=pytest::`python3 .scripts/pytest_parser.py pytest reports/pytest.xml`"
           echo "::set-output name=coverage::`python3 .scripts/pytest_parser.py coverage reports/coverage.xml`"
 
-      - name: Deploy Current Documentation
-        run: |
-          python3 .scripts/docs-deploy.py \
-            ./docs/build/ \
-            ${{ env.CURRENT_IMAGE }} \
-            ${{ secrets.FTP_DOCS_DEPLOY }}
+      - name: Deploy Staging Docs
+        uses: JamesIves/github-pages-deploy-action@4.0.0
+        with:
+          branch: staging.docs
+          folder: docs/build
 
       - name: Upload pytest test results
         if: ${{ always() }}

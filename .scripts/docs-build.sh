@@ -37,9 +37,8 @@ build_docs() {
     -E \
     -j auto \
     docs/src \
-    docs/build/$ref
+    docs/build
 }
 
-# source_docs
 clean_docs
 build_docs
