@@ -24,10 +24,10 @@ Pythia offers:
 * `gst-launch`-like cli, for quick prototyping.
 * Workers and queues management in the background, to offload processing outside of the buffer probe.
 
-## Table of content
+## Contents
 
 1. [pythia - A Gstreamer/Deepstream wrapper for python and Kivy](#pythia---a-gstreamerdeepstream-wrapper-for-python-and-kivy)
-   1. [Table of content](#table-of-content)
+   1. [Contents](#contents)
    1. [Usage Example](#usage-example)
    1. [Setup](#setup)
       1. [Docker Setup](#docker-setup)
