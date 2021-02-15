@@ -1,0 +1,50 @@
+nvstreammux
+  name=m 
+  batch-size=4
+  width=1920
+  height=1080
+! nvinfer
+  config-file-path=/opt/nvidia/deepstream/deepstream/samples/configs/deepstream-app/config_infer_primary.txt
+  batch-size=4
+  unique-id=1
+! nvtracker
+  ll-lib-file=/opt/nvidia/deepstream/deepstream/lib/libnvds_mot_klt.so
+! nvinfer
+  config-file-path=/opt/nvidia/deepstream/deepstream/samples/configs/deepstream-app/config_infer_secondary_carcolor.txt
+  batch-size=16
+  unique-id=2
+  infer-on-gie-id=1
+  infer-on-class-ids=0
+! nvmultistreamtiler
+  rows=2
+  columns=2
+  width=1280
+  height=720
+! nvvideoconvert
+! nvdsosd
+! nvegltransform
+! nveglglessink
+filesrc
+  location=/opt/nvidia/deepstream/deepstream/samples/streams/sample_1080p_h264.mp4
+! qtdemux
+! h264parse
+! nvv4l2decoder
+! m.sink_1
+filesrc
+  location=/opt/nvidia/deepstream/deepstream/samples/streams/sample_1080p_h264.mp4
+! qtdemux
+! h264parse
+! nvv4l2decoder
+! m.sink_2
+filesrc
+  location=/opt/nvidia/deepstream/deepstream/samples/streams/sample_1080p_h264.mp4
+! qtdemux
+! h264parse
+! nvv4l2decoder
+! m.sink_3
+filesrc
+  location=streams/sample_1080p_h264.mp4
+! qtdemux 
+! h264parse 
+! nvv4l2decoder 
+! m.sink_0

@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
-"""Nvidia ini-style configparser utilities."""
+"""Nvidia ini-style configparser utilities.
 
-# -*- coding: utf-8 -*-
-"""Nvidia ini-style configparser utilities."""
+The Gst-nvinfer configuration file uses a “Key File” format described in:
+https://specifications.freedesktop.org/desktop-entry-spec/latest
+
+"""
 
 import configparser
 from pathlib import Path
-from typing import Union
+from typing import Optional
 from typing import Union
 
 from pythia import logger
-from pythia import Gst
 
-class ConfigParser(configparser.ConfigParser):
+
+class ConfigParser(configparser.ConfigParser):  # noqa: R0901
     __source_file__: Path
+
 
 def build_conf(path: Union[str, Path]) -> ConfigParser:
     config_file_path = str(path.resolve()) if isinstance(path, Path) else path
@@ -23,8 +26,9 @@ def build_conf(path: Union[str, Path]) -> ConfigParser:
     config.__source_file__ = Path(config_file_path)
     return config
 
+
 def get_key(
-    conf: ConfigParser, *keyspath:str, on_error="raise"
+    conf: ConfigParser, *keyspath: str, on_error="raise"
 ) -> Union[str, ConfigParser, configparser.SectionProxy]:
     """Walk down a dict-like obj until the end of the path or invalid path.
 
@@ -72,6 +76,9 @@ def gen_classname_mapper(config_file_path: str):
 
     Returns:
         An int -> str mapping for the classes and their names.
+    Raises:
+        ValueError: received `labelfile-path` in `config_file_path` is not a string.
+
     """
 
     def _build_dict(labels_file):
@@ -85,7 +92,9 @@ def gen_classname_mapper(config_file_path: str):
     config = build_conf(config_file_path)
     labels_str = get_key(config, "property", "labelfile-path")
     if not isinstance(labels_str, str):
-        raise ValueError(f"labelfile-path in {config_file_path} must be a string!")
+        raise ValueError(
+            f"labelfile-path in {config_file_path} must be a string!"
+        )
     labels_file = Path(labels_str)
     if not labels_file.is_absolute():
         labels_file = (Path(config_file_path).parent / labels_file).resolve()
@@ -94,32 +103,34 @@ def gen_classname_mapper(config_file_path: str):
     return mapper
 
 
-def classname_mapper_from_pipeline(pipeline, classname_mapper):
-    if not classname_mapper:
-        return {}
-    if isinstance(classname_mapper, str):
-        it = pipeline.iterate_elements()
-        while True:
-            result, el = it.next()
-            if result != Gst.IteratorResult.OK:
-                msg = f"Completed searching the pipeline but found no nvinfer containing {classname_mapper}"
-                raise ValueError(msg)
-            if type(el).__name__ != "GstNvInfer":
-                continue
-            path = el.get_property("config-file-path")
-            if path.endswith(classname_mapper):
-                return gen_classname_mapper(path)
-    if isinstance(classname_mapper, dict):
-        return classname_mapper
-    raise ValueError(f"Invalid classname_mapper=`{classname_mapper}`")
+def get_file_param(
+    config: ConfigParser, *keyspath, on_error="raise", check_existence=False
+) -> Optional[Path]:
+    """Get a filepath from a sequence of getittem-feedable keys.
 
+    Args:
+        config: The source configparser instance from where to read the
+            configuration.
+        keyspath: Sequence of keys used to find the requested value.
+        on_error: Whether to raise if the sequence of keys is not found.
+        check_existence: Validate file existence.
 
-def get_file_param(config:ConfigParser, *keyspath, on_error="raise", check_existence=False):
-    if check_existence and on_error != "raise" :
-        raise ValueError("Either raise if file not found or dont check file existence.")
+    Raises:
+        ValueError: Key found but its value is not a string.
+        FileNotFoundError: Key found but resolved path is nonexistent.
+
+    Returns:
+        Absolute path of the requested value. Can be none if not found
+            and not validated.
+
+    """
 
     config_file_path = config.__source_file__
-    value = get_key(config, *keyspath, on_error=on_error)
+    value = get_key(
+        config,
+        *keyspath,
+        on_error=on_error if not check_existence else "raise",
+    )
     if not isinstance(value, str):
         raise ValueError(f"{keyspath} in {config_file_path} must be a string!")
     if not value:

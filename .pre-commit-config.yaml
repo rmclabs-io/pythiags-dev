@@ -1,0 +1,104 @@
+repos:
+
+  - repo: local
+    hooks:
+
+    - id: echo
+      name: echo 
+      language: system
+      entry: echo 
+      verbose: true
+      pass_filenames: true
+
+
+    - id: avoid-master-commits
+      name: Avoid Accidentally commiting to master
+      language: system
+      verbose: true
+      entry: |
+        bash -c 'git rev-parse --abbrev-ref HEAD | egrep -v "^master"'
+      pass_filenames: false
+      always_run: true
+
+
+  - repo: local
+    hooks:
+    - id: docformatter
+      name: docformatter 
+      language: system
+      entry: docformatter --in-place
+      files: \.pyi?$
+      pass_filenames: true
+
+    - id: black
+      name: black
+      language: system
+      entry: dry -q black 
+      files: \.pyi?$
+      pass_filenames: true
+
+    - id: isort
+      name: isort
+      language: system
+      entry: dry -q isort 
+      files: \.pyi?$
+      pass_filenames: true
+
+    - id: flakehell
+      name: flakehell
+      language: system
+      entry: dry -q flakehell lint
+      files: \.pyi?$
+      pass_filenames: true
+
+
+  - repo: local
+    hooks:
+    - id: pytest
+      name: pytest
+      language: system
+      entry: pytest
+      pass_filenames: false
+
+  - repo: local
+    hooks:
+    - id: docs-build
+      name: Build Documentation
+      language: system
+      entry: .scripts/docs-build.sh
+      pass_filenames: false
+
+  - repo: local
+    hooks:
+    - id: reqs
+      name: Export requeriments.txt
+      language: system
+      pass_filenames: false
+      files: ^(pyproject.toml|poetry.lock)$
+      entry: ./.scripts/export-reqs.sh
+      verbose: true
+
+  - repo: local
+    hooks:
+    - id: devreqs
+      name: Export requeriments.dev.txt
+      language: system
+      pass_filenames: false
+      files: ^(pyproject.toml|poetry.lock|aptitude*.list)$
+      entry: ./.scripts/export-dev-reqs.sh
+
+  - repo: local
+    hooks:
+    - id: build
+      name: Build package
+      language: system
+      pass_filenames: false
+      entry: poetry build
+
+  # - repo: local
+  #   hooks:
+  #   - id: setup.py
+  #     name: Export setup.py
+  #     language: system
+  #     pass_filenames: false
+  #     entry: bash -c "tar -xvf dist/*.tar.gz --wildcards --no-anchored '*/setup.py' --strip=1"

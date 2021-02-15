@@ -1,0 +1,35 @@
+version: "3"
+
+x-common-build: &common-build
+  context: ../
+  dockerfile: docker/${arch}.Dockerfile
+
+x-common: &common
+  image: ghcr.io/rmclabs-io/pythia-${arch}-production:latest
+  build:
+    <<: *common-build
+  environment:
+    - DISPLAY
+    - DBUS_FATAL_WARNINGS
+  runtime: nvidia
+  volumes:
+    - "/tmp/.X11-unix:/tmp/.X11-unix:rw"
+    - "./dist:/dist"
+    - "./docs/build:/docs"
+  network_mode: host
+
+services:
+
+  pythia:
+    <<: *common
+
+  dev:
+    <<: *common
+    image: ghcr.io/rmclabs-io/pythia-${arch}-dev:latest
+    build: 
+      <<: *common-build
+      target: dev
+    entrypoint:
+      - tail
+      - -f
+      - /dev/null

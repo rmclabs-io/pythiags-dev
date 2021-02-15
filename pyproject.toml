@@ -1,0 +1,115 @@
+__extends = "https://raw.githubusercontent.com/rmclabs-io/dev-styleguide/main/python/pyproject.toml"
+
+[tool.poetry]
+name = "pythia"
+version = "0.4.3-alpha.8"
+description = "A Gstreamer/Deepstream wrapper for python and Kivy."
+authors = [
+    "Pablo Woolvett <pablowoolvett@gmail.com>",
+    "Pedro Pablo Correa <pbcorrea@rmc.cl@gmail.com>"
+]
+readme = "README.md"
+packages = [
+    { include = "pythia", from = "src" },
+]
+repository = "https://github.com/rmclabs-io/pythia"
+homepage = "https://wiki.rmclabs.io/index.php?title=pythia"
+documentation = "https://docs.rmclabs.io/pythia"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/rmclabs-io/pythia/issues"
+
+[tool.poetry.dependencies]
+python = "^3.6.9"
+# temporary fix, see https://github.com/kivy/kivy/pull/7362 (revert to kivy==2.1 when it lands)
+kivy = {git = "https://github.com/pwoolvett/kivy.git", rev = "a285f9745ff70e56a70b7f2059f3994755112990", extras = ["base"]}
+PyGObject = "^3.38.0"
+pyds-metadata-patch = {git = "https://github.com/rmclabs-io/pyds_custom_parser.git", rev = "1.1.4", optional = true, markers="platform_machine == 'aarch64'"}
+importlib-metadata = {version = "^1.0", python = "<3.8", optional = true}
+fire = {version = "^0.4.0", optional = true}
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2"
+pre-commit = "^2.9.3"
+flake8-bandit = "^2.1.2"
+flake8-bugbear = "^20.11.1"
+flake8-builtins = "^1.5.3"
+flake8-comprehensions = "^3.3.1"
+flake8-docstrings = "^1.5.0"
+flake8-eradicate = "^1.0.0"
+flake8-debugger = "^4.0.0"
+flake8-mutable = "^1.2.0"
+black = "^20.8b1"
+isort = "^5.7.0"
+pylint = "^2.6.0"
+flake8 = "^3.8.4"
+mypy = "^0.790"
+bandit = "^1.7.0"
+coverage = "^5.3.1"
+flake8-mypy = "^17.8.0"
+pytest-cov = "^2.10.1"
+docformatter-toml = "^0.1.0"
+darglint = "^1.5.8"
+flake8-pytest-style = "^1.3.0"
+mccabe = "^0.6.1"
+pep8-naming = "^0.11.1"
+pycodestyle = "^2.6.0"
+pyflakes = "^2.2.0"
+pandas-vet = "^0.2.2"
+Sphinx = "^3.4.3"
+sphinx-rtd-theme = "^0.5.1"
+m2r2 = "^0.2.7"
+pytest-html = "^3.1.1"
+importlib-metadata = {version = "^1.0", python = "<3.8"}
+python-dotenv = "^0.15.0"
+drytoml = {extras = ["black", "flakeheaven", "isort"], version = "^0.2.8"}
+flakeheaven = "^0.10.0-alpha.0"
+
+[tool.poetry.extras]
+ds = [
+    "pyds-metadata-patch",
+]
+cli = [
+    "fire",
+    "importlib-metadata",
+]
+
+[tool.poetry.scripts]
+pythia = 'pythia.cli:main'
+pythia-launch = 'pythia.cli:pythia_launch'
+
+[tool.docformatter]
+blank=true
+recursive=true
+
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+addopts = '''
+  -raxXs
+  -q
+  --cov=src/pythia
+  --cov-branch
+  --cov-report html:docs/build/coverage
+  --html=docs/build/pytest.html --self-contained-html
+  --junit-xml reports/pytest.xml
+  --cov-report xml:reports/coverage.xml
+'''
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = [
+    "pip >= 19.3.1",
+    "Cython >= 0.29.9",
+    "PyGObject >= 3.36.0",
+    "poetry-core>=1.0.0",
+]
+
+[tool.pylint.IMPORTS]
+known-third-party=[
+    "pyds",
+    "pyds_bbox_meta",
+    "pyds_tracker_meta",
+]

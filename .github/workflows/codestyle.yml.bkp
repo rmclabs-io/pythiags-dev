@@ -1,0 +1,44 @@
+name: Codestyle
+
+on:
+  push:
+    branches:
+      - feature/*
+    tags:
+      - 'v?[0-9]+.[0-9]+.[0-9]+*'
+  pull_request:
+
+jobs: 
+  pre-commit:
+    runs-on: Ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.6.9'
+        architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+    - name: Run image
+      uses: abatilo/actions-poetry@v2.0.0
+      with:
+        poetry-version: 1.1.4
+
+    # # Uncommen this for debugging
+    # - name: Setup Debug Session
+    #   uses: csexton/debugger-action@master
+
+    - name: poetry install
+      run: |
+        poetry install --no-root -E cli
+    - name: pre-commit run
+      run: |
+        poetry run pre-commit run --all-files
+
+    # - name: docformatter
+    #     run: |
+    #       pip install docformatter-toml
+    #       docformatter .
+    # - uses: psf/black@stable
+    # - name: Run isort
+    #   uses: olance/isort-action@v1.0.0
+    #   with:
+    #     args: .

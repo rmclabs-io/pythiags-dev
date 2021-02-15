@@ -1,0 +1,34 @@
+
+name: Standalone Documentation
+
+on:
+  pull_request:
+
+jobs:
+
+  Documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.6
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.6
+
+      - name: Install deps
+        # TODO simplyfy this when poetry1.2 lands
+        run: |
+          sudo apt-get install -yq `cat setup/aptitude.docs.list | tr "\n" " "`
+          cat requirements.dev.txt | egrep "m2r2|phinx|docformatter-toml|importlib-metadata" > requirements.docs.txt
+          pip install -r requirements.docs.txt
+          rm requirements.docs.txt
+
+        # WARNING: without proper configuration, these could generate positive push feedback!
+      - name: Extract Docstrings from .py to .rst
+        run: |
+          sphinx-apidoc --separate --module-first --force -o docs/src src/pythia
+
+      - name: Build Docs
+        run: |
+          pip install .
+          sphinx-build docs/src docs/build

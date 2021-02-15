@@ -7,6 +7,16 @@ pythia.json
 .python-version
 *.jsonl
 .eggs
-assets/
+assets*/
+data/
 **/*.log
 .eggs/
+tmp/
+2021*/labels
+.env
+poetry.toml
+dist/
+docs/build
+docs/src/apidoc
+.coverage
+reports/

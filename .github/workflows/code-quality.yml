@@ -1,0 +1,76 @@
+
+name: Code Quality
+
+on:
+  pull_request:
+
+jobs:
+
+  Format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.6
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.6
+
+      - name: Install deps
+        # TODO simplyfy this when poetry1.2 lands
+        run: |
+          cat requirements.dev.txt | egrep "black|isort|docformatter-toml" > requirements.format.txt
+          pip install drytoml
+          pip install -r requirements.format.txt
+          rm requirements.format.txt
+
+        # WARNING: without proper configuration, these could generate positive push feedback!
+      - name: Run docformatter in check mode
+        run: |
+          docformatter --check .
+      - name: Run black in check mode
+        run: |
+          dry black --check .
+      - name: Run isort in check mode
+        run: |
+          dry isort --check .
+
+      - name: If needed, commit Code Quality changes to the PR
+        if: failure()
+        run: |
+          docformatter --in-place .
+          dry black .
+          dry isort .
+          git config --global user.name 'Code Quality Bot'
+          git config --global user.email 'codequality@rmclabs.io'
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git checkout $GITHUB_HEAD_REF
+          git commit -am "style: Reformat Python code"
+          git push
+
+  Lint:
+    needs: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.6
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.6
+
+      - name: Install deps
+        # TODO simplyfy this when poetry1.2 lands
+        run: |
+          pip install drytoml
+          cat requirements.dev.txt | egrep "flake|lint|codestyle|pep8" > requirements.lint.txt
+          pip install -r requirements.lint.txt
+
+      - name: Ensure all linters enabled
+        # TODO simplify this when poetry1.2 lands
+        run: |
+          ! dry -q flakehell missed | grep -v pandas
+      
+      - name: Lint
+        run: |
+          dry -q flake8helled src tests \
+            && echo "Success!" \
+            || echo "Errors in linter!!!"
