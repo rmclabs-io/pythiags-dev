@@ -1,3 +1,14 @@
+## 0.5.1 (2021-02-16)
+
+### Fix
+
+- **bump**: avoid installing project before versionbump (#13)
+- **refactor**: moved src to pythiags (#12)
+
+### refactor
+
+- **name**: pythiags (#9)
+
 ## 0.5.0 (2021-02-16)
 
 ### Refactor
