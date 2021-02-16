@@ -1,3 +1,9 @@
+## 0.5.2 (2021-02-16)
+
+### Fix
+
+- **docs**: build documentation instead of isort
+
 ## 0.5.1 (2021-02-16)
 
 ### Fix
