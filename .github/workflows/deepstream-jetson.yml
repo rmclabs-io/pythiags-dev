@@ -295,6 +295,16 @@ jobs:
           asset_name: ${{ env.WHEEL }}
           asset_content_type: application/zip
 
+      - name: Publish to pypi
+        env:
+          PYPI_USERNAME: __token__
+          PYPI_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          docker exec ${{ env.CONTAINER_NAME }} \
+            poetry publish \
+            -u $PYPI_USERNAME \
+            -p $PYPI_PASSWORD
+
       - name: Stop docker container
         if: always()
         id: stop-docker-container
