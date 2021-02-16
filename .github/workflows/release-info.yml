@@ -1,0 +1,36 @@
+name: Show what the Next version will be
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    name: "Simulate commitizen bump"
+    steps:
+      - name: Check out
+        uses: actions/checkout@v2
+        with:
+          token: '${{ secrets.CR_PAT }}'
+          fetch-depth: 0
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Ensure master is up to date
+        run: |
+          git fetch -vvv --dry-run |& grep master | fgrep "[up to date]"
+
+      - name: Install deps
+        run: |
+          pip install commitizen==2.14.2
+
+      - name: Show changelog
+        run: |
+          python -m commitizen changelog --dry-run
+
+      - name: Show Bump
+        run: |
+          python -m commitizen bump --dry-run

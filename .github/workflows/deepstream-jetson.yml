@@ -110,7 +110,7 @@ jobs:
       - name: Build Documentation
         id: docs
         run: |
-          docker exec ${{ env.CONTAINER_NAME }} .scripts/docs-build.sh
+          docker exec ${{ env.CONTAINER_NAME }} pre-commit run --all-files isort
 
       - name: Run Tests
         id: pytest
@@ -126,17 +126,18 @@ jobs:
           docker cp ${{ env.CONTAINER_NAME }}:/opt/pysetup/reports reports
 
       - name: Export Test results
-        id: reports-export
+        id: badges-references
         run: |
+          echo "::set-output name=version::`docker exec ${{ env.CONTAINER_NAME }} poetry version --short`"
+          echo "::set-output name=docs::dev.rmclabs.io/pythia"
           echo "::set-output name=pytest::`python3 .scripts/pytest_parser.py pytest reports/pytest.xml`"
           echo "::set-output name=coverage::`python3 .scripts/pytest_parser.py coverage reports/coverage.xml`"
 
-      - name: Deploy Current Documentation
-        run: |
-          python3 .scripts/docs-deploy.py \
-            ./docs/build/ \
-            ${{ env.CURRENT_IMAGE }} \
-            ${{ secrets.FTP_DOCS_DEPLOY }}
+      - name: Deploy Staging Docs
+        uses: JamesIves/github-pages-deploy-action@4.0.0
+        with:
+          branch: staging.docs
+          folder: docs/build
 
       - name: Upload pytest test results
         if: ${{ always() }}
@@ -175,6 +176,28 @@ jobs:
           && python3 -c "import os;e=os.environ;ref=e['V2'].lstrip('refs/tags/');assert e['V1'] == ref;open('ref').write(ref)" \
           cat ref
 
+      - name: Create Version Badge
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.CR_PAT }}
+          gistID: 2d30824c98461a3e43e3aa2c9802ca96
+          filename: version.json
+          label: version
+          message: ${{ steps.badges-references.outputs.version }}
+          color: yellow
+
+      - name: Create Docs Badge
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.CR_PAT }}
+          gistID: 2d30824c98461a3e43e3aa2c9802ca96
+          filename: docs.json
+          label: docs
+          message: ${{ steps.badges-references.outputs.docs }}
+          color: green
+
       - name: Create Pytest Badge
         if: ${{ startsWith(github.ref, 'refs/tags') }}
         uses: schneegans/dynamic-badges-action@v1.0.0
@@ -183,7 +206,7 @@ jobs:
           gistID: 2d30824c98461a3e43e3aa2c9802ca96
           filename: pytest.json
           label: pytest
-          message: ${{ steps.reports-export.outputs.pytest }}
+          message: ${{ steps.badges-references.outputs.pytest }}
           color: green
 
       - name: Create Coverage Badge
@@ -194,7 +217,7 @@ jobs:
           gistID: 2d30824c98461a3e43e3aa2c9802ca96
           filename: coverage.json
           label: coverage
-          message: ${{ steps.reports-export.outputs.coverage }}
+          message: ${{ steps.badges-references.outputs.coverage }}
           color: orange
 
       - name: Define production image name
@@ -225,8 +248,6 @@ jobs:
           ./.scripts/export-reqs.sh
           ./.scripts/export-dev-reqs.sh
 
-
-
       - name: Build docker prod
         if: ${{ startsWith(github.ref, 'refs/tags') }}
         id: build-docker-prod
@@ -237,17 +258,12 @@ jobs:
             docker/${{ matrix.arch }}.Dockerfile \
             .
 
-      - name: Deploy Current Documentation
+      - name: Deploy Production Docs
         if: ${{ startsWith(github.ref, 'refs/tags') }}
-        run: |
-          python3 .scripts/docs-deploy.py \
-            ./docs/build/ \
-            ${{ env.CURRENT_IMAGE_PROD }} \
-            ${{ secrets.FTP_DOCS_DEPLOY }}
-          python3 .scripts/docs-deploy.py \
-            ./docs/build/ \
-            pythia \
-            ${{ secrets.FTP_DOCS_DEPLOY }}
+        uses: JamesIves/github-pages-deploy-action@4.0.0
+        with:
+          branch: docs
+          folder: docs/build
 
       - name: Push tagged Docker image to GitHub Packages
         if: ${{ startsWith(github.ref, 'refs/tags') }}

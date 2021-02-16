@@ -1,12 +1,19 @@
-# pythia - A Gstreamer/Deepstream wrapper for python and Kivy
+# pythia
 
-* [![Deepstream Jetson Docker](https://github.com/rmclabs-io/pythia/workflows/Deepstream%20Jetson%20Docker/badge.svg)](about:blank)
+A Gstreamer/Deepstream wrapper for python and Kivy
 
-* [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
-* [![Pytest](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/pytest.json)](about:blank)
-* [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/coverage.json)](about:blank)
-* [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-* [![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
+[![Version](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/version.json)](https://github.com/rmclabs-io/pythia/releases)
+[![Docs](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/docs.json)](https://dev.rmclabs.io/pythia)
+[![Pytest](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/pytest.json)](about:blank)
+[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/coverage.json)](about:blank)
+
+---
+
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
+
+---
 
 Pythia aims to solve the following problems:
 
@@ -24,10 +31,10 @@ Pythia offers:
 * `gst-launch`-like cli, for quick prototyping.
 * Workers and queues management in the background, to offload processing outside of the buffer probe.
 
-## Table of content
+## Contents
 
-1. [pythia - A Gstreamer/Deepstream wrapper for python and Kivy](#pythia---a-gstreamerdeepstream-wrapper-for-python-and-kivy)
-   1. [Table of content](#table-of-content)
+1. [pythia](#pythia)
+   1. [Contents](#contents)
    1. [Usage Example](#usage-example)
    1. [Setup](#setup)
       1. [Docker Setup](#docker-setup)

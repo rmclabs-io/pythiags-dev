@@ -65,11 +65,12 @@ repos:
     - id: docs-build
       name: Build Documentation
       language: system
-      entry: .scripts/docs-build.sh
+      entry: sphinx-build -a -E -j auto docs/src docs/build
       pass_filenames: false
 
   - repo: local
     hooks:
+
     - id: reqs
       name: Export requeriments.txt
       language: system
@@ -78,8 +79,6 @@ repos:
       entry: ./.scripts/export-reqs.sh
       verbose: true
 
-  - repo: local
-    hooks:
     - id: devreqs
       name: Export requeriments.dev.txt
       language: system
@@ -87,18 +86,8 @@ repos:
       files: ^(pyproject.toml|poetry.lock|aptitude*.list)$
       entry: ./.scripts/export-dev-reqs.sh
 
-  - repo: local
-    hooks:
     - id: build
       name: Build package
       language: system
       pass_filenames: false
       entry: poetry build
-
-  # - repo: local
-  #   hooks:
-  #   - id: setup.py
-  #     name: Export setup.py
-  #     language: system
-  #     pass_filenames: false
-  #     entry: bash -c "tar -xvf dist/*.tar.gz --wildcards --no-anchored '*/setup.py' --strip=1"
