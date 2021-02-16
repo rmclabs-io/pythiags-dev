@@ -1,7 +1,7 @@
 __extends = "https://raw.githubusercontent.com/rmclabs-io/dev-styleguide/main/python/pyproject.toml"
 
 [tool.poetry]
-name = "pythia"
+name = "pythiags"
 version = "0.5.0"
 description = "A Gstreamer/Deepstream wrapper for python and Kivy."
 authors = [

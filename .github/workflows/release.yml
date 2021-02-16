@@ -37,7 +37,7 @@ jobs:
             --user \
             commitizen==2.14.2 \
             poetry==1.1.4
-          python3 -m poetry install -E dev
+          python3 -m poetry install
 
       - name: Bump commitizen(files-only) -> poetry -> commitizen(git, commit, tag)
         run: |

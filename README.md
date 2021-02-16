@@ -185,13 +185,13 @@ To install `pythia` as a dependency for your python project:
     support:
 
     ```bash
-    pip install git+https://github.com/rmclabs-io/pythia.git@main#egg=pythia[cli,ds]
+    pip install pythiags[cli,ds]
     ```
 
   * Using `poetry`:
   
     ```console
-    poetry add "git+https://github.com/rmclabs-io/pythia.git@main[cli,ds]"
+    poetry add pythiags[cli,ds]
     ```
 
 * A normal install should take less than 10 sec. However, for ARM, if no `kivy` wheel is
