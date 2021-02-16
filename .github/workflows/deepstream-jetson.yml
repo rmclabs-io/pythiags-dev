@@ -110,7 +110,7 @@ jobs:
       - name: Build Documentation
         id: docs
         run: |
-          docker exec ${{ env.CONTAINER_NAME }} pre-commit run --all-files isort
+          docker exec ${{ env.CONTAINER_NAME }} pre-commit run --all-files docs-build
 
       - name: Run Tests
         id: pytest
