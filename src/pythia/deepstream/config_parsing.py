@@ -8,7 +8,8 @@ https://specifications.freedesktop.org/desktop-entry-spec/latest
 
 import configparser
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict
+from typing import Optional
 from typing import Union
 
 from pythia import logger
@@ -78,7 +79,8 @@ def gen_classname_mapper(config_file_path: str) -> Dict[int, str]:
         An int -> str mapping for the classes and their names.
 
     Raises:
-        ValueError: received `labelfile-path` in `config_file_path` is not a string.
+        ValueError: received `labelfile-path` in `config_file_path` is
+            not a string.
 
     """
 
