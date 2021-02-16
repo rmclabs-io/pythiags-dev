@@ -1,6 +1,9 @@
 name: Deepstream Jetson Docker
 
 on:
+  push:
+    tags:
+      - 'v?[0-9]+.[0-9]+.[0-9]+*'
   pull_request:
 
 jobs:
@@ -107,7 +110,7 @@ jobs:
       - name: Build Documentation
         id: docs
         run: |
-          docker exec ${{ env.CONTAINER_NAME }} .scripts/docs-build.sh
+          docker exec ${{ env.CONTAINER_NAME }} pre-commit run --all-files isort
 
       - name: Run Tests
         id: pytest
@@ -245,8 +248,6 @@ jobs:
           ./.scripts/export-reqs.sh
           ./.scripts/export-dev-reqs.sh
 
-
-
       - name: Build docker prod
         if: ${{ startsWith(github.ref, 'refs/tags') }}
         id: build-docker-prod
@@ -257,17 +258,12 @@ jobs:
             docker/${{ matrix.arch }}.Dockerfile \
             .
 
-      - name: Deploy Current Documentation
+      - name: Deploy Production Docs
         if: ${{ startsWith(github.ref, 'refs/tags') }}
-        run: |
-          python3 .scripts/docs-deploy.py \
-            ./docs/build/ \
-            ${{ env.CURRENT_IMAGE_PROD }} \
-            ${{ secrets.FTP_DOCS_DEPLOY }}
-          python3 .scripts/docs-deploy.py \
-            ./docs/build/ \
-            pythia \
-            ${{ secrets.FTP_DOCS_DEPLOY }}
+        uses: JamesIves/github-pages-deploy-action@4.0.0
+        with:
+          branch: docs
+          folder: docs/build
 
       - name: Push tagged Docker image to GitHub Packages
         if: ${{ startsWith(github.ref, 'refs/tags') }}
