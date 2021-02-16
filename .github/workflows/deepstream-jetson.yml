@@ -173,7 +173,7 @@ jobs:
         run: |
           export V1=`docker exec ${{ env.CONTAINER_NAME }} poetry version --short` \
           && export V2=${{ github.ref }} \
-          && python3 -c "import os;e=os.environ;ref=e['V2'].lstrip('refs/tags/');assert e['V1'] == ref;open('ref').write(ref)" \
+          && python3 -c "import os;e=os.environ;ref=e['V2'].lstrip('refs/tags/');assert e['V1'] == ref;open('ref','w').write(ref)" \
           cat ref
 
       - name: Create Version Badge
