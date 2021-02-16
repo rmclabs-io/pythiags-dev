@@ -8,7 +8,7 @@ https://specifications.freedesktop.org/desktop-entry-spec/latest
 
 import configparser
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 from typing import Union
 
 from pythia import logger
@@ -64,7 +64,7 @@ def get_key(
     return out
 
 
-def gen_classname_mapper(config_file_path: str):
+def gen_classname_mapper(config_file_path: str) -> Dict[int, str]:
     """Generate a dictionary to convert integers to classnames.
 
     The mapping is constructed by looking into the configfiles
@@ -76,6 +76,7 @@ def gen_classname_mapper(config_file_path: str):
 
     Returns:
         An int -> str mapping for the classes and their names.
+
     Raises:
         ValueError: received `labelfile-path` in `config_file_path` is not a string.
 
@@ -83,11 +84,11 @@ def gen_classname_mapper(config_file_path: str):
 
     def _build_dict(labels_file):
         with open(labels_file, "r") as labelsfile:
-            mapper = {
+            mapper_ = {
                 lineno: kind.rstrip("\n")
                 for lineno, kind in enumerate(labelsfile.readlines())
             }
-        return mapper
+        return mapper_
 
     config = build_conf(config_file_path)
     labels_str = get_key(config, "property", "labelfile-path")
