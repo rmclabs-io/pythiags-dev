@@ -64,6 +64,7 @@ importlib-metadata = {version = "^1.0", python = "<3.8"}
 python-dotenv = "^0.15.0"
 drytoml = {extras = ["black", "flakeheaven", "isort"], version = "^0.2.8"}
 flakeheaven = "^0.10.0-alpha.0"
+commitizen = "^2.14.2"
 
 [tool.poetry.extras]
 ds = [
@@ -113,3 +114,13 @@ known-third-party=[
     "pyds_bbox_meta",
     "pyds_tracker_meta",
 ]
+
+[tool.commitizen]
+name                     = "cz_conventional_commits"
+version = "0.4.3-alpha.8"
+tag_format               = "$version"
+# keep this in sync with the bump workflow to avoid
+# re-triggering it after commitizen bump command pushes
+bump_message             = "release: $current_version → $new_version"
+update_changelog_on_bump = true
+annotated_tag            = true

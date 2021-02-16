@@ -1,9 +1,6 @@
 name: Deepstream Jetson Docker
 
 on:
-  push:
-    tags:
-      - 'v?[0-9]+.[0-9]+.[0-9]+*'
   pull_request:
 
 jobs:
@@ -126,8 +123,10 @@ jobs:
           docker cp ${{ env.CONTAINER_NAME }}:/opt/pysetup/reports reports
 
       - name: Export Test results
-        id: reports-export
+        id: badges-references
         run: |
+          echo "::set-output name=version::`docker exec ${{ env.CONTAINER_NAME }} poetry version --short`"
+          echo "::set-output name=docs::dev.rmclabs.io/pythia"
           echo "::set-output name=pytest::`python3 .scripts/pytest_parser.py pytest reports/pytest.xml`"
           echo "::set-output name=coverage::`python3 .scripts/pytest_parser.py coverage reports/coverage.xml`"
 
@@ -174,6 +173,28 @@ jobs:
           && python3 -c "import os;e=os.environ;ref=e['V2'].lstrip('refs/tags/');assert e['V1'] == ref;open('ref').write(ref)" \
           cat ref
 
+      - name: Create Version Badge
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.CR_PAT }}
+          gistID: 2d30824c98461a3e43e3aa2c9802ca96
+          filename: version.json
+          label: version
+          message: ${{ steps.badges-references.outputs.version }}
+          color: yellow
+
+      - name: Create Docs Badge
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.CR_PAT }}
+          gistID: 2d30824c98461a3e43e3aa2c9802ca96
+          filename: docs.json
+          label: docs
+          message: ${{ steps.badges-references.outputs.docs }}
+          color: green
+
       - name: Create Pytest Badge
         if: ${{ startsWith(github.ref, 'refs/tags') }}
         uses: schneegans/dynamic-badges-action@v1.0.0
@@ -182,7 +203,7 @@ jobs:
           gistID: 2d30824c98461a3e43e3aa2c9802ca96
           filename: pytest.json
           label: pytest
-          message: ${{ steps.reports-export.outputs.pytest }}
+          message: ${{ steps.badges-references.outputs.pytest }}
           color: green
 
       - name: Create Coverage Badge
@@ -193,7 +214,7 @@ jobs:
           gistID: 2d30824c98461a3e43e3aa2c9802ca96
           filename: coverage.json
           label: coverage
-          message: ${{ steps.reports-export.outputs.coverage }}
+          message: ${{ steps.badges-references.outputs.coverage }}
           color: orange
 
       - name: Define production image name
