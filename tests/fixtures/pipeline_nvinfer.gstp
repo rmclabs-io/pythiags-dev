@@ -10,7 +10,7 @@ nvstreammux
   batch-size=1
   name=muxer
 ! nvinfer
-    config-file-path=/mnt/nvme/pythia/data/models/Primary_Detector/config_infer_primary.txt
+    config-file-path=/mnt/nvme/pythiags/data/models/Primary_Detector/config_infer_primary.txt
     batch-size={batch_size}
     name=pgie
 ! nvvideoconvert
@@ -18,6 +18,6 @@ nvstreammux
 ! nvvideoconvert
 ! videoconvert
 ! appsink
-  name=pythia
+  name=pythiags
   emit-signals=true
   caps='video/x-raw,format=RGB'

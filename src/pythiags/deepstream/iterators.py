@@ -11,8 +11,8 @@ import pyds
 import pyds_bbox_meta
 import pyds_tracker_meta
 
-from pythia import Gst
-from pythia import logger
+from pythiags import Gst
+from pythiags import logger
 
 
 def glist_iterate(

@@ -42,7 +42,7 @@ jobs:
           dry isort .
           git config --global user.name 'Code Quality Bot'
           git config --global user.email 'codequality@rmclabs.io'
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git remote set-url origin https://x-access-token:${{ secrets.CR_PAT }}@github.com/$GITHUB_REPOSITORY
           git checkout $GITHUB_HEAD_REF
           git commit -am "style: Reformat Python code"
           git push

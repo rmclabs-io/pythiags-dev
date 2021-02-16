@@ -31,15 +31,18 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
-      - name: Install deps
+      - name: Install utils
         run: |
           pip install \
             --user \
             commitizen==2.14.2 \
             poetry==1.1.4
+
+      - name: Install deps
+        run: |
           python3 -m poetry install
 
-      - name: Bump commitizen(files-only) -> poetry -> commitizen(git, commit, tag)
+      - name: Bump commitizen => poetry => git
         run: |
           python3 -m commitizen bump --yes --files-only \
             && export NEXT_TAG=`python3 -m commitizen version -p` \

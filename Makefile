@@ -10,7 +10,7 @@ models_src=${ds}/samples/models
 configs_src=${ds}/samples/configs/deepstream-app
 models=${data}/models
 
-dockertag=pythia-build
+dockertag=pythiags-build
 target=production
 
 export
@@ -31,12 +31,12 @@ perf:                       ##:    perf: run a sample pipeline and measure perfo
 	&& rm gstnvdsinfer* \
 	; rm counts.txt \
 	; rm -rf 2020* \
-	; poetry run python -m pythia.perf |& tee perf.log\
+	; poetry run python -m pythiags.perf |& tee perf.log\
 	"
 
 all: install data            ##:    all: Install the venv and configure sample data (models, config, images)
-install: .check venv         ##:     ├─ install: Ensure prerequisites are met, then install pythia to virtualenv
-venv: ${venv}                ##:     │     └─ venv   : Install the venv and pythia in editable mode
+install: .check venv         ##:     ├─ install: Ensure prerequisites are met, then install pythiags to virtualenv
+venv: ${venv}                ##:     │     └─ venv   : Install the venv and pythiags in editable mode
 data: models configs images  ##:     └─ data: Configure sample data (models, config, images)
 models: $(MODELS)            ##:            ├─ models: Copy models from deespstream source, so .engine persist
 configs: $(CONFIGS)          ##:            ├─ configs: Copy config from deespstream source, with some minor edits
@@ -64,9 +64,9 @@ docker:                      ##:    docker: build docker image
     #     --user=$(id -u $USER):$(id -g $USER) \
     #     --privileged \
 	# 	--env-file=.env \
-	# 	pythia-build:latest
-#		pythia-build:latest \
-#		python -m pythia videotestsrc
+	# 	pythiags-build:latest
+#		pythiags-build:latest \
+#		python -m pythiags videotestsrc
 
 docker-ctx:                  ##:    docker-ctx: build docker image
 	docker build -f docker/context.Dockerfile -t test/buildcontext .

@@ -1,14 +1,14 @@
 import abc
 
-from pythia import Gst
-from pythia.models import Events
+from pythiags import Gst
+from pythiags.models import Events
 
 
 class Producer(abc.ABC):
     """Interface to connect as buffer probe.
 
-    .. seealso:: pyds iterators in `pythia.pyds_iterators`. .. seealso::
-    pyds parsers in `pythia.pyds_parsers`.
+    .. seealso:: pyds iterators in `pythiags.pyds_iterators`. ..
+    seealso:: pyds parsers in `pythiags.pyds_parsers`.
 
     """
 

@@ -3,7 +3,7 @@ import json
 import logging
 from pathlib import Path
 
-from pythia.models import Events
+from pythiags.models import Events
 
 
 class Consumer(abc.ABC):
@@ -18,7 +18,7 @@ class Consumer(abc.ABC):
 
 
 class LogFileWriter(Consumer):
-    """Logging implementation of a pythia Consumer."""
+    """Logging implementation of a pythiags Consumer."""
 
     def __init__(self, dump_path: Path, serializer=json.dumps):
         self.logger = self.build_logger(dump_path)

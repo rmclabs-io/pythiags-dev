@@ -10,14 +10,14 @@ authors = [
 ]
 readme = "README.md"
 packages = [
-    { include = "pythia", from = "src" },
+    { include = "pythiags", from = "src" },
 ]
-repository = "https://github.com/rmclabs-io/pythia"
-homepage = "https://wiki.rmclabs.io/index.php?title=pythia"
-documentation = "https://docs.rmclabs.io/pythia"
+repository = "https://github.com/rmclabs-io/pythiags"
+homepage = "https://wiki.rmclabs.io/index.php?title=pythiags"
+documentation = "https://docs.rmclabs.io/pythiags"
 
 [tool.poetry.urls]
-"Bug Tracker" = "https://github.com/rmclabs-io/pythia/issues"
+"Bug Tracker" = "https://github.com/rmclabs-io/pythiags/issues"
 
 [tool.poetry.dependencies]
 python = "^3.6.9"
@@ -76,8 +76,8 @@ cli = [
 ]
 
 [tool.poetry.scripts]
-pythia = 'pythia.cli:main'
-pythia-launch = 'pythia.cli:pythia_launch'
+pythiags = 'pythiags.cli:main'
+pythiags-launch = 'pythiags.cli:pythiags_launch'
 
 [tool.docformatter]
 blank=true
@@ -91,7 +91,7 @@ testpaths = [
 addopts = '''
   -raxXs
   -q
-  --cov=src/pythia
+  --cov=src/pythiags
   --cov-branch
   --cov-report html:docs/build/coverage
   --html=docs/build/pytest.html --self-contained-html

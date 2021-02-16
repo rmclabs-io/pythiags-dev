@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Headless Example.
 
-This example demonstrates a simple use of the pythia API.
+This example demonstrates a simple use of the pythiags API.
 
 """
 
@@ -11,16 +11,16 @@ from typing import Dict
 from typing import Optional
 from typing import Tuple
 
-from pythia import GObject
-from pythia import Gst
-from pythia import logger
-from pythia.api import PythiaRunner
-from pythia.consumer import Consumer
-from pythia.producer import Producer
-from pythia.video import parse_launch
+from pythiags import GObject
+from pythiags import Gst
+from pythiags import logger
+from pythiags.api import pythiagsRunner
+from pythiags.consumer import Consumer
+from pythiags.producer import Producer
+from pythiags.video import parse_launch
 
 
-class Standalone(PythiaRunner, abc.ABC):
+class Standalone(pythiagsRunner, abc.ABC):
     def __init__(
         self,
         pipeline_string: str,

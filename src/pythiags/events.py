@@ -4,12 +4,12 @@
 import datetime
 from queue import Queue
 
-from pythia import Gst
-from pythia import logger
-from pythia.background import EventsWorker
-from pythia.consumer import Consumer
-from pythia.models import Events
-from pythia.producer import Producer
+from pythiags import Gst
+from pythiags import logger
+from pythiags.background import EventsWorker
+from pythiags.consumer import Consumer
+from pythiags.models import Events
+from pythiags.producer import Producer
 
 
 def validate_processor(producer, klass):

@@ -3,29 +3,29 @@ from typing import Generator
 import pyds
 import pyds_tracker_meta
 
-from pythia import Gst
-from pythia import logger
-from pythia.deepstream.iterators import frames_per_batch
-from pythia.deepstream.iterators import labels_per_object
-from pythia.deepstream.iterators import objects_per_frame
-from pythia.deepstream.iterators import shadow_info_per_batch
-from pythia.deepstream.iterators import tracker_per_batch
-from pythia.deepstream.parsers import detector_bbox
-from pythia.deepstream.parsers import last_bbox
-from pythia.deepstream.parsers import past_bbox
-from pythia.deepstream.parsers import tracker_bbox
-from pythia.models import Detection
-from pythia.models import Detections
-from pythia.models import TrackerList
-from pythia.models import TrackerShadow
-from pythia.producer import Producer
+from pythiags import Gst
+from pythiags import logger
+from pythiags.deepstream.iterators import frames_per_batch
+from pythiags.deepstream.iterators import labels_per_object
+from pythiags.deepstream.iterators import objects_per_frame
+from pythiags.deepstream.iterators import shadow_info_per_batch
+from pythiags.deepstream.iterators import tracker_per_batch
+from pythiags.deepstream.parsers import detector_bbox
+from pythiags.deepstream.parsers import last_bbox
+from pythiags.deepstream.parsers import past_bbox
+from pythiags.deepstream.parsers import tracker_bbox
+from pythiags.models import Detection
+from pythiags.models import Detections
+from pythiags.models import TrackerList
+from pythiags.models import TrackerShadow
+from pythiags.producer import Producer
 
 
 class DetectorMetadataExtractor(Producer):
     """Extract metadata after `nvinfer` elements in detection mode.
 
-    .. seealso:: pyds iterators in `pythia.pyds_iterators`. .. seealso::
-    pyds parsers in `pythia.pyds_parsers`.
+    .. seealso:: pyds iterators in `pythiags.pyds_iterators`. ..
+    seealso:: pyds parsers in `pythiags.pyds_parsers`.
 
     """
 
@@ -64,8 +64,8 @@ class DetectorMetadataExtractor(Producer):
     ) -> Generator[Detection, None, None]:
         """Obtain detections from pyds metadata.
 
-        .. seealso:: pyds iterators in `pythia.pyds_iterators`. ..
-        seealso:: pyds parsers in in `pythia.pyds_parsers`.
+        .. seealso:: pyds iterators in `pythiags.pyds_iterators`. ..
+        seealso:: pyds parsers in in `pythiags.pyds_parsers`.
 
         """
 

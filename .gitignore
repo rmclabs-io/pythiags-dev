@@ -2,7 +2,6 @@
 *.egg-info/
 *.pyc
 typings/
-pythia.json
 .vscode/
 .python-version
 *.jsonl

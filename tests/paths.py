@@ -9,4 +9,4 @@ FIXTURES = Path(__file__).parent.resolve() / "fixtures"
 
 GST_PIPELINES = FIXTURES / "gst_pipelines"
 DS_PIPELINES = FIXTURES / "ds_pipelines"
-PYTHIA_PIPELINES = FIXTURES / "pythia_pipelines"
+pythiags_PIPELINES = FIXTURES / "pythiags_pipelines"

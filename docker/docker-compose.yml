@@ -5,7 +5,7 @@ x-common-build: &common-build
   dockerfile: docker/${arch}.Dockerfile
 
 x-common: &common
-  image: ghcr.io/rmclabs-io/pythia-${arch}-production:latest
+  image: ghcr.io/rmclabs-io/pythiags-${arch}-production:latest
   build:
     <<: *common-build
   environment:
@@ -20,12 +20,12 @@ x-common: &common
 
 services:
 
-  pythia:
+  pythiags:
     <<: *common
 
   dev:
     <<: *common
-    image: ghcr.io/rmclabs-io/pythia-${arch}-dev:latest
+    image: ghcr.io/rmclabs-io/pythiags-${arch}-dev:latest
     build: 
       <<: *common-build
       target: dev

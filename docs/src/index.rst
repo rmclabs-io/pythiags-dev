@@ -1,4 +1,4 @@
-Pythia Docs
+pythiags Docs
 ===========
 
 .. mdinclude:: ../../README.md

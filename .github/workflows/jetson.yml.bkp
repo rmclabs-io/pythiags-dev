@@ -14,7 +14,7 @@ jobs:
   gst-check:
     runs-on: [self-hosted, xavier]
     container:
-      image: ghcr.io/rmclabs-io/pythia-dev
+      image: ghcr.io/rmclabs-io/pythiags-dev
       env:
         DISPLAY: :0
         DBUS_FATAL_WARNINGS: 0

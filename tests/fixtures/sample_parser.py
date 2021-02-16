@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from pythia import Consumer
-from pythia import logger
+from pythiags import Consumer
+from pythiags import logger
 
 
 class Process(Consumer):  # noqa: R0903

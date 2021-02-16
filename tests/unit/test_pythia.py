@@ -1,2 +1,2 @@
 def test_importable():
-    import pythia  # noqa: F401
+    import pythiags  # noqa: F401

@@ -1,9 +1,9 @@
-# pythia
+# pythiags
 
 A Gstreamer/Deepstream wrapper for python and Kivy
 
-[![Version](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/version.json)](https://github.com/rmclabs-io/pythia/releases)
-[![Docs](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/docs.json)](https://dev.rmclabs.io/pythia)
+[![Version](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/version.json)](https://github.com/rmclabs-io/pythiags/releases)
+[![Docs](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/docs.json)](https://dev.rmclabs.io/pythiags)
 [![Pytest](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/pytest.json)](about:blank)
 [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/coverage.json)](about:blank)
 
@@ -15,16 +15,16 @@ A Gstreamer/Deepstream wrapper for python and Kivy
 
 ---
 
-Pythia aims to solve the following problems:
+pythiags aims to solve the following problems:
 
-* Deepstream metadata extraction requires using buffer probes: pythia provides an easy
+* Deepstream metadata extraction requires using buffer probes: pythiags provides an easy
   to use interface which splits metadata extraction and processing.
-* pyds api iterators are not pythonic: pythia provides intuitive deepstream metadata
+* pyds api iterators are not pythonic: pythiags provides intuitive deepstream metadata
   iterators to use, like `for frame in frames_per_batch(buffer)` instead of pybind c++ casting.
-* Python gstreamer apps get very large very fast: pythia abstracts away common
+* Python gstreamer apps get very large very fast: pythiags abstracts away common
   stuff and lets you focus on the data handling parts.
 
-Pythia offers:
+pythiags offers:
 
 * Common metadata parsing utilities.
 * User-definable metadata parsing by implementing one-method interfaces.
@@ -33,7 +33,7 @@ Pythia offers:
 
 ## Contents
 
-1. [pythia](#pythia)
+1. [pythiags](#pythiags)
    1. [Contents](#contents)
    1. [Usage Example](#usage-example)
    1. [Setup](#setup)
@@ -56,7 +56,7 @@ Pythia offers:
 Custom extractor and processor callbacks are simple. For example:
 
   ```python
-  from pythia import frames_per_batch, objects_per_frame, Extractor, Consumer
+  from pythiags import frames_per_batch, objects_per_frame, Extractor, Consumer
 
   class MyCustomExtract(Extractor):
       def extract_metadata(self, pad, info):
@@ -79,10 +79,10 @@ Custom extractor and processor callbacks are simple. For example:
   ```
 
 ```console
-pythia file ./demo.gstp --obs=pgie --batch-size=10 --ext=my_custom_parsing:MyCustomExtract --proc=my_custom_parsing:MyCustomProcess
+pythiags file ./demo.gstp --obs=pgie --batch-size=10 --ext=my_custom_parsing:MyCustomExtract --proc=my_custom_parsing:MyCustomProcess
 ```
 
-* This command instructed pythia to do the following:
+* This command instructed pythiags to do the following:
   * Load a pipeline from a file located at `./demo.gstp`, which contains
     `gst-launch`-like syntax.
   * Customize a pipeline parameter named `batch_size` to have a value of `10`.
@@ -103,7 +103,7 @@ pythia file ./demo.gstp --obs=pgie --batch-size=10 --ext=my_custom_parsing:MyCus
 
 1. Run `xhost +local:root` before to allow root access to x11. This will change in the
    future to use a specific user only.
-1. `cd docker;docker-compose up -d pythia && docker exec pythia [command]`
+1. `cd docker;docker-compose up -d pythiags && docker exec pythiags [command]`
 
 ### Nondocker Setup
 
@@ -113,7 +113,7 @@ A virtual env is recommended to avoid package clashes with your system python.
 
 1. Hardware:
 
-   * `pythia` is known to work in ubuntu-based distributions: Jetpack 4.4 for ARM
+   * `pythiags` is known to work in ubuntu-based distributions: Jetpack 4.4 for ARM
      (Jetson Xavier) and 18.08 for x86 (2080 TI). Other Linux should work, too,
      depending on deepstream support.
 
@@ -175,9 +175,9 @@ A virtual env is recommended to avoid package clashes with your system python.
 
 #### Install
 
-To install `pythia` as a dependency for your python project:
+To install `pythiags` as a dependency for your python project:
 
-* Make sure the [prerequisites](#prerequisites) are met, then install `pythia` as you
+* Make sure the [prerequisites](#prerequisites) are met, then install `pythiags` as you
   would normally (`pip`/`poetry`/`pipenv`, etc).
   
   * For example, using `pip install git+http`, appropiately selecting a branch / commit
@@ -185,13 +185,13 @@ To install `pythia` as a dependency for your python project:
     support:
 
     ```bash
-    pip install pythiags[cli,ds]
+    pip install pythiagsgs[cli,ds]
     ```
 
   * Using `poetry`:
   
     ```console
-    poetry add pythiags[cli,ds]
+    poetry add pythiagsgs[cli,ds]
     ```
 
 * A normal install should take less than 10 sec. However, for ARM, if no `kivy` wheel is
@@ -200,22 +200,22 @@ To install `pythia` as a dependency for your python project:
 
 ## A quick tutorial
 
-To get command-specific help, you can run `pythia` or `python -m pythia`.
+To get command-specific help, you can run `pythiags` or `python -m pythiags`.
 Everything besides the command and its params is forwarded to `kivy`.
 
 On ARM, also me sure to set the env `DBUS_FATAL_WARNINGS=0`.
 
-Pythia can be used in three modes: from the cli, through its api, or via your own kivy
+pythiags can be used in three modes: from the cli, through its api, or via your own kivy
 application.
 
 ### Sample cli apps
 
-The following examples require pythia to be installed with the `cli` extra.
+The following examples require pythiags to be installed with the `cli` extra.
 
 * Run gstreamer application (only `videotestsrc`):
 
   ```bash
-  pythia videotestsrc
+  pythiags videotestsrc
   ```
 
   This example runs a minimal gstreamer pipeline and uses `kivy` as an appsink, with
@@ -223,22 +223,22 @@ The following examples require pythia to be installed with the `cli` extra.
 
 * Arbitrary pipeline:
 
-  Any gst-launch-like pipeline works, just make sure to connect your pipeline to pythia by
+  Any gst-launch-like pipeline works, just make sure to connect your pipeline to pythiags by
   adding the following element:
 
-  `appsink name=pythia emit-signals=true caps=video/x-raw,format=RGB`
+  `appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB`
 
   * Similar end result as the previous command, with custom elements/properties:
 
     ```bash
-    $ pythia launch \
+    $ pythiags launch \
         videotestsrc \
           pattern=ball \
           num_buffers=100 \
         ! decodebin \
         ! videoconvert \
         ! appsink \
-          name=pythia \
+          name=pythiags \
           emit-signals=true \
           caps=video/x-raw,format=RGB
     ```
@@ -246,7 +246,7 @@ The following examples require pythia to be installed with the `cli` extra.
   * Using Deepstream elements:
 
     ```bash
-    $ pythia launch \
+    $ pythiags launch \
         filesrc \
           location=/opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.h264 \
         ! h264parse \
@@ -265,7 +265,7 @@ The following examples require pythia to be installed with the `cli` extra.
         ! nvvideoconvert \
         ! videoconvert \
         ! appsink \
-          name=pythia \
+          name=pythiags \
           emit-signals=true \
           caps=video/x-raw,format=RGB
     ```
@@ -294,7 +294,7 @@ The following examples require pythia to be installed with the `cli` extra.
   ! nvvideoconvert
   ! videoconvert
   ! appsink
-    name=pythia
+    name=pythiags
     emit-signals=true
     caps=video/x-raw,format=RGB
   ```
@@ -302,7 +302,7 @@ The following examples require pythia to be installed with the `cli` extra.
   Run the pipeline with custom keyword arguments forwarded from the terminal:
 
   ```console
-  pythia file demo.gstp --batch-size=4
+  pythiags file demo.gstp --batch-size=4
   ```
 
   So far, we've yet to beat `gst-launch` (except for the pipelime kwargs,
@@ -318,9 +318,9 @@ The following examples require pythia to be installed with the `cli` extra.
   ```python
   #!/usr/bin/env python
   # -*- coding: utf-8 -*-
-  """Demo file: my_custom_parsing.py with sample pythia api usage."""
+  """Demo file: my_custom_parsing.py with sample pythiags api usage."""
   from time import sleep
-  from pythia import frames_per_batch, objects_per_frame, Extractor, Consumer
+  from pythiags import frames_per_batch, objects_per_frame, Extractor, Consumer
 
   class MyCustomExtract(Extractor):
       def extract_metadata(self, pad, info):
@@ -359,7 +359,7 @@ The following examples require pythia to be installed with the `cli` extra.
     batch-size=1
     name=muxer
   ! nvinfer
-      config-file-path=/mnt/nvme/pythia/data/models/Primary_Detector/config_infer_primary.txt
+      config-file-path=/mnt/nvme/pythiags/data/models/Primary_Detector/config_infer_primary.txt
       batch-size={batch_size}
       name=pgie
   ! nvvideoconvert
@@ -367,15 +367,15 @@ The following examples require pythia to be installed with the `cli` extra.
   ! nvvideoconvert
   ! videoconvert
   ! appsink
-    name=pythia
+    name=pythiags
     emit-signals=true
     caps=video/x-raw,format=RGB
   ```
 
-1. Invoke pythia from the command line, binding your implementation with the pipeline:
+1. Invoke pythiags from the command line, binding your implementation with the pipeline:
 
 ```console
-pythia \
+pythiags \
   file ./demo.gstp \
   --batch-size=10 \
   --obs=pgie \
@@ -385,7 +385,7 @@ pythia \
 
 ## TODO and FAQ
 
-Check out ongoing and future development [here](https://github.com/rmclabs-io/pythia/projects/1)
+Check out ongoing and future development [here](https://github.com/rmclabs-io/pythiags/projects/1)
 
 ### FAQ / Common Issues
 
@@ -458,11 +458,11 @@ Check out ongoing and future development [here](https://github.com/rmclabs-io/py
 
 ### Setup dev environment
 
-On Ubuntu/Jetpack the [Makefile](./Makefile) automatically configures pythia for
+On Ubuntu/Jetpack the [Makefile](./Makefile) automatically configures pythiags for
 development:
 
-  1. Clone `git clone https://github.com/rmclabs-io/pythia.git`
-  2. Go to dir `cd pythia`
+  1. Clone `git clone https://github.com/rmclabs-io/pythiags.git`
+  2. Go to dir `cd pythiags`
   3. Run `make install` to automatically configure the system for usage. When doing
      this, you can skip the rest of the [Setup](#setup) section, including
      [Install](#install).
@@ -487,7 +487,7 @@ To inspect project dependencies, you can search here:
 * `Dockerfile`s in the `docker` folder
 * `Makefile`
 
-Install `pythia` in developer mode either with:
+Install `pythiags` in developer mode either with:
 
 * [OPTION A] `make` in the repo root
 * [OPTION B] `docker-compose up -d dev && docker-compose exec dev bash` in the `docker` folder

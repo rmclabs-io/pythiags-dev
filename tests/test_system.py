@@ -7,8 +7,8 @@ import pytest
 from tests.paths import DS_PIPELINES
 from tests.paths import GST_PIPELINES
 
-import pythia
-from pythia.utils import module_from_file
+import pythiags
+from pythiags.utils import module_from_file
 
 DEEPSTREAM_ELEMENTS = {
     "nvinfer",
@@ -41,7 +41,7 @@ def in_docker() -> bool:
 def gst_launch(pipeline_path):
     with open(pipeline_path) as fp:
         pipeline = fp.read()
-    if not pythia.PYDS_INSTALLED:
+    if not pythiags.PYDS_INSTALLED:
         if any(ds_element in pipeline for ds_element in DEEPSTREAM_ELEMENTS):
             pytest.skip("pyds not installed")
     if in_docker():
@@ -62,13 +62,13 @@ def gst_launch(pipeline_path):
 
 @pytest.mark.incremental
 class TestGstreamer:
-    @pytest.mark.skip(not pythia.PYDS_INSTALLED, "pyds not installed")
+    @pytest.mark.skip(not pythiags.PYDS_INSTALLED, "pyds not installed")
     def import_pyds(self):
         import pyds  # noqa: F401
         import pyds_bbox_meta  # noqa: F401
         import pyds_tracker_meta  # noqa: F401
 
-    @pytest.mark.skip(not pythia.PYDS_INSTALLED, "pyds not installed")
+    @pytest.mark.skip(not pythiags.PYDS_INSTALLED, "pyds not installed")
     def check_plugins(self):
         gst_inspect = sp.check_output(  # noqa: S603
             split("gst-inspect-1.0")
@@ -83,7 +83,7 @@ class TestGstreamer:
 
 @pytest.mark.parametrize("pipeline_path", [*DS_PIPELINES.glob("*")])
 def test_deepstream(pipeline_path):
-    if not pythia.PYDS_INSTALLED:
+    if not pythiags.PYDS_INSTALLED:
         pytest.skip("pyds not installed")
     return gst_launch(pipeline_path)
 

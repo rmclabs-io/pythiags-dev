@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Utilities and shortcuts to ease pythia usage."""
+"""Utilities and shortcuts to ease pythiags usage."""
 
 import imghdr
 import re

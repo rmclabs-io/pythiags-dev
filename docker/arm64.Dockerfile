@@ -122,5 +122,5 @@ RUN ln -sf /usr/bin/python3 $VENV_PATH/bin/python
 WORKDIR /app/
 
 # FIXME move these
-ENTRYPOINT [ "pythia" ]
+ENTRYPOINT [ "pythiags" ]
 CMD [ "videotestsrc" ]

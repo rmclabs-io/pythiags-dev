@@ -26,7 +26,7 @@ jobs:
         # WARNING: without proper configuration, these could generate positive push feedback!
       - name: Extract Docstrings from .py to .rst
         run: |
-          sphinx-apidoc --separate --module-first --force -o docs/src src/pythia
+          sphinx-apidoc --separate --module-first --force -o docs/src src/pythiags
 
       - name: Build Docs
         run: |

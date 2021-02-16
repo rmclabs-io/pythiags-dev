@@ -18,9 +18,9 @@ from kivy.support import install_gobject_iteration
 from kivy.uix.camera import Camera
 from kivy.uix.image import Image
 
-from pythia import GLib
-from pythia import Gst
-from pythia import logger
+from pythiags import GLib
+from pythiags import Gst
+from pythiags import logger
 
 Gst.init(None)
 try:
@@ -81,7 +81,7 @@ class DeepstreamCamera(CameraBase):
 
     1 The last pipeline element must be the following:
 
-      `appsink name=pythia emit-signals=True caps=video/x-raw,format=RGB`
+      `appsink name=pythiags emit-signals=True caps=video/x-raw,format=RGB`
 
     2 The pipeline must contain an element named "decoder". This is used
       internally by `kivy.core.camera.camera_gi.CameraGi` to extract the
@@ -129,7 +129,7 @@ class DeepstreamCamera(CameraBase):
             self._pipeline = None
         self._pipeline = parse_launch(self.pipeline_string)
 
-        self._sink = get_by_name(self._pipeline, "pythia")
+        self._sink = get_by_name(self._pipeline, "pythiags")
         get_static_pad(self._sink, "sink").add_probe(
             Gst.PadProbeType.BUFFER, self.on_first_frame_out
         )

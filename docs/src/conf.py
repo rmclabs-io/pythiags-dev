@@ -13,7 +13,7 @@ from pathlib import Path
 import importlib_metadata
 
 year = datetime.now().year
-version = importlib_metadata.version("pythia")
+version = importlib_metadata.version("pythiags")
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -27,7 +27,7 @@ version = importlib_metadata.version("pythia")
 
 # -- Project information -----------------------------------------------------
 
-project = "Pythia"
+project = "pythiags"
 copyright = f"{year}, RMC Labs "
 author = "Pablo Woolvett"
 
@@ -112,7 +112,7 @@ def run_apidoc(_):
     root_dir = Path(__file__).parents[2].resolve()
     templates = root_dir / "docs/src/templates"
     apidoc = root_dir / "docs/src/apidoc"
-    package = root_dir / "src/pythia"
+    package = root_dir / "src/pythiags"
     sphinx_apidoc = Path(sys.executable).parent / "sphinx-apidoc"
 
     sp.check_call(  # noqa: S603

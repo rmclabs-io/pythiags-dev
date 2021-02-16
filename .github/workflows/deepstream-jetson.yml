@@ -129,7 +129,7 @@ jobs:
         id: badges-references
         run: |
           echo "::set-output name=version::`docker exec ${{ env.CONTAINER_NAME }} poetry version --short`"
-          echo "::set-output name=docs::dev.rmclabs.io/pythia"
+          echo "::set-output name=docs::dev.rmclabs.io/pythiags"
           echo "::set-output name=pytest::`python3 .scripts/pytest_parser.py pytest reports/pytest.xml`"
           echo "::set-output name=coverage::`python3 .scripts/pytest_parser.py coverage reports/coverage.xml`"
 

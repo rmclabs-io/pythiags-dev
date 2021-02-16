@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Custom Pythia Exceptions."""
+"""Custom pythiags Exceptions."""
 
 
 class GstEos(Exception):

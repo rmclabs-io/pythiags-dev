@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Command line interface for pythia."""
+"""Command line interface for pythiags."""
 
 from pathlib import Path
 from typing import Dict
@@ -9,16 +9,16 @@ from typing import Union
 
 import fire
 
-import pythia
-from pythia import Gst
-from pythia import logger
-from pythia.app import PythiaApp
-from pythia.consumer import Consumer
-from pythia.headless import Standalone
-from pythia.producer import Producer
-from pythia.utils import clean_pipeline
-from pythia.utils import instantiated_object_from_importstring
-from pythia.video import GSCameraWidget
+import pythiags
+from pythiags import Gst
+from pythiags import logger
+from pythiags.app import pythiagsApp
+from pythiags.consumer import Consumer
+from pythiags.headless import Standalone
+from pythiags.producer import Producer
+from pythiags.utils import clean_pipeline
+from pythiags.utils import instantiated_object_from_importstring
+from pythiags.video import GSCameraWidget
 
 
 def _build_meta_map(
@@ -32,7 +32,7 @@ def _build_meta_map(
     }
 
 
-class PythiaCli(PythiaApp):
+class pythiagsCli(pythiagsApp):
     root: GSCameraWidget
 
     @property
@@ -44,8 +44,8 @@ class PythiaCli(PythiaApp):
             camera = GSCameraWidget(pipeline_string=self.pipeline_string)
         except ValueError as err:
             msg = (
-                f"PythiaApp: Unable to intialize pipeline. Reason: {repr(err)}"
-                ". Make sure the last element contains this: `appsink name=pythia emit-signals=true caps=video/x-raw,format=RGB`"
+                f"pythiagsApp: Unable to intialize pipeline. Reason: {repr(err)}"
+                ". Make sure the last element contains this: `appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB`"
             )
             logger.error(msg)
             raise
@@ -66,12 +66,12 @@ def video_test_src():
         ! decodebin name=decoder
         ! videoconvert
         ! appsink
-          name=pythia
+          name=pythiags
           emit-signals=True
           caps=video/x-raw,format=RGB
     """
 
-    PythiaCli.cli_run(demo_pipeline)
+    pythiagsCli.cli_run(demo_pipeline)
 
 
 def launch(
@@ -81,7 +81,7 @@ def launch(
     processor: Optional[Consumer] = None,
 ):
     """Build and run a gst pipeline with gst-like syntax."""
-    PythiaCli.cli_run(
+    pythiagsCli.cli_run(
         " ".join(pipeline_parts),
         metadata_extraction_map=_build_meta_map(
             observer,
@@ -104,12 +104,12 @@ def pipeline_file(
     try:
         formatted_pipeline = pipeline_string.format_map(pipeline_kwargs)
     except KeyError as exc:
-        logger.error(f"PythiaApp: Cannot run {real}. Reason: {repr(exc)}")
+        logger.error(f"pythiagsApp: Cannot run {real}. Reason: {repr(exc)}")
         raise
 
     final_pipeline = clean_pipeline(formatted_pipeline)
 
-    PythiaCli.cli_run(
+    pythiagsCli.cli_run(
         final_pipeline,
         metadata_extraction_map=_build_meta_map(
             obs,
@@ -119,7 +119,7 @@ def pipeline_file(
     )
 
 
-def pythia_launch():
+def pythiags_launch():
     """Build and run a gst pipeline with gst-like syntax."""
 
     def cb(
@@ -140,15 +140,15 @@ def pythia_launch():
     fire.Fire(cb)
 
 
-def get_version(name="pythia"):
+def get_version(name="pythiags"):
     try:
         import importlib.metadata as importlib_metadata
     except ModuleNotFoundError:
         import importlib_metadata
 
     version = importlib_metadata.version(name)
-    logger.info(f"Pythia: version {version}")
-    logger.info(f"Pythia: Installed at '{pythia.__file__}'")
+    logger.info(f"pythiags: version {version}")
+    logger.info(f"pythiags: Installed at '{pythiags.__file__}'")
     return version
 
 

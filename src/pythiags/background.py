@@ -8,8 +8,8 @@ from typing import Any
 from typing import Callable
 from typing import Optional
 
-from pythia import logger
-from pythia.models import Events
+from pythiags import logger
+from pythiags.models import Events
 
 
 class StoppableThread(threading.Thread, abc.ABC):

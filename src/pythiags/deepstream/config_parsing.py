@@ -12,7 +12,7 @@ from typing import Dict
 from typing import Optional
 from typing import Union
 
-from pythia import logger
+from pythiags import logger
 
 
 class ConfigParser(configparser.ConfigParser):  # noqa: R0901

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Common interface for pythia applications with and without Kivy.
+"""Common interface for pythiags applications with and without Kivy.
 
-.. seealso:: `pythia.app` and `pythia.perf`
+.. seealso:: `pythiags.app` and `pythiags.perf`
 
 """
 
@@ -16,18 +16,18 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 
-from pythia import Gst
-from pythia import logger
-from pythia.background import StoppableThread
-from pythia.consumer import Consumer
-from pythia.events import EventsHandler
-from pythia.producer import Producer
+from pythiags import Gst
+from pythiags import logger
+from pythiags.background import StoppableThread
+from pythiags.consumer import Consumer
+from pythiags.events import EventsHandler
+from pythiags.producer import Producer
 
 # TODO: where to add GObject.threads_init()
 # <pwoolvett 2021-01-06T15:08:03>
 
 
-class PythiaRunner(abc.ABC):
+class pythiagsRunner(abc.ABC):
     def __init__(
         self,
         pipeline_string: str,
@@ -90,7 +90,7 @@ class PythiaRunner(abc.ABC):
         if skip:
             return
         logger.info(
-            f"PythiaRunner: Taking control of Gst debug logger from now on..."
+            f"pythiagsRunner: Taking control of Gst debug logger from now on..."
         )
 
         if disable_debug_logs:
@@ -119,26 +119,26 @@ class PythiaRunner(abc.ABC):
             # FIXME: validate this logic, seems outdated <pwoolvett 2021-01-08T15:39:04>
             if observer_name:
                 if not (extractor or consumer):
-                    msg = f"PythiaApi: Observer element with name '{observer_name}' supplied, but neither extractor nor consumer provided"
+                    msg = f"pythiagsApi: Observer element with name '{observer_name}' supplied, but neither extractor nor consumer provided"
                     logger.warning(msg)
                 elif not (extractor and consumer):
-                    msg = f"PythiaApi: Observer element  with name '{observer_name}' supplied, you must supply both and extractor and consumer provided"
+                    msg = f"pythiagsApi: Observer element  with name '{observer_name}' supplied, you must supply both and extractor and consumer provided"
                     raise RuntimeError(msg)
             else:
                 if not (extractor or consumer):
-                    msg = f"PythiaApi: None of (observer_name, extractor, consumer) provided. Proceeding without extracting deepstream detections"
+                    msg = f"pythiagsApi: None of (observer_name, extractor, consumer) provided. Proceeding without extracting deepstream detections"
                     return logger.warning(msg)
                 elif extractor and consumer:
                     observer_name = self.pipeline.children[0].name
-                    msg = f"PythiaApi: No name for observer element supplied. As both extractor and consumer provided, pythia will use the element named '{observer_name}'"
+                    msg = f"pythiagsApi: No name for observer element supplied. As both extractor and consumer provided, pythiags will use the element named '{observer_name}'"
                     logger.warning(msg)
                 else:
-                    msg = f"PythiaApi: No name for observer element supplied. you must supply both and extractor and consumer or none of them."
+                    msg = f"pythiagsApi: No name for observer element supplied. you must supply both and extractor and consumer or none of them."
                     return RuntimeError(msg)
 
             observer = self.pipeline.get_by_name(observer_name)
             if not observer:
-                msg = f"PythiaApi: Cannot find element with name '{observer_name}' in pipeline ```{self.pipeline_string}```"
+                msg = f"pythiagsApi: Cannot find element with name '{observer_name}' in pipeline ```{self.pipeline_string}```"
                 raise RuntimeError(msg)
 
             handler = EventsHandler(
@@ -181,16 +181,18 @@ class PythiaRunner(abc.ABC):
         self.__joining = True
 
         for observer_name, workers in self.workers.items():
-            logger.info(f"PythiaApi: Waiting for {observer_name}'s workers...")
+            logger.info(
+                f"pythiagsApi: Waiting for {observer_name}'s workers..."
+            )
             for worker in workers:
                 logger.debug(
-                    f"PythiaApi: Stopping queue {worker.queue} from {worker}..."
+                    f"pythiagsApi: Stopping queue {worker.queue} from {worker}..."
                 )
                 worker.queue.join()
-                logger.debug(f"PythiaApi: Stopping worker {worker}...")
+                logger.debug(f"pythiagsApi: Stopping worker {worker}...")
                 worker.external_stop = True
             for worker in workers:
-                logger.debug(f"PythiaApi: Joining worker {worker}...")
+                logger.debug(f"pythiagsApi: Joining worker {worker}...")
                 worker.join()
 
         self.workers = defaultdict(list)

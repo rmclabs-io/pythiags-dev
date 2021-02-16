@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Pythia - a minimal framework for deepstream and kivy.
+"""pythiags - a minimal framework for deepstream and kivy.
 
 .. versionadded:: 0.3.0
    * *perf* module, which allows to extract ds detections easily.
@@ -31,31 +31,31 @@ from kivy.logger import Logger as logger  # noqa: N813
 
 logger.fixme = logger.debug
 
-from pythia.consumer import Consumer
-from pythia.producer import Producer
+from pythiags.consumer import Consumer
+from pythiags.producer import Producer
 
 try:
     import pyds
 
     # fmt: off
-    from pythia.deepstream.iterators import frames_per_batch   # isort:skip
-    from pythia.deepstream.iterators import objects_per_frame   # isort:skip
-    from pythia.deepstream.metadata_producers import ClassifierMetadataExtractor   # isort:skip
-    from pythia.deepstream.metadata_producers import DetectorMetadataExtractor   # isort:skip
-    from pythia.deepstream.metadata_producers import TrackerShadowMetadataExtractor   # isort:skip
-    from pythia.deepstream.parsers import detector_bbox   # isort:skip
-    from pythia.deepstream.parsers import last_bbox   # isort:skip
-    from pythia.deepstream.parsers import past_bbox   # isort:skip
-    from pythia.deepstream.parsers import tracker_bbox   # isort:skip
+    from pythiags.deepstream.iterators import frames_per_batch   # isort:skip
+    from pythiags.deepstream.iterators import objects_per_frame   # isort:skip
+    from pythiags.deepstream.metadata_producers import ClassifierMetadataExtractor   # isort:skip
+    from pythiags.deepstream.metadata_producers import DetectorMetadataExtractor   # isort:skip
+    from pythiags.deepstream.metadata_producers import TrackerShadowMetadataExtractor   # isort:skip
+    from pythiags.deepstream.parsers import detector_bbox   # isort:skip
+    from pythiags.deepstream.parsers import last_bbox   # isort:skip
+    from pythiags.deepstream.parsers import past_bbox   # isort:skip
+    from pythiags.deepstream.parsers import tracker_bbox   # isort:skip
     # fmt: on
 
     PYDS_INSTALLED = True
 except ImportError:
     PYDS_INSTALLED = False
     logger.warning(
-        "Pythia+DS:"
+        "pythiags+DS:"
         " Unable to import pyds modules."
-        " Make sure to install pythia with the 'ds' extra."
+        " Make sure to install pythiags with the 'ds' extra."
     )
 
     frames_per_batch = None

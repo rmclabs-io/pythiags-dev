@@ -4,7 +4,7 @@ import pyds
 import pyds_bbox_meta
 import pyds_tracker_meta
 
-from pythia.models import Bbox
+from pythiags.models import Bbox
 
 
 def _bounding_box(coords: pyds.NvOSD_RectParams) -> Bbox:
