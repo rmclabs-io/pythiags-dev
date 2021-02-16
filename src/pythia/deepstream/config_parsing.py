@@ -8,7 +8,8 @@ https://specifications.freedesktop.org/desktop-entry-spec/latest
 
 import configparser
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict
+from typing import Optional
 from typing import Union
 
 from pythia import logger
