@@ -1,3 +1,9 @@
+## 0.5.4 (2021-02-17)
+
+### Fix
+
+- **pep8names**: ensure class names after pythia refactor are CamelCase (#15)
+
 ## 0.5.3 (2021-02-17)
 
 ### Fix
