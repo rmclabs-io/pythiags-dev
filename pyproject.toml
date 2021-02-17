@@ -22,9 +22,9 @@ documentation = "https://docs.rmclabs.io/pythiags"
 [tool.poetry.dependencies]
 python = "^3.6.9"
 # temporary fix, see https://github.com/kivy/kivy/pull/7362 (revert to kivy==2.1 when it lands)
-kivy = {git = "https://github.com/pwoolvett/kivy.git", rev = "a285f9745ff70e56a70b7f2059f3994755112990", extras = ["base"]}
+Kivy-jetson = {extras = ["base"], version = "2.1.0.dev0"}
 PyGObject = "^3.38.0"
-pyds-metadata-patch = {git = "https://github.com/rmclabs-io/pyds_custom_parser.git", rev = "1.1.4", optional = true, markers="platform_machine == 'aarch64'"}
+pyds-ext = {version = "^1.2.1", optional = true, markers="platform_machine == 'aarch64'"}
 importlib-metadata = {version = "^1.0", python = "<3.8", optional = true}
 fire = {version = "^0.4.0", optional = true}
 
@@ -68,7 +68,7 @@ commitizen = "^2.14.2"
 
 [tool.poetry.extras]
 ds = [
-    "pyds-metadata-patch",
+    "pyds-ext",
 ]
 cli = [
     "fire",
