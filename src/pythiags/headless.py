@@ -14,13 +14,13 @@ from typing import Tuple
 from pythiags import GObject
 from pythiags import Gst
 from pythiags import logger
-from pythiags.api import pythiagsRunner
+from pythiags.api import PythiaGsRunner
 from pythiags.consumer import Consumer
 from pythiags.producer import Producer
 from pythiags.video import parse_launch
 
 
-class Standalone(pythiagsRunner, abc.ABC):
+class Standalone(PythiaGsRunner, abc.ABC):
     def __init__(
         self,
         pipeline_string: str,

@@ -12,7 +12,7 @@ import fire
 import pythiags
 from pythiags import Gst
 from pythiags import logger
-from pythiags.app import pythiagsApp
+from pythiags.app import PythiaGsApp
 from pythiags.consumer import Consumer
 from pythiags.headless import Standalone
 from pythiags.producer import Producer
@@ -32,7 +32,7 @@ def _build_meta_map(
     }
 
 
-class pythiagsCli(pythiagsApp):
+class PythiaGsCli(PythiaGsApp):
     root: GSCameraWidget
 
     @property
@@ -44,7 +44,7 @@ class pythiagsCli(pythiagsApp):
             camera = GSCameraWidget(pipeline_string=self.pipeline_string)
         except ValueError as err:
             msg = (
-                f"pythiagsApp: Unable to intialize pipeline. Reason: {repr(err)}"
+                f"PythiaGsApp: Unable to intialize pipeline. Reason: {repr(err)}"
                 ". Make sure the last element contains this: `appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB`"
             )
             logger.error(msg)
@@ -71,7 +71,7 @@ def video_test_src():
           caps=video/x-raw,format=RGB
     """
 
-    pythiagsCli.cli_run(demo_pipeline)
+    PythiaGsCli.cli_run(demo_pipeline)
 
 
 def launch(
@@ -81,7 +81,7 @@ def launch(
     processor: Optional[Consumer] = None,
 ):
     """Build and run a gst pipeline with gst-like syntax."""
-    pythiagsCli.cli_run(
+    PythiaGsCli.cli_run(
         " ".join(pipeline_parts),
         metadata_extraction_map=_build_meta_map(
             observer,
@@ -104,12 +104,12 @@ def pipeline_file(
     try:
         formatted_pipeline = pipeline_string.format_map(pipeline_kwargs)
     except KeyError as exc:
-        logger.error(f"pythiagsApp: Cannot run {real}. Reason: {repr(exc)}")
+        logger.error(f"PythiaGsApp: Cannot run {real}. Reason: {repr(exc)}")
         raise
 
     final_pipeline = clean_pipeline(formatted_pipeline)
 
-    pythiagsCli.cli_run(
+    PythiaGsCli.cli_run(
         final_pipeline,
         metadata_extraction_map=_build_meta_map(
             obs,

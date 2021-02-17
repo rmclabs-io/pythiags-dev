@@ -27,7 +27,7 @@ from pythiags.producer import Producer
 # <pwoolvett 2021-01-06T15:08:03>
 
 
-class pythiagsRunner(abc.ABC):
+class PythiaGsRunner(abc.ABC):
     def __init__(
         self,
         pipeline_string: str,
@@ -90,7 +90,7 @@ class pythiagsRunner(abc.ABC):
         if skip:
             return
         logger.info(
-            f"pythiagsRunner: Taking control of Gst debug logger from now on..."
+            f"PythiaGsRunner: Taking control of Gst debug logger from now on..."
         )
 
         if disable_debug_logs:

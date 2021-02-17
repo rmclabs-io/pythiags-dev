@@ -28,7 +28,7 @@ version = importlib_metadata.version("pythiags")
 # -- Project information -----------------------------------------------------
 
 project = "pythiags"
-copyright = f"{year}, RMC Labs "
+copyright = f"{year}, RMC Labs"
 author = "Pablo Woolvett"
 
 # The full version, including alpha/beta/rc tags

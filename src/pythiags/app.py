@@ -21,12 +21,12 @@ from typing import Tuple
 from kivy.app import App
 from kivy.uix.widget import Widget
 
-from pythiags.api import pythiagsRunner
+from pythiags.api import PythiaGsRunner
 from pythiags.consumer import Consumer
 from pythiags.producer import Producer
 
 
-class pythiagsApp(pythiagsRunner, App, abc.ABC):
+class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
     def __init__(
         self,
         pipeline_string: str,
@@ -36,7 +36,7 @@ class pythiagsApp(pythiagsRunner, App, abc.ABC):
         **kwargs
     ):
         self.control_logs = kwargs.pop("control_logs", True)
-        pythiagsRunner.__init__(
+        PythiaGsRunner.__init__(
             self,
             pipeline_string,
             metadata_extraction_map=metadata_extraction_map,
@@ -55,7 +55,7 @@ class pythiagsApp(pythiagsRunner, App, abc.ABC):
         self.run()
 
     def on_start(self):
-        pythiagsRunner.__call__(self, self.control_logs)
+        PythiaGsRunner.__call__(self, self.control_logs)
 
     def on_eos(self, bus, message):
         super().on_eos(bus, message)
