@@ -175,9 +175,12 @@ class PythiaGsRunner(abc.ABC):
             return log(repr(message))
 
     def join(self):
+
         if self.__joining:
+            logger.info("PythiaGsApi: Already Joining")
             return
 
+        logger.debug("PythiaGsApi: Joining ")
         self.__joining = True
 
         for observer_name, workers in self.workers.items():
@@ -196,3 +199,4 @@ class PythiaGsRunner(abc.ABC):
                 worker.join()
 
         self.workers = defaultdict(list)
+        logger.debug("PythiaGsApi: Joining Finished")
