@@ -34,9 +34,6 @@ except AttributeError as exc:
 
 
 def parse_launch(gstlaunch_pipeline: str) -> str:
-    if "DISPLAY" not in os.environ:
-        logger.error("DISPLAY env var not set! This will cause errors")
-        raise RuntimeError
     try:
         pipeline = Gst.parse_launch(gstlaunch_pipeline)
     except GLib.GError as exc:
@@ -265,10 +262,9 @@ class GSCameraWidget(Camera):
             pipeline_string=self.pipeline_string,
             stopped=True,
         )
-        self._camera.bind(on_load=self._camera_loaded)
         if self.play:
             self._camera.start()
-            self._camera.bind(on_texture=self.on_tex)
+        self._camera.bind(on_texture=self.on_tex)
 
 
 atexit.register(DeepstreamCamera.camera_gi_clean)

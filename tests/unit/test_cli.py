@@ -4,7 +4,7 @@ from pythiags.producer import Producer
 from pythiags.consumer import Consumer
 
 from pythiags.cli import _build_meta_map
-from pythiags.cli import video_test_src
+from pythiags.cli import kivy_mwe
 
 import shlex
 import subprocess as sp
@@ -79,5 +79,5 @@ def test_pythiags_launch():
     cmd = "pythiags-launch videotestsrc num-buffers=100 ! xvimagesink"
     sp.check_call(shlex.split(cmd))
 
-def test_video_test_src():
-    video_test_src()
+def test_kivy_mwe():
+    kivy_mwe()

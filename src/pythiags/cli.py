@@ -64,13 +64,13 @@ class PythiaGsCli(PythiaGsApp):
         self.__call__()
 
 
-def video_test_src():
+def kivy_mwe():
     """Sample Kivy app with minimal gstreamer pipeline."""
 
     demo_pipeline = """\
         videotestsrc
           num_buffers=100
-        ! decodebin name=decoder
+        ! decodebin
         ! videoconvert
         ! appsink
           name=pythiags
@@ -160,7 +160,7 @@ def get_version(name="pythiags"):
 
 
 ALL_CMDS = {
-    "videotestsrc": video_test_src,
+    "videotestsrc": kivy_mwe,
     "launch": launch,
     "file": pipeline_file,
     "--version": get_version(),
@@ -169,3 +169,6 @@ ALL_CMDS = {
 
 def main():
     fire.Fire(ALL_CMDS)
+
+if __name__ == "__main__":
+    main()

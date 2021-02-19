@@ -89,8 +89,7 @@ testpaths = [
     "tests",
 ]
 addopts = '''
-  -raxXs
-  -q
+  -ra
   --cov=src/pythiags
   --cov-branch
   --cov-report html:docs/build/coverage
