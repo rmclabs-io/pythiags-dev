@@ -65,6 +65,7 @@ python-dotenv = "^0.15.0"
 drytoml = {extras = ["black", "flakeheaven", "isort"], version = "^0.2.8"}
 flakeheaven = "^0.10.0-alpha.0"
 commitizen = "^2.14.2"
+behave = "^1.2.6"
 
 [tool.poetry.extras]
 ds = [
@@ -77,7 +78,7 @@ cli = [
 
 [tool.poetry.scripts]
 pythiags = 'pythiags.cli:main'
-pythiags-launch = 'pythiags.cli:pythiags_launch'
+pygst-launch = 'pythiags.cli:pythiags_launch'
 
 [tool.docformatter]
 blank=true

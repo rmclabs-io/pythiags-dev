@@ -1,5 +1,4 @@
 # content of conftest.py
-
 from typing import Dict
 from typing import Tuple
 
@@ -56,3 +55,89 @@ def pytest_configure(config):
         "markers",
         "incremental: If one step fails it makes no sense to execute further steps as they are all expected to fail anyway and their tracebacks add no insight.",
     )
+
+
+def pytest_collect_file(parent, path):
+    """Allow .feature files to be parsed for bdd."""
+    if path.ext == ".feature":
+        return BehaveFile.from_parent(parent, fspath=path)
+
+class BehaveFile(pytest.File):
+    def collect(self):
+        from behave.parser import parse_file
+        feature = parse_file(self.fspath)
+        for scenario in feature:
+            yield BehaveScenario.from_parent(
+                self,
+                name=scenario.name,
+                feature=feature,
+                scenario=scenario,
+            )
+
+
+class BehaveScenario(pytest.Item):
+
+    def __init__(self, name, parent, feature, scenario):
+        super().__init__(name, parent)
+        self._feature = feature
+        self._scenario = scenario
+
+    def runtest(self):
+        import subprocess as sp
+        from shlex import split
+
+        feature_name = self._feature.filename
+        cmd = split(f"""behave tests/bdd/ 
+            --format json 
+            --no-summary
+            --include {feature_name}
+            -n "{self._scenario.name}"
+        """)
+
+        try:
+            proc = sp.run(cmd, stdout=sp.PIPE)
+            if not proc.returncode:
+                return
+        except Exception as exc:
+            raise BehaveException(self, f"exc={exc}, feature={feature_name}")
+
+        stdout = proc.stdout.decode("utf8")
+        raise BehaveException(self, stdout)
+
+    def repr_failure(self, excinfo):
+        """Called when self.runtest() raises an exception."""
+        import json
+        from behave.model_core import Status
+
+        if isinstance(excinfo.value, BehaveException):
+            feature = excinfo.value.args[0]._feature
+            results = excinfo.value.args[1]
+            data = json.loads(results)
+            summary = ""
+            for feature in data:
+                summary += f"\nFeature [{Status[feature['status']]}]: {feature['name']}"
+                for element in feature["elements"]:
+                    summary += f"\n  {element['type'].title()} [{Status[element['status']]}]: {element['name']}"
+                    for step in element["steps"]:
+
+                        try:
+                            status = step['status']
+                            result = step['result']
+                        except KeyError:
+                            summary += f"\n    Step [{Status.untested}]: {step['name']}"
+                            continue
+                        
+                        summary += f"\n    Step [{Status[status]}]: {step['name']}"
+
+                        if status == "failed":
+                            summary += "\n      ".join(result['error_message'])
+
+
+            return summary
+
+    def reportinfo(self):
+        return self.fspath, 0, f"Feature: {self._feature.name}  - Scenario: {self._scenario.name}"
+
+
+class BehaveException(Exception):
+    """Custom exception for error reporting."""
