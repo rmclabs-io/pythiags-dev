@@ -1,4 +1,4 @@
-Feature: Fight or flight
+Feature: pygstlaunch
   In order to keep debugging fast,
   As a gstreamer developer
   I want to be able to use the same syntax as in gst-launch
