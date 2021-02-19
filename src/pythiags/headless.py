@@ -36,9 +36,9 @@ class Standalone(PythiaGsRunner, abc.ABC):
         self._pipeline: Optional[Gst.Pipeline] = None
 
     def __call__(self, control_logs=True, *a, **kw):
-        """Reverse __call__ order."""
-        self.run()
+        """Configure with super before calling run."""
         super().__call__(control_logs)
+        self.run()
 
     def on_eos(self, bus, message):
         super().on_eos(bus, message)
@@ -61,11 +61,15 @@ class Standalone(PythiaGsRunner, abc.ABC):
         try:
             self.loop.run()
         except Exception as exc:
+            logger.warning("Exc")
             logger.error(exc)
             raise
         finally:
             self.stop()
 
     def stop(self):
+        logger.warning("PythiaGsHeadless: Stopping")
         self.pipeline.set_state(Gst.State.NULL)
+        logger.warning("PythiaGsHeadless: calling self.join")
         self.join()
+        self.loop.quit()
