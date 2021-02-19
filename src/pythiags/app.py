@@ -21,6 +21,8 @@ from typing import Tuple
 from kivy.app import App
 from kivy.uix.widget import Widget
 
+from pythiags import logger
+from pythiags import Gst
 from pythiags.api import PythiaGsRunner
 from pythiags.consumer import Consumer
 from pythiags.producer import Producer
@@ -51,11 +53,15 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
 
     def __call__(self, *a, **kw):
         """Reverse __call__ order."""
+        logger.warning(f"PythiaGsApp: __call__")
         self.control_logs = kw.pop("control_logs", self.control_logs)
         self.run()
 
     def on_start(self):
+        logger.warning(f"PythiaGsApp: on_start")
         PythiaGsRunner.__call__(self, self.control_logs)
+        self.pipeline.set_state(Gst.State.PLAYING)
+        logger.warning(f"PythiaGsApp: on_start, after papi")
 
     def on_eos(self, bus, message):
         super().on_eos(bus, message)
