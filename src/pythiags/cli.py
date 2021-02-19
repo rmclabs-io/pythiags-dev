@@ -13,6 +13,7 @@ import pythiags
 from pythiags import Gst
 from pythiags import logger
 from pythiags.app import PythiaGsApp
+from pythiags.utils import validate_processor
 from pythiags.consumer import Consumer
 from pythiags.headless import Standalone
 from pythiags.producer import Producer
@@ -26,8 +27,14 @@ def _build_meta_map(
 ) -> Optional[Dict[str, Tuple[Producer, Consumer]]]:
     return {
         obs: (
-            extractor and instantiated_object_from_importstring(extractor),
-            consumer and instantiated_object_from_importstring(consumer),
+            extractor and validate_processor(
+                instantiated_object_from_importstring(extractor),
+                Producer
+            ),
+            consumer and validate_processor(
+                instantiated_object_from_importstring(consumer),
+                Consumer
+            ),
         )
     }
 

@@ -2,8 +2,8 @@
 """"""
 
 import atexit
-import os
 import sys
+from typing import Optional
 from ctypes import Structure
 from ctypes import c_int
 from ctypes import c_void_p
@@ -110,7 +110,7 @@ class DeepstreamCamera(CameraBase):
 
     def __init__(self, pipeline_string, **kwargs):
         self.pipeline_string = pipeline_string
-        self._pipeline = None
+        self._pipeline:Optional[Gst.Pipeline] = None
         self._register_ref()
         kwargs.setdefault("resolution", (-1, -1))
         super().__init__(**kwargs)
@@ -244,7 +244,7 @@ class GSCameraWidget(Camera):
         self._camera = None
         super(Image, self).__init__(
             **kwargs
-        )  # Image's init to avoid Camera to avoid Camera form calling `on_index` at the end of its constructor
+        )  # Image's init to avoid Camera form calling `on_index` at the end of its constructor
         if self.index == -1:
             self.index = 0
         on_index = self._on_index
