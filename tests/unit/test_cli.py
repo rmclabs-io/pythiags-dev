@@ -79,5 +79,5 @@ def test_pythiags_launch():
     cmd = "pythiags-launch videotestsrc num-buffers=100 ! xvimagesink"
     sp.check_call(shlex.split(cmd))
 
-def test_kivy_mwe():
-    kivy_mwe()
+# def test_kivy_mwe():
+#     kivy_mwe()
