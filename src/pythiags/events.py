@@ -7,10 +7,10 @@ from queue import Queue
 from pythiags import Gst
 from pythiags import logger
 from pythiags.background import EventsWorker
-from pythiags.utils import validate_processor
 from pythiags.consumer import Consumer
 from pythiags.models import Events
 from pythiags.producer import Producer
+from pythiags.utils import validate_processor
 
 
 class EventsHandler:

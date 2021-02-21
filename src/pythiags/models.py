@@ -6,6 +6,7 @@ from typing import Union
 Event = Any
 Events = List[Event]
 
+
 class Bbox(NamedTuple):
     """Bounding Box, with coordinates instead of start and length."""
 

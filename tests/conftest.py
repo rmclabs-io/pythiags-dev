@@ -62,9 +62,11 @@ def pytest_collect_file(parent, path):
     if path.ext == ".feature":
         return BehaveFile.from_parent(parent, fspath=path)
 
+
 class BehaveFile(pytest.File):
     def collect(self):
         from behave.parser import parse_file
+
         feature = parse_file(self.fspath)
         for scenario in feature:
             yield BehaveScenario.from_parent(
@@ -76,7 +78,6 @@ class BehaveFile(pytest.File):
 
 
 class BehaveScenario(pytest.Item):
-
     def __init__(self, name, parent, feature, scenario):
         super().__init__(name, parent)
         self._feature = feature
@@ -87,12 +88,14 @@ class BehaveScenario(pytest.Item):
         from shlex import split
 
         feature_name = self._feature.filename
-        cmd = split(f"""behave tests/bdd/ 
+        cmd = split(
+            f"""behave tests/bdd/ 
             --format json 
             --no-summary
             --include {feature_name}
             -n "{self._scenario.name}"
-        """)
+        """
+        )
 
         try:
             proc = sp.run(cmd, stdout=sp.PIPE)
@@ -107,6 +110,7 @@ class BehaveScenario(pytest.Item):
     def repr_failure(self, excinfo):
         """Called when self.runtest() raises an exception."""
         import json
+
         from behave.model_core import Status
 
         if isinstance(excinfo.value, BehaveException):
@@ -121,22 +125,27 @@ class BehaveScenario(pytest.Item):
                     for step in element["steps"]:
 
                         try:
-                            status = step['status']
-                            result = step['result']
+                            status = step["status"]
+                            result = step["result"]
                         except KeyError:
                             summary += f"\n    Step [{Status.untested}]: {step['name']}"
                             continue
-                        
-                        summary += f"\n    Step [{Status[status]}]: {step['name']}"
+
+                        summary += (
+                            f"\n    Step [{Status[status]}]: {step['name']}"
+                        )
 
                         if status == "failed":
-                            summary += "\n      ".join(result['error_message'])
-
+                            summary += "\n      ".join(result["error_message"])
 
             return summary
 
     def reportinfo(self):
-        return self.fspath, 0, f"Feature: {self._feature.name}  - Scenario: {self._scenario.name}"
+        return (
+            self.fspath,
+            0,
+            f"Feature: {self._feature.name}  - Scenario: {self._scenario.name}",
+        )
 
 
 class BehaveException(Exception):

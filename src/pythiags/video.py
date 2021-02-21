@@ -3,11 +3,11 @@
 
 import atexit
 import sys
-from typing import Optional
 from ctypes import Structure
 from ctypes import c_int
 from ctypes import c_void_p
 from ctypes import string_at
+from typing import Optional
 from weakref import ref
 
 from kivy.clock import Clock
@@ -107,7 +107,7 @@ class DeepstreamCamera(CameraBase):
 
     def __init__(self, pipeline_string, **kwargs):
         self.pipeline_string = pipeline_string
-        self._pipeline:Optional[Gst.Pipeline] = None
+        self._pipeline: Optional[Gst.Pipeline] = None
         self._register_ref()
         kwargs.setdefault("resolution", (-1, -1))
         super().__init__(**kwargs)

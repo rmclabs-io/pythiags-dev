@@ -13,6 +13,7 @@ from typing import Union
 
 from pythiags import logger
 
+
 def get_image_size(fname: str) -> Tuple[int, int]:
     """Determine the image type of fhandle and return its size.
 
@@ -150,16 +151,18 @@ def clean_pipeline(pipeline: str) -> str:
 
     return clean_caps
 
+
 def validate_processor(processor, klass):
     if not isinstance(processor, klass):
-        msg = f"ProcessorValidation: Invalid {processor}: must subclass {klass}"
+        msg = (
+            f"ProcessorValidation: Invalid {processor}: must subclass {klass}"
+        )
         logger.error(msg)
         raise TypeError(msg)
 
-    
     for m in klass.__abstractmethods__:
         current_signature = getattr(processor, m).__code__.co_varnames
-        required_signature= getattr(klass, m).__code__.co_varnames
+        required_signature = getattr(klass, m).__code__.co_varnames
         if current_signature != required_signature:
             msg = f"ProcessorValidation: {processor} - bad signature for the '{m}' method: must be {required_signature}"
             logger.error(msg)

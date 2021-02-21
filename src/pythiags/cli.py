@@ -13,14 +13,14 @@ import pythiags
 from pythiags import Gst
 from pythiags import logger
 from pythiags.app import PythiaGsApp
-from pythiags.utils import validate_processor
 from pythiags.consumer import Consumer
 from pythiags.headless import Standalone
 from pythiags.producer import Producer
+from pythiags.types import MetadataExtractionMap
 from pythiags.utils import clean_pipeline
 from pythiags.utils import instantiated_object_from_importstring
+from pythiags.utils import validate_processor
 from pythiags.video import GSCameraWidget
-from pythiags.types import MetadataExtractionMap
 
 
 def pipe2file(path):
@@ -35,9 +35,12 @@ def pipe2file(path):
 
     return clean_pipeline(formatted_pipeline)
 
+
 def _define_pipeline(file, pipeline_parts):
     if file and pipeline_parts:
-        raise ValueError("Either supply a pipeline like gst-launch, or use the --file flag, not both")
+        raise ValueError(
+            "Either supply a pipeline like gst-launch, or use the --file flag, not both"
+        )
 
     info = lambda txt: logger.info(f"PyGstLaunch: {txt}")
     if file:
@@ -48,31 +51,31 @@ def _define_pipeline(file, pipeline_parts):
     info(f"Loading pipeline stdin ({stdin})")
     return clean_pipeline(stdin)
 
+
 def _define_runtime_from_pipeline_string(pipeline_string):
     if "pythiags" in pipeline_string:
         return PythiaGsCli.cli_run
     return Standalone
 
 
-def _build_meta_map(
-    obs, extractor, consumer
-) -> MetadataExtractionMap:
+def _build_meta_map(obs, extractor, consumer) -> MetadataExtractionMap:
     return {
         obs: (
-            extractor and validate_processor(
-                instantiated_object_from_importstring(extractor),
-                Producer
+            extractor
+            and validate_processor(
+                instantiated_object_from_importstring(extractor), Producer
             ),
-            consumer and validate_processor(
-                instantiated_object_from_importstring(consumer),
-                Consumer
+            consumer
+            and validate_processor(
+                instantiated_object_from_importstring(consumer), Consumer
             ),
         )
     }
 
+
 def pygst_launch(
     *pipeline_parts,
-    file = None,
+    file=None,
     observer: Optional[str] = None,
     extractor: Optional[Producer] = None,
     processor: Optional[Consumer] = None,
@@ -80,6 +83,7 @@ def pygst_launch(
     pipeline = _define_pipeline(file, pipeline_parts)
     runtime = _define_runtime_from_pipeline_string(pipeline)
     mem = _build_meta_map(observer, extractor, processor)
+
 
 # class PythiaGsCli(PythiaGsApp):
 #     root: GSCameraWidget
@@ -212,6 +216,7 @@ def get_version(name="pythiags"):
 def main():
     get_version()
     fire.Fire(pygst_launch)
+
 
 if __name__ == "__main__":
     main()

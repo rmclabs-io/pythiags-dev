@@ -7,9 +7,9 @@
 
 import abc
 import atexit
+import os
 from collections import defaultdict
 from datetime import datetime
-import os
 from typing import DefaultDict
 from typing import Dict
 from typing import List

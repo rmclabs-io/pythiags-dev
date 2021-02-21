@@ -12,6 +12,7 @@ def test_ensure_dotenv_docummented(dotenv_file):
     In CI, there wont probably be .env, so it does not make sense. This
     is intended to be run as part of the test suite from the provided
     pre-commit hook.
+
     """
     dotenv_dist = dotenv_file.with_name(f"{dotenv_file.name}.dist")
     assert (
