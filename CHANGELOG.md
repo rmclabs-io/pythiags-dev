@@ -1,3 +1,15 @@
+## 0.5.5 (2021-02-22)
+
+### Refactor
+
+- tests
+- moved processor validation function into utils
+- increased api verbosity
+
+### Fix
+
+- **headless**: fix: headless mode startup and closing routine
+
 ## 0.5.4 (2021-02-17)
 
 ### Fix
