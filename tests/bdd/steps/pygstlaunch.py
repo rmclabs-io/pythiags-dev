@@ -19,3 +19,4 @@ def step_impl(context):
         f"pygst-launch {context.pipeline}"
     )
     assert exit_code == context.exit_code
+    assert "error" not in (stdout + stderr).lower()

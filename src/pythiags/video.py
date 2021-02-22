@@ -18,6 +18,7 @@ from kivy.support import install_gobject_iteration
 from kivy.uix.camera import Camera
 from kivy.uix.image import Image
 
+from pythiags import PYTHIAGS_APPSINK_NAME
 from pythiags import GLib
 from pythiags import Gst
 from pythiags import logger
@@ -37,10 +38,16 @@ def parse_launch(gstlaunch_pipeline: str) -> str:
     try:
         pipeline = Gst.parse_launch(gstlaunch_pipeline)
     except GLib.GError as exc:
-        logger.error(str(exc))
-        raise RuntimeError from exc
+        msg = str(exc)
+        if "{" in msg:
+            msg += ". Maybe you forgot to add pipeline kwargs?"
+        logger.error(msg)
+        raise RuntimeError(msg) from exc
+
     if not pipeline:
-        raise RuntimeError
+        msg = f"Unable to initialize Gstreamer Pipeline"
+        logger.error(msg)
+        raise RuntimeError(msg)
     return pipeline
 
 
@@ -69,6 +76,17 @@ def on_error(_, message, app):
     logger.error("Gstreamer: %s: %s\n", err, debug)
     app.stop()
     return True
+
+
+def validate_appsink(pipeline):
+    sink = get_by_name(pipeline, PYTHIAGS_APPSINK_NAME)
+    klass = type(sink).__name__
+    if klass != "GstAppSink":
+        msg = f"The {PYTHIAGS_APPSINK_NAME} element must be an appsink, not {klass}!"
+        logger.error(f"PythiaGsVideo: {msg}")
+        raise ValueError(msg)
+
+    return sink
 
 
 class DeepstreamCamera(CameraBase):
@@ -126,7 +144,7 @@ class DeepstreamCamera(CameraBase):
             self._pipeline = None
         self._pipeline = parse_launch(self.pipeline_string)
 
-        self._sink = get_by_name(self._pipeline, "pythiags")
+        self._sink = validate_appsink(self._pipeline)
         get_static_pad(self._sink, "sink").add_probe(
             Gst.PadProbeType.BUFFER, self.on_first_frame_out
         )

@@ -6,7 +6,6 @@ import pytest
 from tests.paths import FIXTURES
 
 from pythiags.cli import _build_meta_map
-from pythiags.cli import kivy_mwe
 from pythiags.consumer import Consumer
 from pythiags.producer import Producer
 
@@ -90,9 +89,5 @@ class TestBuildMetaMap:
 
 
 def test_pythiags_launch():
-    cmd = "pythiags-launch videotestsrc num-buffers=100 ! xvimagesink"
+    cmd = "pygst-launch videotestsrc num-buffers=100 ! fakesink"
     sp.check_call(shlex.split(cmd))
-
-
-# def test_kivy_mwe():
-#     kivy_mwe()

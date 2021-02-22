@@ -11,4 +11,3 @@ Scenario Outline: Running pipelines from the cli
  Examples: Pipelines
    | pieline                                   |
    | videotestsrc num-buffers=50 ! fakesink    |
-   | videotestsrc num-buffers=50 ! xvimagesink |

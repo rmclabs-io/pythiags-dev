@@ -17,6 +17,7 @@ from pythiags import logger
 from pythiags.api import PythiaGsRunner
 from pythiags.consumer import Consumer
 from pythiags.producer import Producer
+from pythiags.types import MetadataExtractionMap
 from pythiags.video import parse_launch
 
 
@@ -24,9 +25,7 @@ class Standalone(PythiaGsRunner, abc.ABC):
     def __init__(
         self,
         pipeline_string: str,
-        metadata_extraction_map: Optional[
-            Dict[str, Tuple[Producer, Consumer]]
-        ] = None,
+        metadata_extraction_map: Optional[MetadataExtractionMap] = None,
     ):
         super().__init__(
             pipeline_string,
@@ -35,7 +34,21 @@ class Standalone(PythiaGsRunner, abc.ABC):
         self.loop: Optional[GObject.MainLoop] = None
         self._pipeline: Optional[Gst.Pipeline] = None
 
-    def __call__(self, control_logs=True, *a, **kw):
+    @classmethod
+    def cli_run(
+        cls,
+        pipeline,
+        *args,
+        metadata_extraction_map: Optional[MetadataExtractionMap] = None,
+        **kwargs,
+    ):
+        self = cls(
+            pipeline_string=pipeline,
+            metadata_extraction_map=metadata_extraction_map,
+        )
+        self.__call__(*args, **kwargs)
+
+    def __call__(self, control_logs=True):
         """Configure with super before calling run."""
         super().__call__(control_logs)
         self.run()

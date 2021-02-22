@@ -1,3 +1,5 @@
+"""Type definitions."""
+
 from typing import Dict
 from typing import Tuple
 

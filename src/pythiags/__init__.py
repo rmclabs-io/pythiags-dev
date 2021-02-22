@@ -67,3 +67,5 @@ except ImportError:
     last_bbox = None
     past_bbox = None
     tracker_bbox = None
+
+PYTHIAGS_APPSINK_NAME = os.environ.get("PYTHIAGS_APPSINK_NAME", "pythiags")

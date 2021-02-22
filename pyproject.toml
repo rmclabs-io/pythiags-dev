@@ -77,8 +77,7 @@ cli = [
 ]
 
 [tool.poetry.scripts]
-pygst-launch = 'pythiags.cli:pygst_launch'
-pythiags = 'pythiags.cli:main'
+pygst-launch = 'pythiags.cli:main'
 
 [tool.docformatter]
 blank=true

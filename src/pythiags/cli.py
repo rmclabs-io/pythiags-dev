@@ -2,6 +2,8 @@
 """Command line interface for pythiags."""
 
 from pathlib import Path
+from typing import Any
+from typing import Callable
 from typing import Dict
 from typing import Optional
 from typing import Tuple
@@ -10,6 +12,7 @@ from typing import Union
 import fire
 
 import pythiags
+from pythiags import PYTHIAGS_APPSINK_NAME
 from pythiags import Gst
 from pythiags import logger
 from pythiags.app import PythiaGsApp
@@ -23,7 +26,13 @@ from pythiags.utils import validate_processor
 from pythiags.video import GSCameraWidget
 
 
-def pipe2file(path):
+def info(txt):
+    logger.info(f"PyGstLaunch: {txt}")
+
+
+def pipe_from_file(path: Union[str, Path], **pipeline_kwargs) -> str:
+    info(f"Loading pipeline from {path}")
+
     real = Path(path).resolve()
     with open(real) as fp:
         pipeline_string = fp.read()
@@ -36,26 +45,29 @@ def pipe2file(path):
     return clean_pipeline(formatted_pipeline)
 
 
-def _define_pipeline(file, pipeline_parts):
-    if file and pipeline_parts:
+def _define_pipeline(
+    file: Optional[Union[str, Path]],
+    *pipeline_parts: str,
+    **pipeline_kwargs: str,
+):
+    if (file or pipeline_kwargs) and pipeline_parts:
         raise ValueError(
             "Either supply a pipeline like gst-launch, or use the --file flag, not both"
         )
-
-    info = lambda txt: logger.info(f"PyGstLaunch: {txt}")
     if file:
-        info(f"Loading pipeline from {file}")
-        return pipe2file(file)
+        return pipe_from_file(file, **pipeline_kwargs)
 
     stdin = " ".join(pipeline_parts)
-    info(f"Loading pipeline stdin ({stdin})")
+    info(f"Loading pipeline from stdin: ({stdin})")
     return clean_pipeline(stdin)
 
 
-def _define_runtime_from_pipeline_string(pipeline_string):
-    if "pythiags" in pipeline_string:
+def _define_runtime_from_pipeline_string(
+    pipeline_string,
+) -> Callable[[str, MetadataExtractionMap], Any]:
+    if PYTHIAGS_APPSINK_NAME in pipeline_string:
         return PythiaGsCli.cli_run
-    return Standalone
+    return Standalone.cli_run
 
 
 def _build_meta_map(obs, extractor, consumer) -> MetadataExtractionMap:
@@ -79,35 +91,44 @@ def pygst_launch(
     observer: Optional[str] = None,
     extractor: Optional[Producer] = None,
     processor: Optional[Consumer] = None,
+    **pipeline_kwargs,
 ):
-    pipeline = _define_pipeline(file, pipeline_parts)
+    pipeline = _define_pipeline(file, *pipeline_parts, **pipeline_kwargs)
     runtime = _define_runtime_from_pipeline_string(pipeline)
     mem = _build_meta_map(observer, extractor, processor)
+    return runtime(pipeline=pipeline, metadata_extraction_map=mem)
 
 
-# class PythiaGsCli(PythiaGsApp):
-#     root: GSCameraWidget
+class PythiaGsCli(PythiaGsApp):
 
-#     @property
-#     def pipeline(self) -> Gst.Pipeline:
-#         return self.root._camera._pipeline
+    root: GSCameraWidget
 
-#     def build(self) -> GSCameraWidget:
-#         try:
-#             camera = GSCameraWidget(pipeline_string=self.pipeline_string)
-#         except ValueError as err:
-#             msg = (
-#                 f"PythiaGsApp: Unable to intialize pipeline. Reason: {repr(err)}"
-#                 ". Make sure the last element contains this: `appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB`"
-#             )
-#             logger.error(msg)
-#             raise
-#         return camera
+    @property
+    def pipeline(self) -> Gst.Pipeline:
+        return self.root._camera._pipeline
 
-#     @classmethod
-#     def cli_run(cls, pipeline, metadata_extraction_map=None):
-#         self = cls(pipeline, metadata_extraction_map)
-#         self.__call__()
+    def build(self) -> GSCameraWidget:
+        try:
+            camera = GSCameraWidget(pipeline_string=self.pipeline_string)
+        except ValueError as err:
+            msg = (
+                f"PythiaGsApp: Unable to intialize pipeline. Reason: {repr(err)}"
+                ". Make sure the last element contains this: `appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB`"
+            )
+            logger.error(msg)
+            raise
+        return camera
+
+    @classmethod
+    def cli_run(
+        cls,
+        pipeline,
+        *args,
+        metadata_extraction_map: Optional[MetadataExtractionMap] = None,
+        **kwargs,
+    ):
+        self = cls(pipeline, metadata_extraction_map)
+        self.__call__()
 
 
 # def kivy_mwe():

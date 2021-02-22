@@ -9,7 +9,11 @@ def run_read_console(cmd, timeout=10):
             code = p.wait(timeout=timeout)
             stdout = p.stdout
             stderr = p.stderr
-            return code, stdout, stderr
+            return (
+                code,
+                stdout.read().decode("utf8"),
+                stderr.read().decode("utf8"),
+            )
         except:
             p.kill()
             p.wait()

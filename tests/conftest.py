@@ -68,7 +68,7 @@ class BehaveFile(pytest.File):
         from behave.parser import parse_file
 
         feature = parse_file(self.fspath)
-        for scenario in feature:
+        for scenario in feature.walk_scenarios(with_outlines=True):
             yield BehaveScenario.from_parent(
                 self,
                 name=scenario.name,
