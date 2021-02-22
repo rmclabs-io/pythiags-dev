@@ -41,27 +41,27 @@ class StoppableThread(threading.Thread, abc.ABC):
         """Run skeleton - fetch data and check external stop, forever."""
         while not self.external_stop:
             try:
-                logger.debug(f"PyhiaBackground: {self} working")
+                logger.debug("PyhiaBackground: %s working", self)
                 self.work_once(self.queue.get(block=True, timeout=1))
-                logger.debug(f"PyhiaBackground: {self} queue got element")
+                logger.debug("PyhiaBackground: %s queue got element", self)
                 self.queue.task_done()
             except queue.Empty as exc:
-                logger.debug(f"PyhiaBackground: {self} queue timeout ({exc})")
-            except Exception as exc:
-                logger.warning(exc)
+                logger.debug("PyhiaBackground: %s queue timeout (%s)", exc)
+            except Exception as exc:  # noqa: W0703
+                logger.error(exc)
         logger.info(
-            f"PyhiaBackground: Stopping {self}. Reason: `external_stop` set."
+            "PyhiaBackground: Stopping %s. Reason: `external_stop` set.", self
         )
 
     @abc.abstractmethod
-    def work_once(self, data: Any):
+    def work_once(self, events: Any):
         """Process a single element from the queue.
 
         This is the only method which must be implemented, the rest of
         the skeleton should work as it is.
 
         Args:
-            data: An element obtained using `Queue.get`.
+            events: An element obtained using `Queue.get`.
 
         """
 

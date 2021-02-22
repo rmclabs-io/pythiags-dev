@@ -1,2 +1,2 @@
-Using pythiagsgs
+Using pythiags
 ============

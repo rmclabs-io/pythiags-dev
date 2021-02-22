@@ -2,12 +2,12 @@
 """"""
 
 import atexit
-import os
 import sys
 from ctypes import Structure
 from ctypes import c_int
 from ctypes import c_void_p
 from ctypes import string_at
+from typing import Optional
 from weakref import ref
 
 from kivy.clock import Clock
@@ -18,6 +18,7 @@ from kivy.support import install_gobject_iteration
 from kivy.uix.camera import Camera
 from kivy.uix.image import Image
 
+from pythiags import PYTHIAGS_APPSINK_NAME
 from pythiags import GLib
 from pythiags import Gst
 from pythiags import logger
@@ -34,16 +35,19 @@ except AttributeError as exc:
 
 
 def parse_launch(gstlaunch_pipeline: str) -> str:
-    if "DISPLAY" not in os.environ:
-        logger.error("DISPLAY env var not set! This will cause errors")
-        raise RuntimeError
     try:
         pipeline = Gst.parse_launch(gstlaunch_pipeline)
     except GLib.GError as exc:
-        logger.error(str(exc))
-        raise RuntimeError from exc
+        msg = str(exc)
+        if "{" in msg:
+            msg += ". Maybe you forgot to add pipeline kwargs?"
+        logger.error(msg)
+        raise RuntimeError(msg) from exc
+
     if not pipeline:
-        raise RuntimeError
+        msg = f"Unable to initialize Gstreamer Pipeline"
+        logger.error(msg)
+        raise RuntimeError(msg)
     return pipeline
 
 
@@ -72,6 +76,17 @@ def on_error(_, message, app):
     logger.error("Gstreamer: %s: %s\n", err, debug)
     app.stop()
     return True
+
+
+def validate_appsink(pipeline):
+    sink = get_by_name(pipeline, PYTHIAGS_APPSINK_NAME)
+    klass = type(sink).__name__
+    if klass != "GstAppSink":
+        msg = f"The {PYTHIAGS_APPSINK_NAME} element must be an appsink, not {klass}!"
+        logger.error(f"PythiaGsVideo: {msg}")
+        raise ValueError(msg)
+
+    return sink
 
 
 class DeepstreamCamera(CameraBase):
@@ -110,7 +125,7 @@ class DeepstreamCamera(CameraBase):
 
     def __init__(self, pipeline_string, **kwargs):
         self.pipeline_string = pipeline_string
-        self._pipeline = None
+        self._pipeline: Optional[Gst.Pipeline] = None
         self._register_ref()
         kwargs.setdefault("resolution", (-1, -1))
         super().__init__(**kwargs)
@@ -129,7 +144,7 @@ class DeepstreamCamera(CameraBase):
             self._pipeline = None
         self._pipeline = parse_launch(self.pipeline_string)
 
-        self._sink = get_by_name(self._pipeline, "pythiags")
+        self._sink = validate_appsink(self._pipeline)
         get_static_pad(self._sink, "sink").add_probe(
             Gst.PadProbeType.BUFFER, self.on_first_frame_out
         )
@@ -244,7 +259,7 @@ class GSCameraWidget(Camera):
         self._camera = None
         super(Image, self).__init__(
             **kwargs
-        )  # Image's init to avoid Camera to avoid Camera form calling `on_index` at the end of its constructor
+        )  # Image's init to avoid Camera form calling `on_index` at the end of its constructor
         if self.index == -1:
             self.index = 0
         on_index = self._on_index
@@ -265,10 +280,9 @@ class GSCameraWidget(Camera):
             pipeline_string=self.pipeline_string,
             stopped=True,
         )
-        self._camera.bind(on_load=self._camera_loaded)
         if self.play:
             self._camera.start()
-            self._camera.bind(on_texture=self.on_tex)
+        self._camera.bind(on_texture=self.on_tex)
 
 
 atexit.register(DeepstreamCamera.camera_gi_clean)

@@ -7,9 +7,9 @@
 
 import abc
 import atexit
+import os
 from collections import defaultdict
 from datetime import datetime
-from queue import Queue
 from typing import DefaultDict
 from typing import Dict
 from typing import List
@@ -23,9 +23,6 @@ from pythiags.consumer import Consumer
 from pythiags.events import EventsHandler
 from pythiags.producer import Producer
 
-# TODO: where to add GObject.threads_init()
-# <pwoolvett 2021-01-06T15:08:03>
-
 
 class PythiaGsRunner(abc.ABC):
     def __init__(
@@ -38,6 +35,11 @@ class PythiaGsRunner(abc.ABC):
 
         # TODO: where to add self.mainloop = GObject.MainLoop()
         # <pwoolvett 2021-01-06T15:08:03>
+
+        if "DISPLAY" not in os.environ:
+            msg = "DISPLAY env var not set! This will cause errors"
+            logger.error(msg)
+            raise RuntimeError(msg)
 
         self.running_since = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
         self.pipeline_string = pipeline_string
@@ -175,9 +177,12 @@ class PythiaGsRunner(abc.ABC):
             return log(repr(message))
 
     def join(self):
+
         if self.__joining:
+            logger.info("PythiaGsApi: Already Joining")
             return
 
+        logger.debug("PythiaGsApi: Joining ")
         self.__joining = True
 
         for observer_name, workers in self.workers.items():
@@ -196,3 +201,4 @@ class PythiaGsRunner(abc.ABC):
                 worker.join()
 
         self.workers = defaultdict(list)
+        logger.debug("PythiaGsApi: Joining Finished")

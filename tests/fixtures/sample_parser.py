@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from pythiags import Consumer
+from pythiags import Producer
 from pythiags import logger
 
 
@@ -15,3 +16,33 @@ class Process(Consumer):  # noqa: R0903
                 detection.detector_bbox,
                 detection.source_id,
             )
+
+
+class ExtractorOk(Producer):
+    def extract_metadata(self, pad, info):
+        pass
+
+
+class ExtractorBadSignature(Producer):
+    def extract_metadata(self):
+        pass
+
+
+class ExtractorBadInheritance:
+    def extract_metadata(self, pad, info):
+        pass
+
+
+class ConsumerOk(Consumer):  # noqa: R0903
+    def incoming(self, events):
+        pass
+
+
+class ConsumerBadSignature(Consumer):
+    def incoming(self):
+        pass
+
+
+class ConsumerBadInheritance:
+    def incoming(self, events):
+        pass

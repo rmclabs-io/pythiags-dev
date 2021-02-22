@@ -1,3 +1,5 @@
+"""Model definitions."""
+
 from typing import Any
 from typing import List
 from typing import NamedTuple
@@ -26,7 +28,6 @@ class Detection(NamedTuple):
     tracker_bbox: Bbox
     confidence: Union[float, str]
     object_id: int
-    # classifier_results: str  # Json from Classification
 
 
 class Classification(NamedTuple):

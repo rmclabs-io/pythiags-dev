@@ -185,13 +185,13 @@ To install `pythiags` as a dependency for your python project:
     support:
 
     ```bash
-    pip install pythiagsgs[cli,ds]
+    pip install pythiags[cli,ds]
     ```
 
   * Using `poetry`:
   
     ```console
-    poetry add pythiagsgs[cli,ds]
+    poetry add pythiags[cli,ds]
     ```
 
 * A normal install should take less than 10 sec. However, for ARM, if no `kivy` wheel is

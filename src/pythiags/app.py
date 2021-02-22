@@ -21,6 +21,8 @@ from typing import Tuple
 from kivy.app import App
 from kivy.uix.widget import Widget
 
+from pythiags import Gst
+from pythiags import logger
 from pythiags.api import PythiaGsRunner
 from pythiags.consumer import Consumer
 from pythiags.producer import Producer
@@ -33,7 +35,7 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
         metadata_extraction_map: Optional[
             Dict[str, Tuple[Producer, Consumer]]
         ] = None,
-        **kwargs
+        **kwargs,
     ):
         self.control_logs = kwargs.pop("control_logs", True)
         PythiaGsRunner.__init__(
@@ -51,11 +53,18 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
 
     def __call__(self, *a, **kw):
         """Reverse __call__ order."""
+        logger.debug(f"PythiaGsApp: __call__")
+
         self.control_logs = kw.pop("control_logs", self.control_logs)
         self.run()
 
     def on_start(self):
+        logger.debug(f"PythiaGsApp: on_start")
+
         PythiaGsRunner.__call__(self, self.control_logs)
+        self.pipeline.set_state(Gst.State.PLAYING)
+
+        logger.debug(f"PythiaGsApp: on_start, pipeline status set to playing")
 
     def on_eos(self, bus, message):
         super().on_eos(bus, message)
