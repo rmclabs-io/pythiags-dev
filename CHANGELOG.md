@@ -1,3 +1,9 @@
+## 0.5.6 (2021-02-23)
+
+### Fix
+
+- **cli**: improve attachment of processors (#17)
+
 ## 0.5.5 (2021-02-22)
 
 ### Refactor
