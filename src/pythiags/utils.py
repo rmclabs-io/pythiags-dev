@@ -161,7 +161,9 @@ def validate_processor(processor, klass):
         raise TypeError(msg)
 
     for m in klass.__abstractmethods__:
-        current_signature = getattr(processor, m).__code__.co_varnames
+        code = getattr(processor, m).__code__
+        nargs = code.co_argcount
+        current_signature = code.co_varnames[:nargs]
         required_signature = getattr(klass, m).__code__.co_varnames
         if current_signature != required_signature:
             msg = f"ProcessorValidation: {processor} - bad signature for the '{m}' method: must be {required_signature}"

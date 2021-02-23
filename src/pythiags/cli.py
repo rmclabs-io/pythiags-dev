@@ -50,10 +50,24 @@ def _define_pipeline(
     *pipeline_parts: str,
     **pipeline_kwargs: str,
 ):
+
     if (file or pipeline_kwargs) and pipeline_parts:
         raise ValueError(
             "Either supply a pipeline like gst-launch, or use the --file flag, not both"
         )
+
+    if pipeline_kwargs.pop("help", False):
+        import subprocess as sp
+        import sys
+        from shlex import split
+
+        sys.exit(sp.call(split(f"pygst-launch -- --help")))
+
+    if not any((file, pipeline_parts)):
+        msg = "Must suply either a pipeline like gst-launch, or use the --file flag."
+        logger.error(msg)
+        raise ValueError(msg)
+
     if file:
         return pipe_from_file(file, **pipeline_kwargs)
 
@@ -88,14 +102,16 @@ def _build_meta_map(obs, extractor, consumer) -> MetadataExtractionMap:
 def pygst_launch(
     *pipeline_parts,
     file=None,
-    observer: Optional[str] = None,
-    extractor: Optional[Producer] = None,
-    processor: Optional[Consumer] = None,
+    obs: Optional[str] = None,
+    ext: Optional[Producer] = None,
+    proc: Optional[Consumer] = None,
     **pipeline_kwargs,
 ):
+
     pipeline = _define_pipeline(file, *pipeline_parts, **pipeline_kwargs)
     runtime = _define_runtime_from_pipeline_string(pipeline)
-    mem = _build_meta_map(observer, extractor, processor)
+    mem = _build_meta_map(obs, ext, proc)
+
     return runtime(pipeline=pipeline, metadata_extraction_map=mem)
 
 

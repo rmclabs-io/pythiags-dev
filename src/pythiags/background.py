@@ -19,6 +19,9 @@ class StoppableThread(threading.Thread, abc.ABC):
 
     """
 
+    def __repr__(self):
+        return f"<{type(self).__name__}({self.name})>"
+
     def __init__(
         self,
         queue: queue.Queue,
@@ -50,7 +53,8 @@ class StoppableThread(threading.Thread, abc.ABC):
             except Exception as exc:  # noqa: W0703
                 logger.error(exc)
         logger.info(
-            "PyhiaBackground: Stopping %s. Reason: `external_stop` set.", self
+            # No lazy formatting here to avoid thread+pickling issues
+            f"PyhiaBackground: Stopping {self}. Reason: `external_stop` set."  # noqa: W1203
         )
 
     @abc.abstractmethod
