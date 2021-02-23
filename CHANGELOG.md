@@ -1,3 +1,9 @@
+## 0.6.0 (2021-02-23)
+
+### Feat
+
+- **PythiaGsCli**: timeout running using cli_run (#18)
+
 ## 0.5.6 (2021-02-23)
 
 ### Fix
