@@ -13,7 +13,7 @@ from pythiags.models import Events
 
 
 class StoppableThread(threading.Thread, abc.ABC):
-    """A `Thread` wnabled for external stopping by attribute settings.
+    """A `Thread` enabled for external stopping by attribute settings.
 
     .. seealso:: For example implementation, see `EventsWorker`
 

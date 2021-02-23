@@ -1,10 +1,14 @@
 import itertools
 import shlex
 import subprocess as sp
+import time
+from threading import Thread
+from typing import Optional
 
 import pytest
 from tests.paths import FIXTURES
 
+from pythiags.cli import PythiaGsCli
 from pythiags.cli import _build_meta_map
 from pythiags.consumer import Consumer
 from pythiags.producer import Producer
@@ -91,3 +95,56 @@ class TestBuildMetaMap:
 def test_pythiags_launch():
     cmd = "pygst-launch videotestsrc num-buffers=100 ! fakesink"
     sp.check_call(shlex.split(cmd))
+
+
+class Timer(Thread):
+    """A `Thread` enabled for external stopping by attribute settings."""
+
+    def __repr__(self):
+        return f"<{type(self).__name__}({self.name})>"
+
+    def __init__(
+        self,
+        timeout: int,
+        name: Optional[str] = None,
+        daemon: Optional[bool] = True,
+    ) -> None:
+        """Initialize a stoppable thread.
+
+        Args:
+            queue: Location to retreive data on every iteration.
+            name: Set name (Thread kwarg).
+            daemon: Set thread to daemon mode (Thread kwarg).
+
+        """
+        super().__init__(group=None, target=None, name=name, daemon=daemon)
+        self.timeout = timeout
+        self.external_stop = False
+        self.running_time = 0
+
+    def run(self):
+        """Run skeleton - fetch data and check external stop, forever."""
+        while not self.external_stop and self.running_time < self.timeout:
+            time.sleep(1)
+            self.running_time += 1
+        if not self.external_stop:
+            raise TimeoutError("Function timed out.")
+
+    def stop(
+        self,
+    ):
+        self.external_stop = True
+
+
+def test_cli_timeout():
+    timer = Timer(timeout=10)
+    timer.start()
+    pipeline = "videotestsrc num-buffers=1000000 ! appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB"
+    PythiaGsCli.cli_run(pipeline=pipeline, timeout=5)
+    timer.stop()
+
+
+def test_cli_no_timeout():
+    pipeline = "videotestsrc num-buffers=1000 ! appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB"
+    PythiaGsCli.cli_run(pipeline=pipeline, timeout=2)
+    time.sleep(2)

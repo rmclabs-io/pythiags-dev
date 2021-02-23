@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Command line interface for pythiags."""
 
+import time
 from pathlib import Path
+from threading import Thread
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -141,10 +143,21 @@ class PythiaGsCli(PythiaGsApp):
         pipeline,
         *args,
         metadata_extraction_map: Optional[MetadataExtractionMap] = None,
+        timeout: Optional[int] = None,
         **kwargs,
     ):
         self = cls(pipeline, metadata_extraction_map)
+        if timeout:
+            thread = Thread(target=self.timeout_worker, args=(timeout,))
+            thread.start()
         self.__call__()
+
+    def timeout_worker(self, timeout: int):
+        running_time = 0
+        while running_time < timeout:
+            time.sleep(1)
+            running_time += 1
+        self.pipeline.send_event(Gst.Event.new_eos())
 
 
 # def kivy_mwe():
