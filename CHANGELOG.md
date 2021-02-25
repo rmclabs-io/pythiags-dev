@@ -1,3 +1,13 @@
+## 0.7.1 (2021-02-25)
+
+### Fix
+
+- **app**: background thread init force app crash (#20)
+
+### fix
+
+- **app**: ensure application crashes when the background initialization fails----------commit-delimiter----------
+
 ## 0.7.0 (2021-02-25)
 
 ### Feat
