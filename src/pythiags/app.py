@@ -26,6 +26,7 @@ from pythiags import logger
 from pythiags.api import PythiaGsRunner
 from pythiags.consumer import Consumer
 from pythiags.producer import Producer
+from pythiags.video import PythiaGsCamera
 
 
 class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
@@ -48,6 +49,14 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
         self._root: Optional[Widget] = None
 
     @abc.abstractmethod
+    def on_first_frame_out(self):
+        logger.debug("PythiaGsApp: Gstreamer pipeline ready")
+
+    @abc.abstractmethod
+    def get_camera(self) -> PythiaGsCamera:
+        """Return `pythiags.video:GSCameraWidget` instance reference."""
+
+    @abc.abstractmethod
     def build(self) -> Widget:
         """Return the root App widget."""
 
@@ -62,9 +71,26 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
         logger.debug(f"PythiaGsApp: on_start")
 
         PythiaGsRunner.__call__(self, self.control_logs)
+
+        self.override_camera_first_frame_out_cb()
+
         self.pipeline.set_state(Gst.State.PLAYING)
 
         logger.debug(f"PythiaGsApp: on_start, pipeline status set to playing")
+
+    def override_camera_first_frame_out_cb(self):
+        cam_impl = self.get_camera()._camera
+        original_cb = cam_impl.on_first_frame_out_ or (lambda: None)
+        logger.debug(
+            "PythiaGsApp: Camera `on_first_frame_out` %s", original_cb
+        )
+        def on_first_frame_out_():
+            original_cb()
+            self.on_first_frame_out()
+        cam_impl.on_first_frame_out_ = on_first_frame_out_
+        logger.debug(
+            "PythiaGsApp: Camera `on_first_frame_out` also calls %s", str(self.on_first_frame_out)
+        )
 
     def on_eos(self, bus, message):
         super().on_eos(bus, message)
