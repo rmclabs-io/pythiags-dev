@@ -7,7 +7,9 @@ from ctypes import Structure
 from ctypes import c_int
 from ctypes import c_void_p
 from ctypes import string_at
-from typing import Callable, Optional, TypeVar
+from typing import Callable
+from typing import Optional
+from typing import TypeVar
 from weakref import ref
 
 from kivy.clock import Clock
@@ -91,6 +93,7 @@ def validate_appsink(pipeline):
 
 C = TypeVar("C", bound="PythiaGsCamera")
 
+
 class PythiaGsCamera(CameraBase):
     """Allow arbitrary gst-launch pipeline to be displayed from kivy.
 
@@ -128,8 +131,13 @@ class PythiaGsCamera(CameraBase):
     def __init__(
         self,
         pipeline_string,
-        on_first_frame_out:Callable[[C,],None] = None,
-        **kwargs
+        on_first_frame_out: Callable[
+            [
+                C,
+            ],
+            None,
+        ] = None,
+        **kwargs,
     ):
         self.pipeline_string = pipeline_string
         self.on_first_frame_out_ = on_first_frame_out

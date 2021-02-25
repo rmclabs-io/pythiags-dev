@@ -14,11 +14,13 @@ Modified by RMCLabs @ Q4 2020 for demonstration purposes.
 """
 
 import abc
+from threading import Thread
 from typing import Dict
 from typing import Optional
 from typing import Tuple
 
 from kivy.app import App
+from kivy.clock import Clock
 from kivy.uix.widget import Widget
 
 from pythiags import Gst
@@ -67,16 +69,28 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
         self.control_logs = kw.pop("control_logs", self.control_logs)
         self.run()
 
-    def on_start(self):
+    def on_start_background(self):
         logger.debug(f"PythiaGsApp: on_start")
+
+        camera = self.get_camera()._camera
+        try:
+            camera.set_state(Gst.State.PAUSED)
+            logger.debug(
+                f"PythiaGsApp: on_start, pipeline status set to PAUSED"
+            )
+        except Exception as exc:
+            logger.exception(exc)
+            Clock.schedule_once(lambda dt: self.stop())
 
         PythiaGsRunner.__call__(self, self.control_logs)
 
         self.override_camera_first_frame_out_cb()
+        camera.set_state(Gst.State.PLAYING)
 
-        self.pipeline.set_state(Gst.State.PLAYING)
+        logger.debug(f"PythiaGsApp: on_start, pipeline status set to PLAYING")
 
-        logger.debug(f"PythiaGsApp: on_start, pipeline status set to playing")
+    def on_start(self):
+        Thread(target=self.on_start_background).start()
 
     def override_camera_first_frame_out_cb(self):
         cam_impl = self.get_camera()._camera
@@ -84,12 +98,15 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
         logger.debug(
             "PythiaGsApp: Camera `on_first_frame_out` %s", original_cb
         )
+
         def on_first_frame_out_():
             original_cb()
             self.on_first_frame_out()
+
         cam_impl.on_first_frame_out_ = on_first_frame_out_
         logger.debug(
-            "PythiaGsApp: Camera `on_first_frame_out` also calls %s", str(self.on_first_frame_out)
+            "PythiaGsApp: Camera `on_first_frame_out` also calls %s",
+            str(self.on_first_frame_out),
         )
 
     def on_eos(self, bus, message):
