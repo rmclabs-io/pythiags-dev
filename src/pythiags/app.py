@@ -70,24 +70,25 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
         self.run()
 
     def on_start_background(self):
-        logger.debug(f"PythiaGsApp: on_start")
-
-        camera = self.get_camera()._camera
         try:
+            logger.debug(f"PythiaGsApp: on_start")
+
+            camera = self.get_camera()._camera
             camera.set_state(Gst.State.PAUSED)
             logger.debug(
                 f"PythiaGsApp: on_start, pipeline status set to PAUSED"
             )
+            PythiaGsRunner.__call__(self, self.control_logs)
+
+            self.override_camera_first_frame_out_cb()
+            camera.set_state(Gst.State.PLAYING)
+
+            logger.debug(
+                f"PythiaGsApp: on_start, pipeline status set to PLAYING"
+            )
         except Exception as exc:
-            logger.exception(exc)
+            logger.error(str(exc))
             Clock.schedule_once(lambda dt: self.stop())
-
-        PythiaGsRunner.__call__(self, self.control_logs)
-
-        self.override_camera_first_frame_out_cb()
-        camera.set_state(Gst.State.PLAYING)
-
-        logger.debug(f"PythiaGsApp: on_start, pipeline status set to PLAYING")
 
     def on_start(self):
         Thread(target=self.on_start_background).start()
