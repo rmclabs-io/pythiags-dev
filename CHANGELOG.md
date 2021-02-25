@@ -1,3 +1,9 @@
+## 0.7.0 (2021-02-25)
+
+### Feat
+
+- **app**: application-level callback for on_first_frame_out
+
 ## 0.6.0 (2021-02-23)
 
 ### Feat
