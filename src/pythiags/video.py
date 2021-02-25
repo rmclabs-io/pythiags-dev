@@ -7,7 +7,9 @@ from ctypes import Structure
 from ctypes import c_int
 from ctypes import c_void_p
 from ctypes import string_at
+from typing import Callable
 from typing import Optional
+from typing import TypeVar
 from weakref import ref
 
 from kivy.clock import Clock
@@ -89,7 +91,10 @@ def validate_appsink(pipeline):
     return sink
 
 
-class DeepstreamCamera(CameraBase):
+C = TypeVar("C", bound="PythiaGsCamera")
+
+
+class PythiaGsCamera(CameraBase):
     """Allow arbitrary gst-launch pipeline to be displayed from kivy.
 
     The following requirements must be met:
@@ -123,8 +128,19 @@ class DeepstreamCamera(CameraBase):
         _fields_ = [("memory", c_void_p), ("flags", c_int), ("data", c_void_p)]
         # we don't care about the rest
 
-    def __init__(self, pipeline_string, **kwargs):
+    def __init__(
+        self,
+        pipeline_string,
+        on_first_frame_out: Callable[
+            [
+                C,
+            ],
+            None,
+        ] = None,
+        **kwargs,
+    ):
         self.pipeline_string = pipeline_string
+        self.on_first_frame_out_ = on_first_frame_out
         self._pipeline: Optional[Gst.Pipeline] = None
         self._register_ref()
         kwargs.setdefault("resolution", (-1, -1))
@@ -163,6 +179,8 @@ class DeepstreamCamera(CameraBase):
         if self.resolution == (-1, -1):
             self._resolution = self._texturesize
 
+        if self.on_first_frame_out_:
+            self.on_first_frame_out_()
         return Gst.PadProbeReturn.REMOVE
 
     def _gst_new_sample(self, _):
@@ -239,7 +257,7 @@ class DeepstreamCamera(CameraBase):
         """
         for weakcamera in cls._instances:
             camera = weakcamera()
-            if isinstance(camera, DeepstreamCamera):
+            if isinstance(camera, PythiaGsCamera):
                 camera.stop(on_err="ignore")
                 camera.unload(on_err="ignore")
 
@@ -270,11 +288,11 @@ class GSCameraWidget(Camera):
         on_index()
 
     def _on_index(self, *largs):
-        """Override super to enforce `DeepstreamCamera`"""
+        """Override super to enforce `PythiaGsCamera`"""
         self._camera = None
         if not self.pipeline_string:
             return
-        self._camera = DeepstreamCamera(
+        self._camera = PythiaGsCamera(
             index=self.index,
             # resolution=self.resolution,
             pipeline_string=self.pipeline_string,
@@ -285,4 +303,4 @@ class GSCameraWidget(Camera):
         self._camera.bind(on_texture=self.on_tex)
 
 
-atexit.register(DeepstreamCamera.camera_gi_clean)
+atexit.register(PythiaGsCamera.camera_gi_clean)

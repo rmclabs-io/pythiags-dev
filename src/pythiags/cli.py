@@ -127,7 +127,7 @@ class PythiaGsCli(PythiaGsApp):
 
     def build(self) -> GSCameraWidget:
         try:
-            camera = GSCameraWidget(pipeline_string=self.pipeline_string)
+            self.camera = GSCameraWidget(pipeline_string=self.pipeline_string)
         except ValueError as err:
             msg = (
                 f"PythiaGsApp: Unable to intialize pipeline. Reason: {repr(err)}"
@@ -135,7 +135,13 @@ class PythiaGsCli(PythiaGsApp):
             )
             logger.error(msg)
             raise
-        return camera
+        return self.camera
+
+    def get_camera(self):
+        return self.camera
+
+    def on_first_frame_out(self):
+        super().on_first_frame_out()
 
     @classmethod
     def cli_run(
