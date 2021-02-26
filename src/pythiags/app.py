@@ -31,6 +31,15 @@ from pythiags.producer import Producer
 from pythiags.video import PythiaGsCamera
 
 
+def set_resolution(w, h):
+    from kivy.core.window import Window
+
+    if not Window:
+        raise NoValidWindowProvider
+
+    Window.size = (w, h)
+
+
 class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
     def __init__(
         self,
@@ -38,8 +47,10 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
         metadata_extraction_map: Optional[
             Dict[str, Tuple[Producer, Consumer]]
         ] = None,
+        resolution=None,
         **kwargs,
     ):
+        self.resolution = resolution
         self.control_logs = kwargs.pop("control_logs", True)
         PythiaGsRunner.__init__(
             self,
@@ -65,7 +76,8 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
     def __call__(self, *a, **kw):
         """Reverse __call__ order."""
         logger.debug(f"PythiaGsApp: __call__")
-
+        if self.resolution:
+            set_resolution(*self.resolution)
         self.control_logs = kw.pop("control_logs", self.control_logs)
         self.run()
 
