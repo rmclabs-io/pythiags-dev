@@ -1,3 +1,13 @@
+## 0.8.0 (2021-02-26)
+
+### Fix
+
+- **app**: allow pipeline play after pausing fails for increased verbosity
+
+### Feat
+
+- **app**: allow settings resolution on pythiags application
+
 ## 0.7.1 (2021-02-25)
 
 ### Fix
