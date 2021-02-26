@@ -94,6 +94,10 @@ def validate_appsink(pipeline):
 C = TypeVar("C", bound="PythiaGsCamera")
 
 
+class StateChangeFailed(RuntimeError):
+    pass
+
+
 class PythiaGsCamera(CameraBase):
     """Allow arbitrary gst-launch pipeline to be displayed from kivy.
 
@@ -207,8 +211,9 @@ class PythiaGsCamera(CameraBase):
         try:
             result = self._pipeline.set_state(state)
             if result == Gst.StateChangeReturn.FAILURE:
-                raise RuntimeError
-        except (AttributeError, RuntimeError) as err:
+                msg = f"{type(self).__name__}: Unable to change state to {state.value_name} - you should check your pipeline"
+                raise StateChangeFailed(msg)
+        except (AttributeError, StateChangeFailed) as err:
             if on_err == "warn":
                 return logger.error(err)
             if on_err == "raise":

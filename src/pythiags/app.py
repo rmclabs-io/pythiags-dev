@@ -27,8 +27,18 @@ from pythiags import Gst
 from pythiags import logger
 from pythiags.api import PythiaGsRunner
 from pythiags.consumer import Consumer
+from pythiags.exc import NoValidWindowProvider
 from pythiags.producer import Producer
 from pythiags.video import PythiaGsCamera
+
+
+def set_resolution(w, h):
+    from kivy.core.window import Window
+
+    if not Window:
+        raise NoValidWindowProvider
+
+    Window.size = (w, h)
 
 
 class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
@@ -38,8 +48,10 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
         metadata_extraction_map: Optional[
             Dict[str, Tuple[Producer, Consumer]]
         ] = None,
+        resolution=None,
         **kwargs,
     ):
+        self.resolution = resolution
         self.control_logs = kwargs.pop("control_logs", True)
         PythiaGsRunner.__init__(
             self,
@@ -58,6 +70,10 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
     def get_camera(self) -> PythiaGsCamera:
         """Return `pythiags.video:GSCameraWidget` instance reference."""
 
+    @property
+    def pipeline(self):
+        return self.get_camera()._camera._pipeline
+
     @abc.abstractmethod
     def build(self) -> Widget:
         """Return the root App widget."""
@@ -65,7 +81,8 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
     def __call__(self, *a, **kw):
         """Reverse __call__ order."""
         logger.debug(f"PythiaGsApp: __call__")
-
+        if self.resolution:
+            set_resolution(*self.resolution)
         self.control_logs = kw.pop("control_logs", self.control_logs)
         self.run()
 
@@ -74,7 +91,7 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
             logger.debug(f"PythiaGsApp: on_start")
 
             camera = self.get_camera()._camera
-            camera.set_state(Gst.State.PAUSED)
+            camera.set_state(Gst.State.PAUSED, on_err="warn")
             logger.debug(
                 f"PythiaGsApp: on_start, pipeline status set to PAUSED"
             )
