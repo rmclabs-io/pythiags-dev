@@ -14,3 +14,10 @@ class GstError(Exception):
 
     def ___repr__(self):
         return "Gstreamer Error"
+
+
+class NoValidWindowProvider(EnvironmentError):
+    """Kivy Found no valid Window providers."""
+
+    def ___repr__(self):
+        return self.__doc__

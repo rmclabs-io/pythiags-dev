@@ -27,6 +27,7 @@ from pythiags import Gst
 from pythiags import logger
 from pythiags.api import PythiaGsRunner
 from pythiags.consumer import Consumer
+from pythiags.exc import NoValidWindowProvider
 from pythiags.producer import Producer
 from pythiags.video import PythiaGsCamera
 
@@ -86,7 +87,7 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
             logger.debug(f"PythiaGsApp: on_start")
 
             camera = self.get_camera()._camera
-            camera.set_state(Gst.State.PAUSED)
+            camera.set_state(Gst.State.PAUSED, on_err="warn")
             logger.debug(
                 f"PythiaGsApp: on_start, pipeline status set to PAUSED"
             )
