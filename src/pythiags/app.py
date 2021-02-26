@@ -70,6 +70,10 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
     def get_camera(self) -> PythiaGsCamera:
         """Return `pythiags.video:GSCameraWidget` instance reference."""
 
+    @property
+    def pipeline(self):
+        return self.get_camera()._camera._pipeline
+
     @abc.abstractmethod
     def build(self) -> Widget:
         """Return the root App widget."""
