@@ -46,10 +46,16 @@ class StoppableThread(threading.Thread, abc.ABC):
             try:
                 logger.debug("PyhiaBackground: %s working", str(self))
                 self.work_once(self.queue.get(block=True, timeout=1))
-                logger.debug("PyhiaBackground: %s queue got element", str(self))
+                logger.debug(
+                    "PyhiaBackground: %s queue got element", str(self)
+                )
                 self.queue.task_done()
             except queue.Empty as exc:
-                logger.debug("PyhiaBackground: %s queue timeout (%s)", str(self), str(exc))
+                logger.debug(
+                    "PyhiaBackground: %s queue timeout (%s)",
+                    str(self),
+                    str(exc),
+                )
             except Exception as exc:  # noqa: W0703
                 logger.error(exc)
         logger.info(
