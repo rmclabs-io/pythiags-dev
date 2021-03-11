@@ -1,3 +1,14 @@
+## 0.8.1 (2021-03-11)
+
+### Perf
+
+- **background**: avoid enqueuing on falsy content
+
+### Fix
+
+- **logging**: avoid crash when using kivy logger in debug mode
+- **processor**: validate processor using real signature form inspect
+
 ## 0.8.0 (2021-02-26)
 
 ### Fix
