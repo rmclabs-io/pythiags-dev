@@ -59,7 +59,7 @@ class EventsHandler:
         self.worker = EventsWorker(
             callback=self.consumer.incoming,
             queue=self.events_queue,
-            name=f"{type(self.producer).__name__} -> {type(self.consumer).__name__}"
+            name=f"{type(self.producer).__name__} -> {type(self.consumer).__name__}",
         )
         self.worker.start()
         return self.worker

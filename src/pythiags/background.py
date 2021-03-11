@@ -48,14 +48,18 @@ class StoppableThread(threading.Thread, abc.ABC):
         """Run skeleton - fetch data and check external stop, forever."""
         while not self.external_stop:
             try:
-                self.work_once(self.queue.get(block=True, timeout=self.pop_timeout))
-                logger.debug("PyhiaBackground: %s popped element from queue", str(self))
+                self.work_once(
+                    self.queue.get(block=True, timeout=self.pop_timeout)
+                )
+                logger.debug(
+                    "PyhiaBackground: %s popped element from queue", str(self)
+                )
                 self.queue.task_done()
             except queue.Empty:
                 logger.debug(
                     "PyhiaBackground: %s empty queue after %s [s]",
                     str(self),
-                    self.pop_timeout
+                    self.pop_timeout,
                 )
             except Exception as exc:  # noqa: W0703
                 logger.error(exc)
