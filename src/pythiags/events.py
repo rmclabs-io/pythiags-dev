@@ -50,12 +50,16 @@ class EventsHandler:
         self, pad: Gst.Pad, info: Gst.PadProbeInfo
     ) -> Gst.PadProbeReturn:
         """Store the output of the producers callback in a queue."""
-        self.events_queue.put(self.producer.extract_metadata(pad, info))
+        meta = self.producer.extract_metadata(pad, info)
+        if meta:
+            self.events_queue.put(meta)
         return Gst.PadProbeReturn.OK
 
     def run_in_background(self):
         self.worker = EventsWorker(
-            callback=self.consumer.incoming, queue=self.events_queue
+            callback=self.consumer.incoming,
+            queue=self.events_queue,
+            name=f"{type(self.producer).__name__} -> {type(self.consumer).__name__}"
         )
         self.worker.start()
         return self.worker
