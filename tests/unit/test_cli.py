@@ -52,7 +52,7 @@ class TestBuildMetaMap:
             if not extractor_ok:
                 if "badsignature" in extractor.lower():
                     assert (
-                        "bad signature for the 'extract_metadata' method: must be ('self', 'pad', 'info')"
+                        "bad signature for the 'extract_metadata' method: must be ['self', 'pad', 'info']"
                         in exc
                     )
                 else:
@@ -63,7 +63,7 @@ class TestBuildMetaMap:
             elif not consumer_ok:
                 if "badsignature" in consumer.lower():
                     assert (
-                        "bad signature for the 'incoming' method: must be ('self', 'events')"
+                        "bad signature for the 'incoming' method: must be ['self', 'events']"
                         in exc
                     )
                 else:

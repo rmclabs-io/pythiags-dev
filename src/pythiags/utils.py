@@ -2,6 +2,7 @@
 """Utilities and shortcuts to ease pythiags usage."""
 
 import imghdr
+import inspect
 import re
 import struct
 from importlib import import_module
@@ -161,12 +162,10 @@ def validate_processor(processor, klass):
         raise TypeError(msg)
 
     for m in klass.__abstractmethods__:
-        code = getattr(processor, m).__code__
-        nargs = code.co_argcount
-        current_signature = code.co_varnames[:nargs]
-        required_signature = getattr(klass, m).__code__.co_varnames
+        required_signature = inspect.getfullargspec(getattr(klass, m)).args
+        current_signature = inspect.getfullargspec(getattr(processor, m)).args
         if current_signature != required_signature:
-            msg = f"ProcessorValidation: {processor} - bad signature for the '{m}' method: must be {required_signature}"
+            msg = f"ProcessorValidation: {processor} - bad signature for the '{m}' method: must be {required_signature}, not {current_signature}"
             logger.error(msg)
             raise TypeError(msg)
     return processor
