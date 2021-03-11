@@ -25,8 +25,9 @@ class StoppableThread(threading.Thread, abc.ABC):
     def __init__(
         self,
         queue: queue.Queue,
-        name: Optional[str] = None,
+        name: Optional[str] = "BackgroundThread",
         daemon: Optional[bool] = True,
+        pop_timeout: Optional[int] = 1,
     ) -> None:
         """Initialize a stoppable thread.
 
@@ -34,22 +35,32 @@ class StoppableThread(threading.Thread, abc.ABC):
             queue: Location to retreive data on every iteration.
             name: Set name (Thread kwarg).
             daemon: Set thread to daemon mode (Thread kwarg).
+            pop_timeout: Use as `queue.Queue.get` timeout. Set to `None`
+                disables timeout.
 
         """
         super().__init__(group=None, target=None, name=name, daemon=daemon)
         self.queue = queue
         self.external_stop = False
+        self.pop_timeout = pop_timeout
 
     def run(self):
         """Run skeleton - fetch data and check external stop, forever."""
         while not self.external_stop:
             try:
-                logger.debug("PyhiaBackground: %s working", self)
-                self.work_once(self.queue.get(block=True, timeout=1))
-                logger.debug("PyhiaBackground: %s queue got element", self)
+                self.work_once(
+                    self.queue.get(block=True, timeout=self.pop_timeout)
+                )
+                logger.debug(
+                    "PyhiaBackground: %s popped element from queue", str(self)
+                )
                 self.queue.task_done()
-            except queue.Empty as exc:
-                logger.debug("PyhiaBackground: %s queue timeout (%s)", exc)
+            except queue.Empty:
+                logger.debug(
+                    "PyhiaBackground: %s empty queue after %s [s]",
+                    str(self),
+                    self.pop_timeout,
+                )
             except Exception as exc:  # noqa: W0703
                 logger.error(exc)
         logger.info(

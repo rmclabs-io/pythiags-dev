@@ -114,7 +114,7 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
         cam_impl = self.get_camera()._camera
         original_cb = cam_impl.on_first_frame_out_ or (lambda: None)
         logger.debug(
-            "PythiaGsApp: Camera `on_first_frame_out` %s", original_cb
+            "PythiaGsApp: Camera `on_first_frame_out` %s", str(original_cb)
         )
 
         def on_first_frame_out_():
