@@ -52,7 +52,11 @@ class StoppableThread(threading.Thread, abc.ABC):
                 logger.debug("PyhiaBackground: %s popped element from queue", str(self))
                 self.queue.task_done()
             except queue.Empty:
-                logger.debug("PyhiaBackground: %s empty queue after %s [s]", str(self), self.pop_timeout)
+                logger.debug(
+                    "PyhiaBackground: %s empty queue after %s [s]",
+                    str(self),
+                    self.pop_timeout
+                )
             except Exception as exc:  # noqa: W0703
                 logger.error(exc)
         logger.info(
