@@ -921,7 +921,7 @@ snowballstemmer = "*"
 
 [[package]]
 name = "pyds-ext"
-version = "1.2.1"
+version = "1.3.0"
 description = "DeepStream bindings and extra metadata for tracker and bbox"
 category = "main"
 optional = true
@@ -1391,7 +1391,7 @@ ds = ["pyds-ext"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.9"
-content-hash = "7962d4837a33f7425989767d4db98bac923b1de0b9f0cc90872470c2e9b1a462"
+content-hash = "6f426284216e5325f18714fa4edd0dc883539b6a2b8735f508166b4ce04cd563"
 
 [metadata.files]
 alabaster = [
@@ -1895,7 +1895,7 @@ pydocstyle = [
     {file = "pydocstyle-5.1.1.tar.gz", hash = "sha256:19b86fa8617ed916776a11cd8bc0197e5b9856d5433b777f51a3defe13075325"},
 ]
 pyds-ext = [
-    {file = "pyds_ext-1.2.1-py3-none-any.whl", hash = "sha256:1f93f8ae962fff66b2a77911bd7fa5408928314abfd27e06fcc1d4fb3cd609df"},
+    {file = "pyds_ext-1.3.0-py3-none-any.whl", hash = "sha256:2fcb68a20af5edd62dabc8ab3d7855793372063d2a54fead6e575a1009c70600"},
 ]
 pyflakes = [
     {file = "pyflakes-2.2.0-py2.py3-none-any.whl", hash = "sha256:0d94e0e05a19e57a99444b6ddcf9a6eb2e5c68d3ca1e98e90707af8152c90a92"},

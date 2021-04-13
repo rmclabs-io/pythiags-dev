@@ -8,6 +8,7 @@ from typing import Generator
 from typing import Tuple
 
 import pyds
+import pyds_analytics_meta
 import pyds_bbox_meta
 import pyds_tracker_meta
 
@@ -162,3 +163,47 @@ def labels_per_object(
     for classifier_metadata in classification_per_object(object_metadata):
         for label_info in labels_per_classification(classifier_metadata):
             yield label_info
+
+
+def analytics_per_frame(
+    frame_metadata: pyds.NvDsFrameMeta,
+) -> Generator[pyds_analytics_meta.NvDsAnalyticsFrameMeta, None, None]:
+    for user_meta in glist_iterate(
+        frame_metadata.frame_user_meta_list, pyds.NvDsUserMeta.cast
+    ):
+        if user_meta.base_meta.meta_type != pyds.nvds_get_user_meta_type(
+            "NVIDIA.DSANALYTICSFRAME.USER_META"
+        ):
+            continue
+        yield pyds_analytics_meta.NvDsAnalyticsFrameMeta.cast(
+            user_meta.user_meta_data
+        )
+
+
+def frame_analytics_per_batch(
+    info: Gst.PadProbeInfo,
+) -> Generator[pyds_analytics_meta.NvDsAnalyticsFrameMeta, None, None]:
+    for frame_meta in frames_per_batch(info):
+        yield from analytics_per_frame(frame_meta)
+
+
+def analytics_per_object(
+    obj_meta: pyds_bbox_meta.NvDsObjectMeta,
+) -> Generator[pyds_analytics_meta.NvDsAnalyticsObjInfo, None, None]:
+    for user_meta in glist_iterate(
+        obj_meta.obj_user_meta_list, pyds.NvDsUserMeta.cast
+    ):
+        if user_meta.base_meta.meta_type != pyds.nvds_get_user_meta_type(
+            "NVIDIA.DSANALYTICSOBJ.USER_META"
+        ):
+            continue
+        yield pyds_analytics_meta.NvDsAnalyticsObjInfo.cast(
+            user_meta.user_meta_data
+        )
+
+
+def object_analytics_per_frame(
+    frame_metadata: pyds.NvDsFrameMeta,
+) -> Generator[pyds_analytics_meta.NvDsAnalyticsObjInfo, None, None]:
+    for obj_meta in objects_per_frame(frame_metadata):
+        yield from analytics_per_object(obj_meta)
