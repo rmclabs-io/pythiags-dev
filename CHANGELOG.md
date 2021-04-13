@@ -1,3 +1,13 @@
+## 0.9.0 (2021-04-13)
+
+### Feat
+
+- **deepstream.iterators**: dsanalytics metadata extraction (#24)
+
+### feat
+
+- **deepstream.iterators**: deepstream analytics metadata extraction implementation
+
 ## 0.8.1 (2021-03-11)
 
 ### Perf
