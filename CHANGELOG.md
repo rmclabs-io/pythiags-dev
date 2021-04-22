@@ -1,3 +1,9 @@
+## 0.10.0 (2021-04-22)
+
+### Feat
+
+- **x86**: Add support for GPU devices (non jetson-arm)
+
 ## 0.9.0 (2021-04-13)
 
 ### Feat
