@@ -56,9 +56,9 @@ pythiags offers:
 Custom extractor and processor callbacks are simple. For example:
 
   ```python
-  from pythiags import frames_per_batch, objects_per_frame, Extractor, Consumer
+  from pythiags import frames_per_batch, objects_per_frame, Producer, Consumer
 
-  class MyCustomExtract(Extractor):
+  class MyCustomExtract(Producer):
       def extract_metadata(self, pad, info):
           # This needs to be fast to release buffers downstream
           return [
@@ -114,8 +114,8 @@ A virtual env is recommended to avoid package clashes with your system python.
 1. Hardware:
 
    * `pythiags` is known to work in ubuntu-based distributions: Jetpack 4.4 for ARM
-     (Jetson Xavier) and 18.08 for x86 (2080 TI). Other Linux should work, too,
-     depending on deepstream support.
+     (Jetson Xavier) and 20.04 for x86 (2080 TI). Other Linux should work, too,
+     depending on gstreamer+deepstream support.
 
    * Additional Jetson information:
      <details><summary>[printenv | grep JETSON - Click here to expand]</summary>
@@ -185,7 +185,12 @@ To install `pythiags` as a dependency for your python project:
     support:
 
     ```bash
-    pip install pythiags[cli,ds]
+    pip install pythiags[cli,ds,gpu]
+    ```
+
+
+    ```bash
+    pip install pythiags[cli,ds,jetson]
     ```
 
   * Using `poetry`:
@@ -359,7 +364,7 @@ The following examples require pythiags to be installed with the `cli` extra.
     batch-size=1
     name=muxer
   ! nvinfer
-      config-file-path=/mnt/nvme/pythiags/data/models/Primary_Detector/config_infer_primary.txt
+      config-file-path=/opt/nvidia/deepstream/deepstream/samples/configs/deepstream-app/config_infer_primary.txtPrimary_Detector/config_infer_primary.txt
       batch-size={batch_size}
       name=pgie
   ! nvvideoconvert
