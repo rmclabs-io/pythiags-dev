@@ -1,5 +1,6 @@
 import atexit
 import shutil
+import sys
 import tempfile
 from pathlib import Path
 
@@ -47,6 +48,7 @@ def run_pipeline(context):
         multifilesrc location={context.images_path}/%d.jpg
         ! nvjpegdec
         ! nvvideoconvert
+        ! queue
         ! muxer.sink_0 nvstreammux
             width=1280
            height=720
@@ -56,11 +58,15 @@ def run_pipeline(context):
             config-file-path=/opt/nvidia/deepstream/deepstream/samples/configs/deepstream-app/config_infer_primary.txt
             batch-size=1
             name=nvinfer_observer
+        ! queue
         ! nvvideoconvert
         ! nvdsosd
         ! nvvideoconvert
         ! videoconvert
-        ! appsink   name=pythiags   emit-signals=true   caps=video/x-raw,format=RGB"""
+        ! appsink
+          name=pythiags
+          emit-signals=true
+          caps=video/x-raw,format=RGB"""
 
     cmd = f"""pygst-launch {pipeline}
         --obs=nvinfer_observer
@@ -73,8 +79,12 @@ def run_pipeline(context):
 
 
 @then("I see the detections in the console")
-def asdf(context):
+def read_detections_from_console(context):
     text = (context.stdout + context.stderr).lower()
+    if context.exit_code != 0:
+        print(context.stdout)
+        print(context.stderr, file=sys.stderr)
+        raise RuntimeError
     for index in range(NUM_FRAMES):
         for klass in ("car", "person"):
             assert (

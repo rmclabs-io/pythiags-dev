@@ -14,23 +14,13 @@ import os
 import gi
 
 gi.require_version("Gst", "1.0")
+gi.require_version("GstApp", "1.0")
 from gi.repository import GLib  # isort:skip
 from gi.repository import GObject  # isort:skip
 from gi.repository import Gst  # isort:skip
+from gi.repository import GstApp  # isort:skip
 
-# HACK: until https://github.com/kivy/kivy/pull/7326 lands
-# Although here we revert it by default to shush kivy
-# <pwoolvett 2021-01-12T16:31>
-TRUTHY = {"true", "1", "yes"}
-os.environ.setdefault("KIVY_NO_ARGS", "true")
-if os.environ["KIVY_NO_ARGS"] not in TRUTHY:
-    del os.environ["KIVY_NO_ARGS"]
-# END HACK
-
-from kivy.logger import Logger as logger  # noqa: N813
-
-logger.fixme = logger.debug
-
+from pythiags._setup import logger
 from pythiags.consumer import Consumer
 from pythiags.producer import Producer
 
@@ -50,12 +40,11 @@ try:
     # fmt: on
 
     PYDS_INSTALLED = True
+    logger.debug("PythiaGs: Module pyds succesfully loaded")
 except ImportError:
     PYDS_INSTALLED = False
     logger.warning(
-        "pythiags+DS:"
-        " Unable to import pyds modules."
-        " Make sure to install pythiags with the 'ds' extra."
+        "PythiaGs: Unable to import pyds module. Make sure to install pythiags with the 'ds' extra."
     )
 
     frames_per_batch = None
@@ -67,5 +56,21 @@ except ImportError:
     last_bbox = None
     past_bbox = None
     tracker_bbox = None
+
+try:
+    import kivy
+
+    KIVY_INSTALLED = True
+    del kivy
+except ImportError:
+    KIVY_INSTALLED = False
+    logger.warning(
+        "Unable to import kivy module. Make sure to install pythiags with the 'kivy' extra."
+    )
+
+if "DISPLAY" not in os.environ:
+    logger.warning("DISPLAY env var not set! This will cause errors")
+
+Gst.init(None)
 
 PYTHIAGS_APPSINK_NAME = os.environ.get("PYTHIAGS_APPSINK_NAME", "pythiags")

@@ -17,7 +17,6 @@ import pythiags
 from pythiags import PYTHIAGS_APPSINK_NAME
 from pythiags import Gst
 from pythiags import logger
-from pythiags.app import PythiaGsApp
 from pythiags.consumer import Consumer
 from pythiags.headless import Standalone
 from pythiags.producer import Producer
@@ -25,7 +24,6 @@ from pythiags.types import MetadataExtractionMap
 from pythiags.utils import clean_pipeline
 from pythiags.utils import instantiated_object_from_importstring
 from pythiags.utils import validate_processor
-from pythiags.video import GSCameraWidget
 
 
 def info(txt):
@@ -41,7 +39,7 @@ def pipe_from_file(path: Union[str, Path], **pipeline_kwargs) -> str:
     try:
         formatted_pipeline = pipeline_string.format_map(pipeline_kwargs)
     except KeyError as exc:
-        logger.error(f"PythiaGsApp: Cannot run {real}. Reason: {repr(exc)}")
+        logger.error(f"Cannot run {real}. Reason: {repr(exc)}")
         raise
 
     return clean_pipeline(formatted_pipeline)
@@ -82,7 +80,14 @@ def _define_runtime_from_pipeline_string(
     pipeline_string,
 ) -> Callable[[str, MetadataExtractionMap], Any]:
     if PYTHIAGS_APPSINK_NAME in pipeline_string:
-        return PythiaGsCli.cli_run
+        if pythiags.KIVY_INSTALLED:
+            from pythiags.kivy_app import PythiaGsCli
+
+            return PythiaGsCli.cli_run
+        raise ValueError(
+            "Unable to use PythiaGsCli because kivy is not installed."
+            " You should install pythiags with the kivy extra."
+        )
     return Standalone.cli_run
 
 
@@ -115,55 +120,6 @@ def pygst_launch(
     mem = _build_meta_map(obs, ext, proc)
 
     return runtime(pipeline=pipeline, metadata_extraction_map=mem)
-
-
-class PythiaGsCli(PythiaGsApp):
-
-    root: GSCameraWidget
-
-    @property
-    def pipeline(self) -> Gst.Pipeline:
-        return self.root._camera._pipeline
-
-    def build(self) -> GSCameraWidget:
-        try:
-            self.camera = GSCameraWidget(pipeline_string=self.pipeline_string)
-        except ValueError as err:
-            msg = (
-                f"PythiaGsApp: Unable to intialize pipeline. Reason: {repr(err)}"
-                ". Make sure the last element contains this: `appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB`"
-            )
-            logger.error(msg)
-            raise
-        return self.camera
-
-    def get_camera(self):
-        return self.camera
-
-    def on_first_frame_out(self):
-        super().on_first_frame_out()
-
-    @classmethod
-    def cli_run(
-        cls,
-        pipeline,
-        *args,
-        metadata_extraction_map: Optional[MetadataExtractionMap] = None,
-        timeout: Optional[int] = None,
-        **kwargs,
-    ):
-        self = cls(pipeline, metadata_extraction_map)
-        if timeout:
-            thread = Thread(target=self.timeout_worker, args=(timeout,))
-            thread.start()
-        self.__call__()
-
-    def timeout_worker(self, timeout: int):
-        running_time = 0
-        while running_time < timeout:
-            time.sleep(1)
-            running_time += 1
-        self.pipeline.send_event(Gst.Event.new_eos())
 
 
 # def kivy_mwe():
@@ -270,7 +226,7 @@ def get_version(name="pythiags"):
 
 
 def main():
-    get_version()
+    # get_version()
     fire.Fire(pygst_launch)
 
 

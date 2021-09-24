@@ -117,14 +117,15 @@ def run_apidoc(_):
 
     sp.check_call(  # noqa: S603
         shlex.split(
-            f"\
-        {sphinx_apidoc} \
-        --templatedir={templates}  --separate \
-        --module-first \
-        --force \
-        -o {apidoc} \
-        {package} \
-    "
+            f"""
+        {sphinx_apidoc}
+        --templatedir={templates}
+        --separate
+        --module-first
+        --force
+        -o {apidoc}
+        {package}
+    """
         )
     )
 

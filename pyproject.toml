@@ -22,13 +22,13 @@ documentation = "https://docs.rmclabs.io/pythiags"
 [tool.poetry.dependencies]
 python = "^3.6.9"
 PyGObject = "^3.38.0"
-importlib-metadata = {version = "^1.0", python = "<3.8", optional = true}
+importlib-metadata = {version = "^1.0", python = "<3.8"}
 fire = {version = "^0.4.0", optional = true}
 
 pyds-ext = {version = "^1.4.2", optional = true}
 
 # temporary fix, see https://github.com/kivy/kivy/pull/7362 (revert to kivy==2.1 when it lands)
-Kivy-jetson = {extras = ["base"], version = "2.1.0.dev0", markers="platform_machine == 'aarch64'"}
+Kivy-jetson = {extras = ["base"], optional = true, version = "2.1.0.dev0", markers="platform_machine == 'aarch64'"}
 Kivy = {version = "^2.0.0", optional = true, markers="platform_machine == 'x86_64'"}
 
 [tool.poetry.dev-dependencies]
@@ -63,7 +63,6 @@ Sphinx = "^3.4.3"
 sphinx-rtd-theme = "^0.5.1"
 m2r2 = "^0.2.7"
 pytest-html = "^3.1.1"
-importlib-metadata = {version = "^1.0", python = "<3.8"}
 python-dotenv = "^0.15.0"
 drytoml = {extras = ["black", "flakeheaven", "isort"], version = "^0.2.8"}
 flakeheaven = "^0.10.0-alpha.0"
@@ -76,13 +75,10 @@ ds = [
 ]
 cli = [
     "fire",
-    "importlib-metadata",
 ]
-gpu = [
-    "Kivy",
-]
-jetson = [
+kivy = [
     "Kivy-jetson",
+    "Kivy",
 ]
 
 [tool.poetry.scripts]
@@ -122,6 +118,9 @@ known-third-party=[
     "pyds_bbox_meta",
     "pyds_tracker_meta",
 ]
+
+[tool.flakehell]
+extended_default_ignore=[]  # add this
 
 [tool.commitizen]
 name                     = "cz_conventional_commits"

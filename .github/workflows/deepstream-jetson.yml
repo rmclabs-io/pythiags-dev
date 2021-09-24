@@ -112,10 +112,15 @@ jobs:
         run: |
           docker exec ${{ env.CONTAINER_NAME }} pre-commit run --all-files docs-build
 
-      - name: Run Tests
+      - name: Run Pyest
         id: pytest
         run: |
           docker exec ${{ env.CONTAINER_NAME }} pre-commit run --all-files pytest
+
+      - name: Run BDD Tests
+        id: behave
+        run: |
+          docker exec ${{ env.CONTAINER_NAME }} pre-commit run --all-files behave
 
       - name: Export Documentation and testing artifacts
         id: docs-export

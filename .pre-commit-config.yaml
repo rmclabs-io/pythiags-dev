@@ -62,6 +62,14 @@ repos:
 
   - repo: local
     hooks:
+    - id: behave
+      name: behave
+      language: system
+      entry: behave tests/bdd
+      pass_filenames: false
+
+  - repo: local
+    hooks:
     - id: docs-build
       name: Build Documentation
       language: system

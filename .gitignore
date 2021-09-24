@@ -17,5 +17,6 @@ poetry.toml
 dist/
 docs/build
 docs/src/apidoc
-.coverage
+.coverage*
 reports/
+WIP

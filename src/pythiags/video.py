@@ -24,8 +24,10 @@ from pythiags import PYTHIAGS_APPSINK_NAME
 from pythiags import GLib
 from pythiags import Gst
 from pythiags import logger
+from pythiags.utils import get_by_name
+from pythiags.utils import get_static_pad
+from pythiags.utils import parse_launch
 
-Gst.init(None)
 try:
     install_gobject_iteration()
 except AttributeError as exc:
@@ -34,37 +36,6 @@ except AttributeError as exc:
         logger.warning(exc)
     else:
         raise
-
-
-def parse_launch(gstlaunch_pipeline: str) -> str:
-    try:
-        pipeline = Gst.parse_launch(gstlaunch_pipeline)
-    except GLib.GError as exc:
-        msg = str(exc)
-        if "{" in msg:
-            msg += ". Maybe you forgot to add pipeline kwargs?"
-        logger.error(msg)
-        raise RuntimeError(msg) from exc
-
-    if not pipeline:
-        msg = f"Unable to initialize Gstreamer Pipeline"
-        logger.error(msg)
-        raise RuntimeError(msg)
-    return pipeline
-
-
-def get_by_name(pipeline: Gst.Pipeline, name: str) -> Gst.Element:
-    element = pipeline.get_by_name(name)
-    if element:
-        return element
-    raise ValueError(f"{pipeline}.get_by_name('{name}') returned None")
-
-
-def get_static_pad(element: Gst.Element, padname: str) -> Gst.Pad:
-    pad = element.get_static_pad(padname)
-    if pad:
-        return pad
-    raise ValueError(f"{element}.get_static_pad('{padname}') returned None")
 
 
 def on_eos(_, __, app):
@@ -80,10 +51,24 @@ def on_error(_, message, app):
     return True
 
 
+APPSINK_CLS = {
+    "GstAppSink",
+    "AppSink",
+}
+"""Valid appsink classes.
+
+Depending on whether `from gi.repository import GstApp` has been run,
+It could be one of:
+* __gi__.GstAppSink
+* GstApp.AppSink
+
+"""
+
+
 def validate_appsink(pipeline):
     sink = get_by_name(pipeline, PYTHIAGS_APPSINK_NAME)
     klass = type(sink).__name__
-    if klass != "GstAppSink":
+    if klass not in APPSINK_CLS:
         msg = f"The {PYTHIAGS_APPSINK_NAME} element must be an appsink, not {klass}!"
         logger.error(f"PythiaGsVideo: {msg}")
         raise ValueError(msg)

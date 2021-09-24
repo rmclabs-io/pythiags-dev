@@ -1,3 +1,5 @@
+import sys
+
 from behave import then
 from behave import when
 from tests import run_read_console
@@ -22,7 +24,10 @@ def step_impl(context, no_errors_or_nice_message):
     msg = no_errors_or_nice_message.lower()
 
     if is_valid:
-        assert not context.exit_code, "Valid pipeline exited non-zero"
+        if context.exit_code != 0:
+            print(context.stdout, flush=True)
+            print(context.stderr, file=sys.stderr, flush=True)
+            raise RuntimeError
 
         if msg == "none":
             return

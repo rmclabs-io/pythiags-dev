@@ -77,13 +77,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 
 FROM poetry as dev
-
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+        # required for eg textoverlay
+        gstreamer1.0-x
 COPY requirements.dev.txt requirements.dev.txt
 RUN pip install --no-cache-dir -r requirements.dev.txt
 
 COPY poetry.lock pyproject.toml  README.md ./
 ADD ./src ./src
-RUN poetry install -vvv -E ds -E cli
+RUN poetry install -vvv -E ds -E cli -E kivy
 ADD . .
 
 
@@ -93,7 +96,7 @@ ADD . .
 FROM poetry as installer
 COPY poetry.lock pyproject.toml  README.md ./
 ADD ./src ./src
-RUN poetry install -vvv --no-dev -E ds -E cli
+RUN poetry install -vvv --no-dev -E ds -E cli -E kivy
 
 
 # `production` image used for runtime

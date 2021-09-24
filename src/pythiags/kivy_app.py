@@ -14,6 +14,7 @@ Modified by RMCLabs @ Q4 2020 for demonstration purposes.
 """
 
 import abc
+import time
 from threading import Thread
 from typing import Dict
 from typing import Optional
@@ -29,6 +30,9 @@ from pythiags.api import PythiaGsRunner
 from pythiags.consumer import Consumer
 from pythiags.exc import NoValidWindowProvider
 from pythiags.producer import Producer
+from pythiags.types import MetadataExtractionMap
+from pythiags.utils import traced
+from pythiags.video import GSCameraWidget
 from pythiags.video import PythiaGsCamera
 
 
@@ -134,3 +138,63 @@ class PythiaGsApp(PythiaGsRunner, App, abc.ABC):
     def on_error(self, bus, message):
         super().on_error(bus, message)
         self.stop()
+
+
+class PythiaGsCli(PythiaGsApp):
+
+    root: GSCameraWidget
+
+    @property
+    def pipeline(self) -> Gst.Pipeline:
+        return self.root._camera._pipeline
+
+    def build(self) -> GSCameraWidget:
+        try:
+            self.camera = GSCameraWidget(pipeline_string=self.pipeline_string)
+        except ValueError as err:
+            msg = (
+                f"PythiaGsApp: Unable to intialize pipeline. Reason: {repr(err)}"
+                ". Make sure the last element contains this: `appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB`"
+            )
+            logger.error(msg)
+            raise
+        return self.camera
+
+    def get_camera(self):
+        return self.camera
+
+    def on_first_frame_out(self):
+        super().on_first_frame_out()
+
+    @classmethod
+    def cli_run(
+        cls,
+        pipeline,
+        *args,
+        metadata_extraction_map: Optional[MetadataExtractionMap] = None,
+        timeout: Optional[int] = None,
+        **kwargs,
+    ):
+        self = cls(pipeline, metadata_extraction_map)
+        if timeout:
+            pass
+            # from kivy.app import App
+            from kivy.clock import Clock
+
+            # Clock.schedule_once(lambda dt: self.stop(), timeout)
+            Clock.schedule_once(self.timeout_worker, timeout)
+            # thread = Thread(target=self.timeout_worker, args=(timeout,))
+            # thread.start()
+        self.__call__()
+
+    def timeout_worker(self, timeout: int):
+        # running_time = 0
+        # while running_time < timeout:
+        #     time.sleep(1)
+        #     running_time += 1
+        self.pipeline.send_event(Gst.Event.new_eos())
+
+    @traced(logger.info)
+    def on_eos(self, *a, **kw):
+        r = super().on_eos(*a, **kw)
+        return r

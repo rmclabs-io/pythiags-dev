@@ -8,9 +8,9 @@ from typing import Optional
 import pytest
 from tests.paths import FIXTURES
 
-from pythiags.cli import PythiaGsCli
 from pythiags.cli import _build_meta_map
 from pythiags.consumer import Consumer
+from pythiags.kivy_app import PythiaGsCli
 from pythiags.producer import Producer
 
 
@@ -136,15 +136,20 @@ class Timer(Thread):
         self.external_stop = True
 
 
+SAMPLE_PIPE = "videotestsrc num-buffers={num_buffers} ! video/x-raw, framerate={fps}/1 ! timeoverlay ! appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB"
+
+
 def test_cli_timeout():
     timer = Timer(timeout=10)
     timer.start()
-    pipeline = "videotestsrc num-buffers=1000000 ! appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB"
+    # pipeline = "videotestsrc num-buffers=1000000 ! appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB"
+    pipeline = SAMPLE_PIPE.format(num_buffers=1000000, fps=30)
     PythiaGsCli.cli_run(pipeline=pipeline, timeout=5)
     timer.stop()
 
 
 def test_cli_no_timeout():
-    pipeline = "videotestsrc num-buffers=1000 ! appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB"
+    # pipeline = "videotestsrc num-buffers=60 ! timeoverlay ! appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB"
+    pipeline = SAMPLE_PIPE.format(num_buffers=60, fps=30)
     PythiaGsCli.cli_run(pipeline=pipeline, timeout=2)
     time.sleep(2)
