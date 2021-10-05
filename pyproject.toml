@@ -6,7 +6,7 @@ version = "0.11.0"
 description = "A Gstreamer/Deepstream wrapper for python and Kivy."
 authors = [
     "Pablo Woolvett <pablowoolvett@gmail.com>",
-    "Pedro Pablo Correa <pbcorrea@rmc.cl@gmail.com>"
+    "Pedro Pablo Correa <pbcorrea@rmc.cl>"
 ]
 readme = "README.md"
 packages = [

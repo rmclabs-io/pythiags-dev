@@ -21,6 +21,7 @@ from gi.repository import Gst  # isort:skip
 from gi.repository import GstApp  # isort:skip
 
 from pythiags._setup import logger
+from pythiags._setup import version as __version__
 from pythiags.consumer import Consumer
 from pythiags.producer import Producer
 

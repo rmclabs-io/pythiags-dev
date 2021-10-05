@@ -1,5 +1,6 @@
 # region imports ###################################################################
 from datetime import datetime
+from pathlib import Path
 from time import sleep
 from typing import Callable
 
@@ -111,18 +112,21 @@ class RecordBin:
 
     def __attach(self, caps_str):
 
-        # TODO: if this is too slow, we could build de bin ahead of
-        # time, without adding it to the pipeline, and just overrithe
-        # the "name", "caps", and filesink's "location" properties
-        # instead...
+        sink_location = self.filename_generator()
+        stem = Path(sink_location).stem
+        # TODO: Check performance issues
+        # if this is too slow, we could build the bin ahead of time,
+        #         without adding it to the pipeline. Then, just override: caps,
+        #         name, filesink's location properties instead
+        # <pwoolvett 2021-10-05T16:16:36Z>
         self.record_bin = parse_bin(
             self.RECORD_BIN_STRING.format(
-                sink_location=self.filename_generator(),
+                sink_location=sink_location,
                 caps=caps_str,
             ),
             True,
         )
-        self.record_bin.set_name("recordbin")
+        self.record_bin.set_name(f"recordbin_for_{stem}")
         gst_add(self.pipeline, self.record_bin)
         return self.record_bin
 

@@ -107,7 +107,7 @@ class RingBuffer:
             self.RINGBUFFER_BIN_STRING,
             True,
         )
-        self.ringbuffer_bin.set_name("ringbuffer_bin")
+        self.ringbuffer_bin.set_name(f"ringbuffer_bin_for_{self.src_tee_name}")
 
         gst_add(self.pipeline, self.ringbuffer_bin)
 

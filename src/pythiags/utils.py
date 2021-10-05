@@ -13,6 +13,7 @@ from importlib import import_module
 from importlib.util import module_from_spec
 from importlib.util import spec_from_file_location
 from pathlib import Path
+from typing import Callable
 from typing import Optional
 from typing import Tuple
 from typing import Union
@@ -75,11 +76,11 @@ def raise_when_returns(*invalids):
 
 
 def traced(
-    logging_function,
-    log_time=False,
-    log_pre=True,
-    log_post=True,
-    log_exc=True,
+    logging_function: Callable,
+    log_time: bool = False,
+    log_pre: bool = True,
+    log_post: bool = True,
+    log_exc: bool = True,
 ):
 
     any_log = log_pre or log_post or log_exc

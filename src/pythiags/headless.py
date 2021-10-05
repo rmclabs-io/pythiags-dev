@@ -18,6 +18,7 @@ from pythiags import GObject
 from pythiags import Gst
 from pythiags import logger
 from pythiags.api import PythiaGsRunner
+from pythiags.background import PostponedBackgroundThread
 from pythiags.background import run_later
 from pythiags.consumer import Consumer
 from pythiags.producer import Producer
@@ -67,9 +68,18 @@ class Standalone(
 
         self.background = background
         self.on_background_failure = on_background_failure
+        self.background_running_thread: Optional[
+            PostponedBackgroundThread
+        ] = None
+
+    @property
+    def background_state(self) -> Optional[PostponedBackgroundThread.States]:
+        if not self.background_running_thread:
+            return None
+        return self.background_running_thread.state
 
     @classmethod
-    def cli_run(
+    def build_and_run(
         cls,
         pipeline,
         *args,
@@ -83,9 +93,15 @@ class Standalone(
             background=background,
         )
         self.__call__(*args, **kwargs)
+        return self
+
+    cli_run = build_and_run
 
     def __call__(self, control_logs=True, background=SENTINEL):
         """Configure with super before calling run."""
+        state = self.background_state
+        if state:
+            raise RuntimeError(f"already running! state={state}")
         super().__call__(control_logs)
 
         self.loop = GLib.MainLoop()
@@ -116,12 +132,13 @@ class Standalone(
         return self._pipeline
 
     def _run_background(self):
-        return run_later(
+        self.background_running_thread = th = run_later(
             cb=self._run_foreground,
             delay=0,
             on_success=None,
             on_failure=self.on_background_failure,
         )
+        return th
 
     def _run_foreground(self):
         logger.trace(f"running {self}'s loop")

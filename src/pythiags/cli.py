@@ -2,6 +2,7 @@
 """Command line interface for pythiags."""
 
 import time
+from functools import partial
 from pathlib import Path
 from threading import Thread
 from typing import Any
@@ -88,7 +89,7 @@ def _define_runtime_from_pipeline_string(
             "Unable to use PythiaGsCli because kivy is not installed."
             " You should install pythiags with the kivy extra."
         )
-    return Standalone.cli_run
+    return partial(Standalone.cli_run, background=False)
 
 
 def _build_meta_map(obs, extractor, consumer) -> MetadataExtractionMap:
