@@ -11,9 +11,9 @@ from behave import given
 from behave import then
 from behave import use_fixture
 from behave import when
-from gi.repository import Gst
 from tests import video_stats
 
+from pythiags import Gst
 from pythiags.headless import Standalone
 from pythiags.recorder import VideoRecorder
 from pythiags.utils import get_by_name
