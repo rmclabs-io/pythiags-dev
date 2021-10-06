@@ -1,3 +1,9 @@
+## 0.11.1 (2021-10-06)
+
+### Fix
+
+- **recorder**: allow multiple videorecorder instances in same pipeline (#33)
+
 ## 0.11.0 (2021-09-24)
 
 ## 0.10.0 (2021-04-22)
