@@ -1,4 +1,5 @@
 import re
+import warnings
 from collections import defaultdict
 from datetime import datetime
 from datetime import timedelta
@@ -117,6 +118,15 @@ def standalone_background(context, wait, control_logs):
     if wait:
         sleep(wait)
     yield context.app_thread
+    t0 = datetime.now()
+    while context.app.recorder.busy:
+        if (
+            datetime.now() - t0
+        ).total_seconds() > 2.1 * context.app.recorder.ring_buffer.window_size_sec:
+            warnings.warn("TIMEOUT REACHED AWAITNG RECORDER!")
+            break
+        sleep(0.01)
+
     context.app.stop()
 
 

@@ -175,8 +175,13 @@ class VideoRecorder:
         return callback(*args, **kwargs)
 
     @traced(logger.warning)
-    def _on_dettached_record(self, *a, **kw):
-        th = run_later(self.record, 1 / 100, *a, **kw)
+    def _on_dettached_record(
+        self,
+        on_video_finished: Optional[Callable] = None,
+    ):
+        th = run_later(
+            self.record, 1 / 100, on_video_finished=on_video_finished
+        )
         th.join()
         return th._output
 
@@ -204,15 +209,28 @@ class VideoRecorder:
         self.on_video_finished = on_video_finished
 
     @traced(logger.warning)
-    def _on_starting_record(self, *a, **kw):
+    def _on_starting_record(
+        self,
+        on_video_finished: Optional[Callable] = None,
+    ):
         self.reset_stop_recording_timer()
+        self.on_video_finished = on_video_finished
 
-    def _on_recording_record(self):
+    def _on_recording_record(
+        self,
+        on_video_finished: Optional[Callable] = None,
+    ):
         self.reset_stop_recording_timer()
+        self.on_video_finished = on_video_finished
 
     @traced(logger.warning)
-    def _on_finishing_record(self, *a, **kw):
-        th = run_later(self.record, 1 / 100, *a, **kw)
+    def _on_finishing_record(
+        self,
+        on_video_finished: Optional[Callable] = None,
+    ):
+        th = run_later(
+            self.record, 1 / 100, on_video_finished=on_video_finished
+        )
         th.join()
         return th._output
 

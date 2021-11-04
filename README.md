@@ -459,6 +459,20 @@ Check out ongoing and future development [here](https://github.com/rmclabs-io/py
      # run your program here
      ```
 
+* Q: Program exits with error (from docker):
+
+     ```console
+     X Error of failed request:  BadShmSeg (invalidshared segment parameter)
+       Major opcode of failed request:  150 (XVideo)
+       Minor opcode of failed request:  19 ()
+       Segment id in failed request:  0x121
+       Serial number of failed request:  57
+       Current serial number in output stream:  58
+     python: ../../src/hb-object-private.hh:154: Type* hb_object_reference(Type*) [with Type = hb_unicode_funcs_t]: Assertion `hb_object_is_valid (obj)' failed.
+     ```
+
+  A: Add `--ipc=host` flag to docker run.
+
 ## Contribute
 
 ### Setup dev environment

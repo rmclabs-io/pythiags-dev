@@ -49,5 +49,4 @@ jobs:
       - name: Pushing to branch
         run: |
           export remote_repo="https://${{ github.actor }}:${{ secrets.CR_PAT }}@github.com/${{ github.repository }}.git" \
-          && git pull $remote_repo master \
           && git push "$remote_repo" HEAD:master --follow-tags --tags

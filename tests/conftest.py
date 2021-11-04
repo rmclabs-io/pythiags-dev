@@ -9,9 +9,6 @@ from typing import Dict
 from typing import Tuple
 
 import pytest
-from behave.__main__ import run_behave
-from behave.configuration import Configuration
-from behave.runner import Runner
 
 # store history of failures per test class name and per index in parametrize (if parametrize used)
 _test_failed_incremental: Dict[str, Dict[Tuple[int, ...], str]] = {}
