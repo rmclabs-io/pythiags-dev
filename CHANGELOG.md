@@ -1,3 +1,13 @@
+## 0.12.0 (2021-11-05)
+
+### Feat
+
+- **recorder**: enable recordbin, ringbuffer customization (#39)
+
+### feat
+
+- **recorder**: enable recordbin, ringbuffer customization----------commit-delimiter----------
+
 ## 0.11.2 (2021-11-05)
 
 ### Fix
