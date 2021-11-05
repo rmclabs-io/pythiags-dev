@@ -24,8 +24,9 @@ from pythiags.producer import Producer
 class DetectorMetadataExtractor(Producer):
     """Extract metadata after `nvinfer` elements in detection mode.
 
-    .. seealso:: pyds iterators in `pythiags.pyds_iterators`. ..
-    seealso:: pyds parsers in `pythiags.pyds_parsers`.
+    See Also:
+        * pyds iterators in :mod:`pythiags.pyds_iterators`.
+        * pyds parsers in :mod:`pythiags.pyds_parsers`.
 
     """
 
@@ -64,8 +65,9 @@ class DetectorMetadataExtractor(Producer):
     ) -> Generator[Detection, None, None]:
         """Obtain detections from pyds metadata.
 
-        .. seealso:: pyds iterators in `pythiags.pyds_iterators`. ..
-        seealso:: pyds parsers in in `pythiags.pyds_parsers`.
+        See Also:
+            * pyds iterators in :mod:`pythiags.pyds_iterators`.
+            * pyds parsers in in :mod:`pythiags.pyds_parsers`.
 
         """
 

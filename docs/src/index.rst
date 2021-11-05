@@ -1,5 +1,5 @@
 pythiags Docs
-===========
+=============
 
 .. mdinclude:: ../../README.md
    :start-line: 1
@@ -11,6 +11,7 @@ Table of contents
    :includehidden:
    :maxdepth: 2
 
+   examples.rst
    tutorial
    apidoc/modules.rst
    tests

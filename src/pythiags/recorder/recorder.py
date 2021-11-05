@@ -1,3 +1,9 @@
+"""Video Recorder module for pythiags.
+
+Example:
+
+"""
+
 # region imports ##############################################################
 import collections
 import enum
@@ -7,6 +13,7 @@ from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import Optional
+from typing import Type
 
 from pythiags import Gst
 from pythiags import logger
@@ -23,56 +30,113 @@ from pythiags.utils import traced
 
 
 class States(enum.IntFlag):
+    """Possible states for the :class:`Recorder`."""
+
     DETTACHED = 0
+    """The ringbuffer is not connected."""
+
     BUFFERING = 1
+    """The ringbuffer is connected and buffering - pipeline fixed."""
+
     STARTING = 2
+    """Connecting record bin - pipeline in modification."""
+
     RECORDING = 4
+    """Recordbin recording to file - pipeline fixed."""
+
     FINISHING = 8
+    """Recordbin file finishing - pipeline in modification."""
 
 
-OnRecord = Callable[[Any], str]
+OnVideoFinished = Callable[[str], Any]
+OnRecord = Callable[[Optional[OnVideoFinished]], None]
 
 
 class VideoRecorder:
+    """Record videos including past and future frames.
 
-    """
+    Allow the creation of video files containing frames before a
+    record event is received, by keeping a ringbuffer containing
+    previous frames.
 
-    Signals:
-        - record (method): external trigger to start recording
-        - flowing (callback): internal message when recordbin is pushing
-        - timeout (timeout): internal message when timewindow has passed
-        - cleanup_done (callback): internal message when timewindow has passed
+    Example:
+        The following example creates a `demo_video.webm` file
+        containing buffers from two seconds *before* the
+        :meth:`record` method is called, and up to two seconds into
+        the future (or an EOS is received).
+
+        >>> pipeline:Gst.pipeline = ... # should contain a named `tee`
+        >>> recorder = VideoRecorder(
+        ...     pipeline=pipeline,
+        ...     src_tee_name="t1",  # the name of the menioned tee
+        ...     filename_generator=lambda: "demo_video.webm",
+        ...     timeout_sec=0.1,
+        ...     window_size_sec=2,
+        ... )
+        >>> video_path = recorder.record()
+
     """
 
     def __init__(
         self,
         pipeline: Gst.Pipeline,
         src_tee_name: str,
-        filename_generator: Callable,
+        filename_generator: Callable[[], str],
         timeout_sec: float,
         window_size_sec: float,
+        ring_buffer_cls: Type[RingBuffer] = RingBuffer,
+        record_bin_cls: Type[RecordBin] = RecordBin,
     ):
+        """Constructor.
+
+        Args:
+            pipeline: A :class:`Gst.Pipeline` object to attach to. It must
+                contain at least a named :class:`Gst.Tee` element.
+            src_tee_name: Name of the pipeline's tee.
+            filename_generator: Function to call to dynamically generate
+                new filenames on disjoint video records.
+            timeout_sec: Raise if unable to attach after this
+                value has passed [Unused] .
+            window_size_sec: How long before and after a :meth:`record`
+                is called to record a video. Together with the
+                `pipeline`s framerate, determines the ringbuffer
+                size.
+            ring_buffer_cls: Custom :class:`RingBuffer` implementation.
+            record_bin_cls: Custom :class:`RecordBin` implementation.
+
+        """
         self.pipeline = pipeline
 
-        self._state = States.DETTACHED
+        self._state: States = States.DETTACHED
         self._deque: Optional[collections.deque] = None
         self._stop_recording_timer: Optional[PostponedBackgroundThread] = None
-        self.ring_buffer = RingBuffer(
+        self.ring_buffer = ring_buffer_cls(
             src_tee_name,
             window_size_sec,
         )
-        self.record_bin = RecordBin(
+        self.record_bin = record_bin_cls(
             filename_generator,
             timeout_sec,
         )
 
-        self.on_record_dispatch: Dict[State, OnRecord] = {
+        self.on_record_dispatch: Dict[States, OnRecord] = {
             States.DETTACHED: self._on_dettached_record,
             States.BUFFERING: self._on_buffering_record,
             States.STARTING: self._on_starting_record,
             States.RECORDING: self._on_recording_record,
             States.FINISHING: self._on_finishing_record,
         }
+        """Map :attr:`state`'s to callbacks when :meth:`record` is called.
+
+        By default, the mapping has the following form:
+
+            * States.DETTACHED: Re-schedule the record after a delay.
+            * States.BUFFERING: Reset timer and bind the recordbin.
+            * States.STARTING: Reset timer.
+            * States.RECORDING: Reset timer.
+            * States.FINISHING: Re-schedule the record after a delay.
+
+        """
 
         self.ring_buffer.bind(
             self.pipeline,
@@ -88,7 +152,8 @@ class VideoRecorder:
     # region properties ################################################
 
     @property
-    def state(self):
+    def state(self) -> States:
+        """The recording state - one of :class:`States`."""
         return self._state
 
     # @traced(logger.trace, log_time=True)
@@ -99,15 +164,49 @@ class VideoRecorder:
         # logger.info(f"RecorderState: {datetime.now()} - Changed state from {repr(pre)} to {repr(value)}")
 
     @property
-    def deque(self):
+    def deque(self) -> Optional[collections.deque]:
+        """The ringbuffer container, backed by a :obj:`collections.deque`.
+
+        The :class:`VideoRecorder` is the actual owner of the ringbuffer
+        container, and not the :attr:`VideoRecorder.ring_buffer`, as one
+        might think, because this allows for easier instantiation, given
+        its size must be dynamically set once the caps have been
+        negotiated.
+
+        While in :obj:`States.RECORDING`, the
+        :attr:`VideoRecorder.record_bin` pops buffers from here.
+
+        See Also:
+            The initialization, as performed at
+            :meth:`_on_ringbuffer_bound`
+
+        """
         return self._deque
 
     @deque.setter
-    def deque(self, value):
+    def deque(self, value: collections.deque):
         self._deque = value
 
     @property
-    def stop_recording_timer(self) -> PostponedBackgroundThread:
+    def stop_recording_timer(self) -> Optional[PostponedBackgroundThread]:
+        """Timer to the stop recording event.
+
+        Normally its value is :obj:`None`, except while in
+        :obj:`States.RECORDING`, where it contains a background thread
+        waiting for a timeout.
+
+        If :meth:`record` is called before the timeout, the timer gets
+        reset.
+
+        Once the timeout is reached, the thread signals the
+        `VideoRecorder` to stop recording.
+
+        When the recording is done, it returns back to `None`.
+
+        See Also:
+            :meth:`reset_stop_recording_timer`
+
+        """
         return self._stop_recording_timer
 
     @stop_recording_timer.setter
@@ -121,6 +220,18 @@ class VideoRecorder:
 
     @property
     def busy(self):
+        """:obj:`True` unless in :obj:`States.BUFFERING` state.
+
+        Example:
+
+            This can be useful eg when you want to wait for a currently
+            recording video to be finished:
+
+                >>> while recorder.busy:
+                ...     sleep(.1)
+                >>> print("recording finished")
+
+        """
         return self.state != States.BUFFERING
 
     # endregion properties #############################################
@@ -129,10 +240,19 @@ class VideoRecorder:
 
     # @dotted
     # @traced(logger.info, log_time=True)
-    def record_bg(self, *args, **kwargs) -> str:
-        """Initiate recording process.
+    def record_bg(
+        self,
+        on_video_finished: Optional[OnVideoFinished] = None,
+    ) -> None:
+        """Initiate recording process without blocking.
 
-        .. seealso: record
+        Warning:
+            Normal users should use :meth:`record` instead.
+
+        This is used internally, and should only be called if you do not
+        care about the delay or actual response of the pipeline. If you
+        want to use this method anyway, you'll probably want to check
+        for :attr:`RecordBin.filesink_location` manually.
 
         """
         state = self.state
@@ -140,23 +260,51 @@ class VideoRecorder:
             callback = self.on_record_dispatch[state]
         except KeyError as exc:
             raise NotImplementedError(f"Unhandled state {state}") from exc
-        return callback(*args, **kwargs)
+        return callback(on_video_finished=on_video_finished)
 
     @traced(logger.info, log_time=False, log_post=False)
     def record(
         self,
-        *args,
-        poll_msec=0.001,
-        max_delay_sec=0.1,
-        **kwargs,
+        poll_msec: float = 0.001,
+        max_delay_sec: float = 0.1,
+        on_video_finished: Optional[OnVideoFinished] = None,
     ) -> str:
-        """Initiate and await recording process.
+        """Record and block until video file exists.
 
-        .. seealso: record_bg
+        This is the main usage case for the recorder. When calling this
+        method the :class:`VideoRecorder` does one of the following,
+        depending on its :attr:`state`:
+
+
+         starts creating a video
+        containing past bufers attaches the recordbin and
+        connect callbacks to start pushing buffers from the ringbuffer
+        ASAP - effectively
+
+        Loops and waits until the recordbin's filesink has a valid
+        location, which means the record video is being created.
+
+        Args:
+            poll_msec: Time in milliseconds to wait between each check
+                for the video file existence.
+            max_delay_sec: Maximum time in milliseconds to wait for the
+                video file to exist.
+
+        Raises:
+            TimoutError: if no file is available after the specified
+                `max_delay_sec`.
+
+        See Also:
+
+            * :meth:`record_bg`
+                For the backgorund record process.
+            * :attr:`on_record_dispatch`
+                For the available actions taken by the
+                :class:`VideoRecorder`, depending on its :attr:`state`.
 
         """
         t0 = datetime.now()
-        self.record_bg(*args, **kwargs)
+        self.record_bg(on_video_finished=on_video_finished)
         while True:
             sleep(poll_msec / 1e3)
             if (t0 - datetime.now()).total_seconds() > max_delay_sec:
@@ -167,18 +315,12 @@ class VideoRecorder:
                 logger.exception(exc)
                 pass
 
-        state = self.state
-        try:
-            callback = self.on_record_dispatch[state]
-        except KeyError as exc:
-            raise NotImplementedError(f"Unhandled state {state}") from exc
-        return callback(*args, **kwargs)
-
     @traced(logger.warning)
     def _on_dettached_record(
         self,
-        on_video_finished: Optional[Callable] = None,
+        on_video_finished: Optional[OnVideoFinished] = None,
     ):
+        """Re-schedule the record after a delay."""
         th = run_later(
             self.record, 1 / 100, on_video_finished=on_video_finished
         )
@@ -188,8 +330,9 @@ class VideoRecorder:
     @traced(logger.info, log_time=True)
     def _on_buffering_record(
         self,
-        on_video_finished: Optional[Callable] = None,
+        on_video_finished: Optional[OnVideoFinished] = None,
     ):
+        """Reset timer and bind the recordbin."""
         self.recording_start_time = datetime.now()
         self.reset_stop_recording_timer()
         self.state = (self.state & ~States.BUFFERING) | States.STARTING
@@ -211,7 +354,7 @@ class VideoRecorder:
     @traced(logger.warning)
     def _on_starting_record(
         self,
-        on_video_finished: Optional[Callable] = None,
+        on_video_finished: Optional[OnVideoFinished] = None,
     ):
         self.reset_stop_recording_timer()
         self.on_video_finished = on_video_finished
@@ -226,7 +369,7 @@ class VideoRecorder:
     @traced(logger.warning)
     def _on_finishing_record(
         self,
-        on_video_finished: Optional[Callable] = None,
+        on_video_finished: Optional[OnVideoFinished] = None,
     ):
         th = run_later(
             self.record, 1 / 100, on_video_finished=on_video_finished
@@ -316,10 +459,18 @@ class VideoRecorder:
     # endregion recordbin signals handling ################################
 
     def reset_stop_recording_timer(self):
+        """Cancel and reset :sttr:`stop_recording_timer`.
+
+        Given that the ringbuffer at current time contains buffers from
+        `now-`:attr:`RingBuffer.window_size_sec`, the new timeout is
+        scheduled in two times the time window: once backwards (as
+        incoming buffers are delayed by window_size), once into the
+        future.
+
+        """
         self.stop_recording_timer = run_later(
             self.__on_window_timeout,
-            2
-            * self.ring_buffer.window_size_sec,  # once backwards (as incoming buffers are delayd by window_size), once into the future.
+            2 * self.ring_buffer.window_size_sec,  #
         )
 
     @traced(logger.trace)

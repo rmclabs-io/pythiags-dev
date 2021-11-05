@@ -91,6 +91,9 @@ html_theme_options = {
 }
 
 
+# -- autodoc config ---------------------------------------------------
+autoclass_content = "both"
+
 # -- napoleon config ---------------------------------------------------
 # See https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html#getting-started
 napoleon_google_docstring = True

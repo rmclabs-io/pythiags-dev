@@ -7,8 +7,9 @@ from pythiags.models import Events
 class Producer(abc.ABC):
     """Interface to connect as buffer probe.
 
-    .. seealso:: pyds iterators in `pythiags.pyds_iterators`. ..
-    seealso:: pyds parsers in `pythiags.pyds_parsers`.
+    See Also:
+        * pyds iterators in :mod:`pythiags.pyds_iterators`.
+        * pyds parsers in :mod:`pythiags.pyds_parsers`.
 
     """
 

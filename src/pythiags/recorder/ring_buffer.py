@@ -148,7 +148,9 @@ class RingBuffer:
             struct = caps.get_structure(0)
             success, *framerate = struct.get_fraction("framerate")
             if not success:
-                raise RuntimeError
+                raise RuntimeError(
+                    "Unable to read `framerate` fraction from the ringbuffer appsink pad's caps"
+                )
             framerate = float(framerate[0] / framerate[1])
             rinbugger_len = math.ceil(self.window_size_sec * framerate)
             logger.debug(f"rinbugger_len={rinbugger_len}")

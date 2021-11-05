@@ -333,7 +333,7 @@ def parse_launch(gstlaunch_pipeline: str) -> str:
 
 
 @raise_when_returns(None)
-def parse_bin(gstlaunch_bin: str, *a, **kw) -> str:
+def parse_bin(gstlaunch_bin: str, *a, **kw) -> Gst.Bin:
     try:
         return Gst.parse_bin_from_description(gstlaunch_bin, *a, **kw)
     except GLib.GError as exc:
