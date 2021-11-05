@@ -1,3 +1,9 @@
+## 0.11.2 (2021-11-05)
+
+### Fix
+
+- **recorder**: allow on_video_finished on multiple calls (#36)
+
 ## 0.11.1 (2021-10-06)
 
 ### Fix
