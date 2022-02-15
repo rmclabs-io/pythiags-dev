@@ -1,3 +1,9 @@
+## 0.12.1 (2022-02-15)
+
+### Fix
+
+- **recorder**: correct recorder poll max delay
+
 ## 0.12.0 (2021-11-05)
 
 ### Feat
