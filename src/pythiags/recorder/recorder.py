@@ -307,7 +307,7 @@ class VideoRecorder:
         self.record_bg(on_video_finished=on_video_finished)
         while True:
             sleep(poll_msec / 1e3)
-            if (t0 - datetime.now()).total_seconds() > max_delay_sec:
+            if (datetime.now() - t0).total_seconds() > max_delay_sec:
                 raise TimeoutError(f"record took longer than {max_delay_sec}")
             try:
                 return self.record_bin.filesink_location
