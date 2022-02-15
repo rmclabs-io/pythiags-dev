@@ -20,7 +20,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -yq `cat setup/aptitude.docs.list | tr "\n" " "`
-          cat requirements.dev.txt | egrep "m2r2|phinx|docformatter-toml|importlib-metadata" > requirements.docs.txt
+          cat requirements.dev.txt | egrep "mistune|m2r2|phinx|docformatter-toml|importlib-metadata" > requirements.docs.txt
           pip install -r requirements.docs.txt
           rm requirements.docs.txt
 

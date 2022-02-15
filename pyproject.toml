@@ -62,6 +62,7 @@ pandas-vet = "^0.2.2"
 Sphinx = "^3.4.3"
 sphinx-rtd-theme = "^0.5.1"
 m2r2 = "^0.2.7"
+mistune = "0.8.4"
 pytest-html = "^3.1.1"
 python-dotenv = "^0.15.0"
 drytoml = {extras = ["black", "flakeheaven", "isort"], version = "^0.2.8"}
