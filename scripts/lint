@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [ "$#" -eq 0 ]; then
+  paths='src tests scripts'
+else
+  paths="${@}"
+fi
+
+set -x
+./scripts/format --check $paths docs/conf.py
+flake8heavened $paths
+
+mypy $paths

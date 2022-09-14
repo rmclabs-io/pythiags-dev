@@ -1,0 +1,3 @@
+videotestsrc
+   num-buffers=10
+! nveglglessink

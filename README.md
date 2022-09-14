@@ -1,11 +1,11 @@
-# pythiags
+# pythia
 
-A Gstreamer/Deepstream wrapper for python and Kivy
+Pythonic Deepstream.
 
-[![Version](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/version.json)](https://github.com/rmclabs-io/pythiags/releases)
-[![Docs](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/docs.json)](https://dev.rmclabs.io/pythiags)
-[![Pytest](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/pytest.json)](about:blank)
-[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rmc-labs/2d30824c98461a3e43e3aa2c9802ca96/raw/coverage.json)](about:blank)
+---
+[![PyPI - Version](https://img.shields.io/pypi/v/pythiags)](https://pypi.org/project/pythiags/)
+[![PyPI - Wheels](https://img.shields.io/pypi/wheel/pythiags)](https://pypi.org/project/pythiags/)
+[![Docs](https://img.shields.io/badge/docs-github_pages-blue)](https://rmclabs-io.github.io/pythia-docs/)
 
 ---
 
@@ -15,393 +15,313 @@ A Gstreamer/Deepstream wrapper for python and Kivy
 
 ---
 
-pythiags aims to solve the following problems:
 
-* Deepstream metadata extraction requires using buffer probes: pythiags provides an easy
-  to use interface which splits metadata extraction and processing.
-* pyds api iterators are not pythonic: pythiags provides intuitive deepstream metadata
-  iterators to use, like `for frame in frames_per_batch(buffer)` instead of pybind c++ casting.
-* Python gstreamer apps get very large very fast: pythiags abstracts away common
-  stuff and lets you focus on the data handling parts.
+[NVidia Deepstream](https://developer.nvidia.com/deepstream-sdk) is an excellent gstreamer
+framework which allows to build ai-powered, performant applications running on nvidia
+hardware. Its python API and bindings, however, have a bunch of painpoints which we've
+here collected and addressed with pythia:
 
-pythiags offers:
+* **Metadata Extraction**: Deepstream metadata extraction requires using buffer probes:
+  pythia provides an easy to use interface which splits metadata extraction and
+  processing.
+* **Metadata Iteration**: pyds api iterators are not pythonic: pythia provides intuitive 
+  deepstream metadata iterators to use, like `for frame in frames_per_batch(buffer)`
+  wrapping pybind c++ casting and iteration.
+* **Python boilerplate**: Python gstreamer apps get very large very fast. Pythia abstracts
+  away common stuff and lets you focus on your application.
+* **Quick prototyping**: Sometimes you just want to check the performance of a new model
+  (eg after exporting from [Nvidia TAO](https://developer.nvidia.com/tao)), or verify
+  the environment. Pythia comes with ready-to-run demo applications, and a
+  `gst-launch`-like cli.
 
-* Common metadata parsing utilities.
-* User-definable metadata parsing by implementing one-method interfaces.
-* `gst-launch`-like cli, for quick prototyping.
-* Workers and queues management in the background, to offload processing outside of the buffer probe.
+pythia offers:
 
-## Contents
+* Common metadata extraction and parsing utilities.
+* Workers and queues management in the background, to offload processing outside of the 
+  buffer probe.
+* Ready to use Docker images for both aarch64 (jetson) and x86_64 (nvidia gpu).
 
-1. [pythiags](#pythiags)
-   1. [Contents](#contents)
-   1. [Usage Example](#usage-example)
-   1. [Setup](#setup)
-      1. [Docker Setup](#docker-setup)
-      1. [Nondocker Setup](#nondocker-setup)
-         1. [Prerequisites](#prerequisites)
-         1. [Install](#install)
-   1. [A quick tutorial](#a-quick-tutorial)
-      1. [Sample cli apps](#sample-cli-apps)
-      1. [Sample module using the API](#sample-module-using-the-api)
-   1. [TODO and FAQ](#todo-and-faq)
-      1. [FAQ / Common Issues](#faq--common-issues)
-   1. [Contribute](#contribute)
-      1. [Setup dev environment](#setup-dev-environment)
-      1. [Pull Requests](#pull-requests)
-      1. [Notes](#notes)
+## Examples
 
-## Usage Example
+### Running pythia from the cli
 
-Custom extractor and processor callbacks are simple. For example:
+<details><summary> gst-pylaunch</summary>
 
-  ```python
-  from pythiags import frames_per_batch, objects_per_frame, Producer, Consumer
+You can run familiar pipelines and attach buffer probes from simple python modules.
 
-  class MyCustomExtract(Producer):
-      def extract_metadata(self, pad, info):
-          # This needs to be fast to release buffers downstream
-          return [
-              {
-                  "label" : obj_meta.obj_label,
-                  "confidence": obj_meta.confidence,
-                  "frame_number": frame.frame_num,
-              }
-              for frame in frames_per_batch(info)
-              for obj_meta in objects_per_frame(frame)
-          ]
+#### Create Files
 
-  class MyCustomProcess(Consumer):
-      def incoming(self, detections):
-          # This can be as slow as required
-          for detection in detections:
-              print(detection)
-  ```
+<!-- gst-pylaunch probe -->
+* Create a file `probe.py` with:
 
-```console
-pythiags file ./demo.gstp --obs=pgie --batch-size=10 --ext=my_custom_parsing:MyCustomExtract --proc=my_custom_parsing:MyCustomProcess
+```python
+
+from pythia import objects_per_batch
+
+def gen_detections(batch_meta):
+    for frame, detection in objects_per_batch(batch_meta):
+        box = detection.rect_params
+        yield {
+            "frame_num": frame.frame_num,
+            "label": detection.obj_label,
+            "left": box.left,
+            "top": box.top,
+            "width": box.width,
+            "height": box.height,
+            "confidence": detection.confidence,
+        }
+
 ```
 
-* This command instructed pythiags to do the following:
-  * Load a pipeline from a file located at `./demo.gstp`, which contains
-    `gst-launch`-like syntax.
-  * Customize a pipeline parameter named `batch_size` to have a value of `10`.
-  * Install a buffer probe in the `source pad` of the `pgie`-named element of the
+<!-- gst-pylaunch pipeline -->
+* Create a file `pipeline.txt` with:
+
+```
+uridecodebin
+  uri=file://{input}
+! identity
+  eos-after=30
+! nvvideoconvert
+! muxer.sink_0
+nvstreammux
+  name=muxer width=1280 height=720 batch-size=1
+! nvinfer
+  name=pgie
+  config-file-path={pgie-conf}
+! nvvideoconvert
+! nvdsosd
+! nvvideoconvert
+! queue
+! x264enc
+! mp4mux
+! filesink location={output}
+```
+
+#### Running pythia
+
+<!-- gst-pylaunch console -->
+* run the application with:
+
+```console
+$ gst-pylaunch \
+  -p ./pipeline.txt \
+  --pgie-conf=/opt/nvidia/deepstream/deepstream/samples/configs/deepstream-app/config_infer_primary.txt \
+  --input=/opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.mp4 \
+  --output=/tmp/overlayed.mp4 \
+  --probe=probe.py:gen_detections@pgie.src
+```
+
+Note the `--pgie-conf`, `--input`, and `--output` cli args were dynamically parsed and
+added from the pipeline file. 
+
+This command instructed pythia to do the following:
+  1. Load a pipeline from a file located at `./pipeline.txt`, which contains
+    `gst-launch`-like syntax with some parameters to be inserted (`input`, `pgie-conf`,
+    `output`).
+  2. Format the pipelie with `input`, `pgie-conf` and `output` from received parameters.
+    (For a more complex syntax, you can install `pythia[jinja]` to use jinja as a
+    template backend. See the documentation for more details.)
+  4. Setup a buffer probe which internally calls the `gen_detections` method defined in the
+    `probe.py` file.
+  5. Attach said buffer probe in the `source pad` of the `pgie`-named element of the
     pipeline.
-  * Import and call `my_custom_parsing` -> `MyCustomExtract` -> `extract_metadata`
-     (user-defined module -> user-defined class -> mandatory user-defined callback implementation),
-     and store the output of `extract_metadata` in a queue, for each buffer arriving at
-     the `source pad`, releasing them downstream as soon as possible.
-  * Start a worker in a secondary thread monitoring the queue.
-  * When the queue contains data, call `my_custom_parsing` -> `MyCustomProcess` ->
-    `incoming` (user-defined module -> user-defined class -> mandatory user-defined callback
-    implementation), which may be time consuming without affecting pipeline performance.
+  6. Send incoming metadata to a logger which prints jsonified metadata to console.
+
+#### Check your output
+
+* Check your console to see the incoming detections.
+* Want to do something else with the detections? You can choose between several
+  backends: logging (stdout <default>, stderr, file available), in-memory (deque),
+  kafka, redis, or implement your own streaming connector with the `PYTHIA_STREAM_URI`
+  env var. Check the documentation for more details.
+  
+</details>
+
+
+### Develop applications based on pythia
+<details><summary>python API</summary>
+
+
+If you want more granular control over the behavior of the application, its signals,
+events, and messages, you can instead program an aplication using pythia's API.
+
+
+#### Create Files
+
+Continuing with the same pipeline as in the previous example,
+
+<!-- api application -->
+* Create a file `myscript.py` with:
+
+```python
+import json
+from kafka import KafkaProducer
+from kafka.admin import KafkaAdminClient, NewTopic
+from pythia import Application, Gst, objects_per_batch
+
+class App(Application):
+
+    def __init__(self, *a, **kw):
+        super().__init__(*a, **kw)
+        self.manual_kafka = KafkaProducer(
+            bootstrap_servers="kafka:9092"
+        )
+
+    def on_message_error(self, *a, **kw):
+        err, debug = super().on_message_error(*a, **kw)
+        self.manual_kafka.send(
+            "app_events",
+            json.dumps({ "CONDITION":"ERROR", "ERR": err, "DEBUG": debug}).encode()
+        )
+        raise RuntimeError("Unhandled pipeline error")
+
+    def on_message_eos(self, bus, message):
+        self.manual_kafka.send(
+            "app_events",
+            json.dumps({ "CONDITION":"EOS", "SENT_BY": str(message.src)}).encode()
+        )
+        super().on_message_eos(bus, message)
+
+app = App.from_pipeline_file(
+    "pipeline.txt",
+    params={
+      "pgie-conf": "/opt/nvidia/deepstream/deepstream/samples/configs/deepstream-app/config_infer_primary.txt",
+      "input": "/opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.mp4",
+      "output": "/tmp/overlayed.mp4",
+    }
+)
+
+@app.probe(
+    "pgie",
+    pad_direction="src",
+    backend_uri="kafka://kafka:9092?stream=raw_detections"
+)
+def pgie_srcprobe(batch_meta):
+    for frame, detection in objects_per_batch(batch_meta):
+        frame_num = frame.frame_num
+        box = detection.rect_params
+        yield {
+            "frame_num": frame_num,
+            "label": detection.obj_label,
+            "left": box.left,
+            "top": box.top,
+            "width": box.width,
+            "height": box.height,
+            "confidence": detection.confidence,
+        }
+
+@app.probe(
+    "muxer",
+    pad_direction="src",
+)
+def source_probe(pad, info):
+    app.manual_kafka.send(
+        "app_events",
+        json.dumps({
+            "CONDITION":"STARTED",
+            "PAD_CAPS": pad.props.caps.to_string(),
+            "PAD_DIRECTION": pad.props.direction,
+            "PAD_OFFSET": pad.props.offset,
+        }).encode()
+    )
+    return Gst.PadProbeReturn.REMOVE
+
+if __name__ == "__main__":
+    admin = KafkaAdminClient(bootstrap_servers="kafka:9092")
+    if "app_events" not in admin.list_topics():
+        admin.create_topics(
+            new_topics=[
+                NewTopic(name="app_events", num_partitions=1,replication_factor=1)
+            ],
+            validate_only=False,
+        )
+    app()
+
+```
+
+#### Running pythia
+
+<!-- api console -->
+* run the application with:
+
+```console
+$ python myscript.py
+```
+
+In this mode, you have more control over the application behavior:
+
+1. Subclass application
+2. instantiate a custom message handler (a kafka producer in this example)
+3. forward error and EOS messages to a custom kafka topic
+4. interpolate the pipeline template file with python variables to construct the app
+5. use the `@app.probe` decorator as a generator, letting pythia handle the messages
+  internally
+6. use the `@app.probe` decorator as a probe, handling manually the buffer flow and
+  messaging.
+
+
+Want to do something else while the application is running? you can run the application
+with `app(background=True)` instead. See the documentation for details and more
+examples.
+
+#### Check your output
+
+* Check the kafka topics to see the incoming detections.
+
+</details>
 
 ## Setup
 
-### Docker Setup
+### Prerequisites
 
-1. Run `xhost +local:root` before to allow root access to x11. This will change in the
-   future to use a specific user only.
-1. `cd docker;docker-compose up -d pythiags && docker exec pythiags [command]`
-
-### Nondocker Setup
-
-A virtual env is recommended to avoid package clashes with your system python.
-
-#### Prerequisites
-
-1. Hardware:
-
-   * `pythiags` is known to work in ubuntu-based distributions: Jetpack 4.4 for ARM
-     (Jetson Xavier) and 20.04 for x86 (2080 TI). Other Linux should work, too,
-     depending on gstreamer+deepstream support.
-
-   * Additional Jetson information:
-     <details><summary>[printenv | grep JETSON - Click here to expand]</summary>
-     <p>
-
-     ```bash
-     $ printenv | grep JETSON
-     JETSON_TYPE=AGX Xavier [16GB]
-     JETSON_VULKAN_INFO=1.2.70
-     JETSON_CUDA_ARCH_BIN=7.2
-     JETSON_CHIP_ID=25
-     JETSON_OPENCV=4.1.1
-     JETSON_L4T_RELEASE=32
-     JETSON_L4T=32.4.3
-     JETSON_VISIONWORKS=1.6.0.501
-     JETSON_OPENCV_CUDA=NO
-     JETSON_SOC=tegra194
-     JETSON_MACHINE=NVIDIA Jetson AGX Xavier [16GB]
-     JETSON_JETPACK=4.4
-     JETSON_CODENAME=galen
-     JETSON_CUDA=10.2.89
-     JETSON_L4T_REVISION=4.3
-     JETSON_BOARD=P2822-0000
-     JETSON_MODULE=P2888-0001
-     JETSON_VPI=0.3.7
-     JETSON_TENSORRT=7.1.3.0
-     ```
-
-     </p>
-     </details>
-
-1. For development, use poetry and skip to [Developing](#developing)
-1. System dependencies:
-
-   [This list](./setup/aptitude.build.list) includes build dependencies.
-   [This list](./setup/aptitude.run.list) includes runtime dependencies.
-   To install them all, you can download said files and then run the following command:
-
-   ```bash
-   sudo apt install -yq `cat setup/aptitude.build.list | tr "\n" " "` `cat setup/aptitude.run.list | tr "\n" " "`
-   ```
-
-1. [python >=3.6](https://www.python.org/downloads/)
-
-   ([venv](https://docs.python.org/3/tutorial/venv.html) recommended)
-
-1. pip upgrade:
-
-  It's necessary to upgrade to `pip >=20.3`.
-
-  ```bash
-  pip install --upgrade pip
-  pip --version
-  ```
-
-1. [Nvidia Deepstream v5](https://developer.nvidia.com/deepstream-getting-started)
-
-#### Install
-
-To install `pythiags` as a dependency for your python project:
-
-* Make sure the [prerequisites](#prerequisites) are met, then install `pythiags` as you
-  would normally (`pip`/`poetry`/`pipenv`, etc).
-  
-  * For example, using `pip install git+http`, appropiately selecting a branch / commit
-    /tag (eg `main`), and optionally adding `[cli,ds]` at the end for cli and deepstream
-    support:
-
-    ```bash
-    pip install pythiags[cli,ds,gpu]
-    ```
+* nvidia hardware (either jetson or gpu)
+* One of
+  - recent docker (with support `--gpus=all`)
+  - `nvidia-docker` installed,
+  - environment with deepstream 6.1 and [these bindings](https://github.com/rmclabs.io/deepstream_python_apps)
 
 
-    ```bash
-    pip install pythiags[cli,ds,jetson]
-    ```
+### Install
 
-  * Using `poetry`:
-  
-    ```console
-    poetry add pythiags[cli,ds]
-    ```
+#### non-docker
 
-* A normal install should take less than 10 sec. However, for ARM, if no `kivy` wheel is
-  available, it could take around 13 [min] ( `jetson_clocks` enabled and `nvpmodel` at
-  `MAXN`).
+* `pip install pythiags`
 
-## A quick tutorial
+#### docker
 
-To get command-specific help, you can run `pythiags` or `python -m pythiags`.
-Everything besides the command and its params is forwarded to `kivy`.
+* `docker pull ghcr.io/rmclabs-io/pythia` or `ghcr.io/rmclabs-io/pythia-l4t`
+* Build your image using `FROM ghcr.io/rmclabs-io/pythia` or
+  `FROM ghcr.io/rmclabs-io/pythia-l4t`
 
-On ARM, also me sure to set the env `DBUS_FATAL_WARNINGS=0`.
+Alternatively, you could use `ghcr.io/rmclabs-io/pythia-dev` or
+`FROM ghcr.io/rmclabs-io/pythia-l4t-dev`.
 
-pythiags can be used in three modes: from the cli, through its api, or via your own kivy
-application.
+## Usage
 
-### Sample cli apps
+Note: If running from docker, make sure you've properly configured the container and its
+environment, see the
+[dockerfile](https://docs.nvidia.com/metropolis/deepstream/dev-guide/text/DS_docker_containers.html#)
 
-The following examples require pythiags to be installed with the `cli` extra.
+For more examples and tutorials, visit the
+[examples section](https://dev.rmclabs.io/pythia/docs/examples.html)
+of the documentation.
 
-* Run gstreamer application (only `videotestsrc`):
+## FAQ
 
-  ```bash
-  pythiags videotestsrc
-  ```
-
-  This example runs a minimal gstreamer pipeline and uses `kivy` as an appsink, with
-  no inference model and no buffer probes.
-
-* Arbitrary pipeline:
-
-  Any gst-launch-like pipeline works, just make sure to connect your pipeline to pythiags by
-  adding the following element:
-
-  `appsink name=pythiags emit-signals=true caps=video/x-raw,format=RGB`
-
-  * Similar end result as the previous command, with custom elements/properties:
-
-    ```bash
-    $ pythiags launch \
-        videotestsrc \
-          pattern=ball \
-          num_buffers=100 \
-        ! decodebin \
-        ! videoconvert \
-        ! appsink \
-          name=pythiags \
-          emit-signals=true \
-          caps=video/x-raw,format=RGB
-    ```
-
-  * Using Deepstream elements:
-
-    ```bash
-    $ pythiags launch \
-        filesrc \
-          location=/opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.h264 \
-        ! h264parse \
-        ! nvv4l2decoder \
-        ! muxer.sink_0 \
-        nvstreammux \
-          width=1280 \
-          height=720 \
-          batch-size=1 \
-          name=muxer \
-        ! nvinfer \
-            config-file-path=/opt/nvidia/deepstream/deepstream/samples/configs/deepstream-app/config_infer_primary.txt \
-            batch-size=4 \
-        ! nvvideoconvert \
-        ! nvdsosd \
-        ! nvvideoconvert \
-        ! videoconvert \
-        ! appsink \
-          name=pythiags \
-          emit-signals=true \
-          caps=video/x-raw,format=RGB
-    ```
-
-* Load a pipeline from file:
-
-  Define a pipeline in a file using `gst-launch` syntax, optionally with variables inside curly braces:
-
-  ```console
-  $ cat demo.gstp 
-  filesrc
-    location=/opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.h264
-  ! h264parse
-  ! nvv4l2decoder
-  ! muxer.sink_0
-  nvstreammux
-    width=1280
-    height=720
-    batch-size=1
-    name=muxer
-  ! nvinfer
-      config-file-path=/opt/nvidia/deepstream/deepstream/samples/configs/deepstream-app/config_infer_primary.txt
-      batch-size={batch_size}
-  ! nvvideoconvert
-  ! nvdsosd
-  ! nvvideoconvert
-  ! videoconvert
-  ! appsink
-    name=pythiags
-    emit-signals=true
-    caps=video/x-raw,format=RGB
-  ```
-
-  Run the pipeline with custom keyword arguments forwarded from the terminal:
-
-  ```console
-  pythiags file demo.gstp --batch-size=4
-  ```
-
-  So far, we've yet to beat `gst-launch` (except for the pipelime kwargs,
-  which is a win already), because we haven't done anything interesting with the
-  metadata.
-
-  Lets change that.
-
-### Sample module using the API
-
-1. Define `Extractor` and `Consumer`:
-
-  ```python
-  #!/usr/bin/env python
-  # -*- coding: utf-8 -*-
-  """Demo file: my_custom_parsing.py with sample pythiags api usage."""
-  from time import sleep
-  from pythiags import frames_per_batch, objects_per_frame, Extractor, Consumer
-
-  class MyCustomExtract(Extractor):
-      def extract_metadata(self, pad, info):
-          # This needs to be fast to release buffers downstream
-          return [
-              {
-                  "label" : obj_meta.obj_label,
-                  "confidence": obj_meta.confidence,
-                  "frame_number": frame.frame_num,
-              }
-              for frame in frames_per_batch(info)
-              for obj_meta in objects_per_frame(frame)
-          ]
-
-  class MyCustomProcess(Consumer):
-      def incoming(self, detections):
-          # This can be as slow as required
-          for detection in detections:
-              print("Slowly processing detection")
-              sleep(1)
-              print("detection succesfully processed")
-  ```
-
-1. Create a file contianing a deepstream pipeline:
-
-  ```console
-  $ cat ./demo.gstp
-  filesrc
-    location=/opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.h264
-  ! h264parse
-  ! nvv4l2decoder
-  ! muxer.sink_0
-  nvstreammux
-    width=1280
-    height=720
-    batch-size=1
-    name=muxer
-  ! nvinfer
-      config-file-path=/opt/nvidia/deepstream/deepstream/samples/configs/deepstream-app/config_infer_primary.txtPrimary_Detector/config_infer_primary.txt
-      batch-size={batch_size}
-      name=pgie
-  ! nvvideoconvert
-  ! nvdsosd
-  ! nvvideoconvert
-  ! videoconvert
-  ! appsink
-    name=pythiags
-    emit-signals=true
-    caps=video/x-raw,format=RGB
-  ```
-
-1. Invoke pythiags from the command line, binding your implementation with the pipeline:
-
-```console
-pythiags \
-  file ./demo.gstp \
-  --batch-size=10 \
-  --obs=pgie \
-  --ext=my_custom_parsing:MyCustomExtract \
-  --proc=my_custom_parsing:MyCustomProcess
-```
-
-## TODO and FAQ
-
-Check out ongoing and future development [here](https://github.com/rmclabs-io/pythiags/projects/1)
+Check out ongoing and future development [here](https://github.com/rmclabs-io/pythiags/projects)
 
 ### FAQ / Common Issues
 
 * Q: Package installation fails:
 
-  A1: upgrade your pip: `pip install --upgrade pip` (Required "pip>=10").
-  A2: Make sure you've installed the build prerequisites, as listed in `setup/aptitude.build.list`.
+  * A1: upgrade your pip: `pip install --upgrade pip` (Required "pip>=10").
+  * A2: Make sure you've installed the build prerequisites, as listed in `reqs/apt.build.list`.
 
 * Q: My application is running slow on Jetson
 
-  A: Ensure to enable jetson-clocks and maxn (See [reference](https://docs.nvidia.com/metropolis/deepstream/dev-guide/text/DS_Performance.html#jetson)):
+  * A: Ensure to enable jetson-clocks and maxn (See
+    [reference](https://docs.nvidia.com/metropolis/deepstream/dev-guide/text/DS_Performance.html#jetson))
+    :
 
      ```console
      sudo nvpmodel -m 0
@@ -430,35 +350,6 @@ Check out ongoing and future development [here](https://github.com/rmclabs-io/py
      # run your program here
      ```
 
-* Q: Program exits with error:
-
-     ```console
-      dbus[6955]: arguments to dbus_message_new_method_call() were incorrect, assertion "path != NULL" failed in file ../../../dbus/dbus-message.c line 1362.
-      This is normally a bug in some application using the D-Bus library.
-
-        D-Bus not built with -rdynamic so unable to print a backtrace
-      Aborted (core dumped)
-     ```
-
-  A: This is a known bug for Kivy on arm, see [here](https://forums.developer.nvidia.com/t/got-crash-when-run-python-kivy-sample-code/66898/8).
-     Export the variable `DBUS_FATAL_WARNINGS=0` and run your program.
-
-     ```bash
-     export DBUS_FATAL_WARNINGS=0
-     # run your program here
-     ```
-
-     This does not occur inside docker.
-
-* Q: Kivy is controlling my commandline arguments (`sys.argv`) parsing!
-
-  A:      Export the variable `KIVY_NO_ARGS=1` and run your program.
-
-     ```bash
-     export KIVY_NO_ARGS=1
-     # run your program here
-     ```
-
 * Q: Program exits with error (from docker):
 
      ```console
@@ -471,42 +362,23 @@ Check out ongoing and future development [here](https://github.com/rmclabs-io/py
      python: ../../src/hb-object-private.hh:154: Type* hb_object_reference(Type*) [with Type = hb_unicode_funcs_t]: Assertion `hb_object_is_valid (obj)' failed.
      ```
 
-  A: Add `--ipc=host` flag to docker run.
+  * A: Add `--ipc=host` flag to docker run.
 
 ## Contribute
 
-### Setup dev environment
+1. fork
+2. clone
+3. Pull Request from new branch
+4. [Optional, recommended]: use provided devcontainer.
+5. [Optional, recommended]: run `pre-commit install` to validate commits.
+6. add tests, docs, code, scripts, etc
+7. [Optional] check code manually, with `./scripts/format`, `./scripts/lint`,
+  `./scripts/docs`, `./scripts/test`, etc.
+8. Commit using
+  [Conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summary).
+9. push, wait for ci and/or maintainers feedback
+10. repeat 6-8 until success!
 
-On Ubuntu/Jetpack the [Makefile](./Makefile) automatically configures pythiags for
-development:
-
-  1. Clone `git clone https://github.com/rmclabs-io/pythiags.git`
-  2. Go to dir `cd pythiags`
-  3. Run `make install` to automatically configure the system for usage. When doing
-     this, you can skip the rest of the [Setup](#setup) section, including
-     [Install](#install).
-
-  Run `make all`.
-
-Our main focus is on supporting the jetson platform, but we'll also support
-contributions which improve GPU support for x86.
-
-### Pull Requests
-
-1. Open issue with suggestion
-1. Create a pull request
-1. Check codestyle and testing (`pre-commit` and Github Actions, eg in
-   `.github/workflows/deepstream-jetson.yml`.
-
-### Notes
-
-To inspect project dependencies, you can search here:
-
-* aptitude pachage lists, in `setup` folder
-* `Dockerfile`s in the `docker` folder
-* `Makefile`
-
-Install `pythiags` in developer mode either with:
-
-* [OPTION A] `make` in the repo root
-* [OPTION B] `docker-compose up -d dev && docker-compose exec dev bash` in the `docker` folder
+For more instructions, visit the
+[Developers section](https://rmclabs-io.github.io/pythia-docs/development)
+of the documentation.

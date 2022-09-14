@@ -1,0 +1,223 @@
+name: Deepstream Docker
+
+on:
+  push:
+    tags:
+      - 'v?[0-9]+.[0-9]+.[0-9]+*'
+  pull_request:
+
+jobs:
+  build-test-report-publish:
+    strategy:
+      matrix:
+        runner:
+          - {tags: [self-hosted, xavier, jetpack-5.0], buildx: '', platform: 'jetson'}
+          - {tags: [self-hosted, silverstone, gpu], buildx: '--buildx', platform: 'gpu'}
+    runs-on: ${{ matrix.runner.tags }}
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build docker development image
+        id: build-docker-dev
+        run: |
+          ./scripts/docker.py build --target=dev ${{ matrix.runner.buildx }} --dry-run \
+          && ./scripts/docker.py build ${{ matrix.runner.buildx }} --target=dev \
+          && echo "CURRENT_TAG=$(cat .CURRENT_TAG)" >> $GITHUB_ENV
+
+      - name: Run Container detached
+        run: |
+          xhost +local:root \
+          && docker network create pythia-network &> /tmp/nw-c || grep -q 'already exists' /tmp/nw-c \
+          && docker run \
+            --rm \
+            --detach \
+            --ipc=host \
+            --gpus=all \
+            --network=pythia-network \
+            --cidfile=./current-container \
+            -e DISPLAY \
+            -e DBUS_FATAL_WARNINGS=0 \
+            -v /tmp/.X11-unix:/tmp/.X11-unix \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            --entrypoint tail \
+            ${{ env.CURRENT_TAG }} \
+            -f /dev/null \
+          && export CONTAINER_NAME=`cat ./current-container` \
+          && echo "CONTAINER_NAME=$CONTAINER_NAME" >> $GITHUB_ENV
+        env:
+          DISPLAY: :0
+
+      - name: Run Code Style - Format
+        id: format
+        run: |
+          docker exec ${{ env.CONTAINER_NAME }} pre-commit clean
+          docker exec ${{ env.CONTAINER_NAME }} ./scripts/format
+
+      - name: Run Code Style - Lint
+        id: lint
+        run: |
+          docker exec ${{ env.CONTAINER_NAME }} ./scripts/lint
+
+      - name: Run Pyest
+        id: pytest
+        run: |
+          docker exec ${{ env.CONTAINER_NAME }} ./scripts/test
+
+      - name: Build Documentation
+        id: docs
+        run: |
+          docker exec ${{ env.CONTAINER_NAME }} ./scripts/docs
+
+      - name: Build python poackage - poetry build sdist and wheels
+        run: |
+          docker exec ${{ env.CONTAINER_NAME }} poetry build --format wheel
+
+      - name: Export package, Documentation and testing artifacts
+        id: docs-export
+        run: |
+          mkdir -p docs
+          rm -rf docs
+          docker cp ${{ env.CONTAINER_NAME }}:/opt/rmclabs/pythia/docs docs
+          touch docs/_build/html/.nojekyll
+          docker cp ${{ env.CONTAINER_NAME }}:/opt/rmclabs/pythia/reports reports
+          docker cp ${{ env.CONTAINER_NAME }}:/opt/rmclabs/pythia/dist dist
+          export WHEEL=`ls dist | grep whl | tail -n1` \
+            && echo "WHEEL=$WHEEL" >> $GITHUB_ENV
+
+      - name: Upload pytest test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: pytest-results-${{ matrix.runner.platform }}
+          path: ./reports/pytest.xml
+
+      - name: Upload coverage test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-results-${{ matrix.runner.platform }}
+          path: ./reports/coverage.xml
+
+      - name: Comment coverage Results
+        if: github.event_name == 'pull_request'
+        uses: 5monkeys/cobertura-action@master
+        with:
+          path: reports/coverage.xml
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          minimum_coverage: 0
+
+      - name: Deploy Staging Docs
+        if: ${{ !startsWith(github.ref, 'refs/tags') }}
+        uses: JamesIves/github-pages-deploy-action@4.0.0
+        with:
+          branch: staging
+          folder: docs/_build/html
+          repository-name: rmclabs-io/pythia-docs
+          token: ${{ secrets.CR_PAT }}
+
+      - name: Ensure git tag and poetry version are aligned
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        run: |
+          export V1=`docker exec ${{ env.CONTAINER_NAME }} poetry version --short` \
+          && export V2=${{ github.ref }} \
+          && python3 -c "import os;e=os.environ;ref=e['V2'].lstrip('refs/tags/');assert e['V1'] == ref;open('ref','w').write(ref)" \
+          cat ref
+
+      - name: Create Release
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Deploy Production Docs
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        uses: JamesIves/github-pages-deploy-action@4.0.0
+        with:
+          branch: master
+          folder: docs/_build/html
+          repository-name: rmclabs-io/pythia-docs
+          token: ${{ secrets.CR_PAT }}
+
+      - name: Build docker prod
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        id: build-docker-prod
+        run: |
+          ./scripts/docker.py build --target=prod \
+          && echo "CURRENT_TAG_PROD=$(cat .CURRENT_TAG)" >> $GITHUB_ENV
+
+      - name: Docker meta
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ env.CURRENT_TAG }}
+            ${{ env.CURRENT_TAG_PROD }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Push tagged Docker image to GitHub Packages
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        run: |
+          docker push ${{ env.CURRENT_IMAGE_PROD }}
+          docker push ${{ env.CURRENT_IMAGE }}
+
+      - name: Upload packaged python package
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: python-package-distributions
+          path: dist
+
+      - name: Upload Release Asset
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        uses: AButler/upload-release-assets@v2.0
+        with:
+          files: 'dist/*'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: ${{ github.ref_name }}
+
+      - name: Stop docker container
+        if: always()
+        id: stop-docker-container
+        run: |
+          docker container rm --force ${{ env.CONTAINER_NAME }}
+
+
+  pypi-pub:
+    name: publish to pypi
+    if: ${{ startsWith(github.ref, 'refs/tags') }}
+    runs-on: ubuntu-latest
+    needs:
+      - build-test-report-publish
+
+    steps:
+
+      - name: Check out src from Git
+        uses: actions/checkout@v2
+
+      - name: Switch to using Python 3.8 by default
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Download all the dists
+        uses: actions/download-artifact@v2
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_TOKEN }}

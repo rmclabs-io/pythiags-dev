@@ -1,134 +1,329 @@
-__extends = "https://raw.githubusercontent.com/rmclabs-io/dev-styleguide/main/python/pyproject.toml"
-
 [tool.poetry]
 name = "pythiags"
 version = "0.12.1"
-description = "A Gstreamer/Deepstream wrapper for python and Kivy."
+description = "pythonic Deepstream."
 authors = [
     "Pablo Woolvett <pablowoolvett@gmail.com>",
     "Pedro Pablo Correa <pbcorrea@rmc.cl>"
 ]
 readme = "README.md"
 packages = [
-    { include = "pythiags", from = "src" },
+    { include = "pythia", from = "src" },
 ]
-repository = "https://github.com/rmclabs-io/pythiags"
-homepage = "https://wiki.rmclabs.io/index.php?title=pythiags"
-documentation = "https://docs.rmclabs.io/pythiags"
+repository = "https://github.com/rmclabs-io/pythia"
+homepage = "https://dev.rmclabs.io/pythia"
+documentation = "https://rmclabs-io.github.io/pythia-docs/"
+
 
 [tool.poetry.urls]
-"Bug Tracker" = "https://github.com/rmclabs-io/pythiags/issues"
+"Bug Tracker" = "https://github.com/rmclabs-io/pythia/issues"
 
 [tool.poetry.dependencies]
-python = "^3.6.9"
-PyGObject = "^3.38.0"
-importlib-metadata = {version = "^1.0", python = "<3.8"}
-fire = {version = "^0.4.0", optional = true}
+python = "^3.8"
+pycairo = "1.21.0"
+pygobject = "3.36.0"
+pyds_ext = ">=2,<3"
+numpy = "^1.23.2"
 
-pyds-ext = {version = "^1.4.2", optional = true}
-
-# temporary fix, see https://github.com/kivy/kivy/pull/7362 (revert to kivy==2.1 when it lands)
-Kivy-jetson = {extras = ["base"], optional = true, version = "2.1.0.dev0", markers="platform_machine == 'aarch64'"}
-Kivy = {version = "^2.0.0", optional = true, markers="platform_machine == 'x86_64'"}
+typer = {version = "*", optional = true}
+Jinja2 = {version = "^3.1.2", optional = true}
+fire = {version = "0.4.0", optional = true}
+opencv-python = {version = ">=4.6.0.66", optional = true}
+kafka-python = {version = "2.0.2", optional = true}
+redis = {version = "4.3.4", optional = true}
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2"
-pre-commit = "^2.9.3"
-flake8-bandit = "^2.1.2"
-flake8-bugbear = "^20.11.1"
-flake8-builtins = "^1.5.3"
-flake8-comprehensions = "^3.3.1"
-flake8-docstrings = "^1.5.0"
-flake8-eradicate = "^1.0.0"
-flake8-debugger = "^4.0.0"
-flake8-mutable = "^1.2.0"
-black = "^20.8b1"
-isort = "^5.7.0"
-pylint = "^2.6.0"
-flake8 = "^3.8.4"
-mypy = "^0.790"
-bandit = "^1.7.0"
-coverage = "^5.3.1"
-flake8-mypy = "^17.8.0"
-pytest-cov = "^2.10.1"
-docformatter-toml = "^0.1.0"
-darglint = "^1.5.8"
-flake8-pytest-style = "^1.3.0"
-mccabe = "^0.6.1"
-pep8-naming = "^0.11.1"
-pycodestyle = "^2.6.0"
-pyflakes = "^2.2.0"
-pandas-vet = "^0.2.2"
-Sphinx = "^3.4.3"
-sphinx-rtd-theme = "^0.5.1"
-m2r2 = "^0.2.7"
-mistune = "0.8.4"
-pytest-html = "^3.1.1"
-python-dotenv = "^0.15.0"
-drytoml = {extras = ["black", "flakeheaven", "isort"], version = "^0.2.8"}
-flakeheaven = "^0.10.0-alpha.0"
-commitizen = "^2.14.2"
-behave = "^1.2.6"
+
+pre-commit = "*"
+commitizen = "*"
+
+pytest = "*"
+pytest-html = "*"
+pytest-cov = "*"
+
+black = "^22.6.0"
+docformatter = {version = ">=1.5", extras = ["tomli"]}
+isort = "*"
+
+mypy = "^0.971"
+flakeheaven = "*"
+pylint = "*"
+flake8-bandit = "*"
+flake8-bugbear = "*"
+flake8-builtins = "*"
+flake8-comprehensions = "*"
+flake8-docstrings = "*"
+flake8-eradicate = "*"
+flake8-debugger = "*"
+flake8-mutable = "*"
+flake8-pytest-style = "*"
+flake8-black = "^0.3.3"
+pep8-naming = "*"
+pandas-vet = "*"
+darglint = "*"
+PyGObject-stubs = "^1.0.0"
+
+
+Sphinx = "*"
+furo = "^2022.6.21"
+myst-parser = "^0.18.0"
+
+# black = "^20.8b1"
+# isort = "^5.7.0"
+# pylint = "^2.6.0"
+# flake8 = "^3.8.4"
+# mypy = "^0.790"
+# bandit = "^1.7.0"
+# coverage = "^5.3.1"
+# flake8-mypy = "^17.8.0"
+# mccabe = "^0.6.1"
+flake8-boolean-trap = "^0.1.0"
+typing-extensions = "^4.3.0"
+# pycodestyle = "^2.6.0"
+# pyflakes = "^2.2.0"
+
+
+# m2r2 = "^0.2.7"
+# mistune = "0.8.4"
+# python-dotenv = "^0.15.0"
+# drytoml = {extras = ["black", "flakeheaven", "isort"], version = "^0.2.8"}
 
 [tool.poetry.extras]
-ds = [
-    "pyds-ext",
-]
 cli = [
-    "fire",
+  "typer",
+  "fire"
 ]
-kivy = [
-    "Kivy-jetson",
-    "Kivy",
-]
+jinja = ["Jinja2"]
+opencv = ["opencv-python"]
+kafka = ["kafka-python"]
+redis = ["redis"]
+
+
 
 [tool.poetry.scripts]
-pygst-launch = 'pythiags.cli:main'
+gst-pylaunch = "pythia.cli.app:app"
+
+[tool.poetry.group.dev.dependencies]
+docker-compose = "^1.29.2"
+types-redis = "^4.3.20"
+types-six = "^1.16.19"
+
+[tool.black]
+line-length = 79
+
+[tool.isort]
+profile = "black"
+force_single_line = true
+src_paths = ["src"]
+known_local_folder = ["tests"]
+atomic = true
+sections = ["FUTURE","STDLIB","THIRDPARTY","FIRSTPARTY","LOCALFOLDER"]
+force_alphabetical_sort_within_sections = true
 
 [tool.docformatter]
-blank=true
-recursive=true
+blank = true
+recursive = true
 
+[tool.flakeheaven]
+format = "colored"
+max_line_length = 79
+docstring-convention = "google"  # flake8-docstrings
+docstring_style = "google"  # darglint
+exclude = [
+    "src/pythia/version.py",
+]
+pytest-fixture-no-parentheses = true  # https://github.com/m-burst/flake8-pytest-style/blob/master/docs/rules/PT001.md
+pytest-mark-no-parentheses = true  # https://github.com/m-burst/flake8-pytest-style/blob/master/docs/rules/PT023.md
+
+[tool.flakeheaven.plugins]
+flake8-bandit = [
+  "+*",
+  "-S322",  # input for python2, no problem
+  "-S404",  # control should be performed on subprocess usage, on import is useless
+  "-S607",  # partial executable path are fine
+]
+flake8-boolean-trap = ["+*"]
+flake8-bugbear = ["+*"]
+flake8-builtins = ["+*"]
+flake8-comprehensions = ["+*"]
+flake8-darglint = ["+*"]
+flake8-docstrings = [
+  "+*",
+  "-D101",  # pylint dupe
+  "-D102",  # pylint dupe
+  "-D103",  # pylint dupe
+  "-D202",  # black conflict
+  "-D412",  # we do want lines between header and contents. See https://github.com/PyCQA/pydocstyle/issues/412
+]
+flake8-eradicate = ["+*"]
+flake8-debugger = [
+  "+*",
+  "-T100",  # pylint dupe
+]
+flake8-mutable = [
+  "+*",
+  "-M511",  # B008 dupe
+]
+flake8-pytest-style = ["+*"]
+mccabe = ["+*"]
+pep8-naming = [
+  "+*",
+  "-N805",  # pylint duplicate
+  "-N801",  # pylint dupe
+  "-N806",  # pylint dupe
+  "-N802",  # pylint dupe
+]
+pycodestyle = [
+  "+*",
+  "-E501",  # pylint duplicate
+  "-E203",  # false positives on list slice
+  "-E722",  # bugbear duplicate
+  "-E402",  # isort duplicate
+  "-W503",  # black conflict, looks ok
+]
+pyflakes = [
+  "+*",
+  "-F821",  # pylint dupe
+  "-F541",  # pylint dupe
+  "-F822",  # pylint dupe
+]
+pylint = [
+  "+*",
+  "-E1136",  # disabled for python3.9, at least until support for 3.9 lands. See https://github.com/PyCQA/pylint/issues/3882
+  "-C0114",  # flake8-docstrings duplicate
+  "-W0611",  # pyflakes duplicate
+  "-A003",   # flake8-builtins dupe
+  "-C0415",   # F401
+]
+pandas-vet = [
+  "+*",
+  "-PD011", # too many false positives (eg dict().values()). See https://github.com/deppen8/pandas-vet/issues/106
+  "-PD005",  # https://github.com/deppen8/pandas-vet/issues/108
+]
+
+[tool.flakeheaven.exceptions."scripts/*.py"]
+flake8-darglint = [
+  "-*",  # no docstrings required for dev scripts
+]
+pylint = [
+  "-C0116", # no docstrings required for dev scripts
+]
+flake8-bandit = [
+  "-S602",  # scripts are fine to escape to shell
+]
+
+[tool.flakeheaven.exceptions."src/pythia/types.py"]
+pylint = [
+  "-R0903",  # typing module does not require method def in cls
+]
+# [tool.flakeheaven.exceptions."docs/src/conf.py"]
+# flake8-eradicate = [
+#   "-E800",
+# ]
+# flake8-docstrings = [
+#   "-D100",
+#   "-D101",
+#   "-D102",
+#   "-D103",
+#   "-D104",
+# ]
+# flake8-builtins = [
+#   "-A001", # variable "copyright" is shadowing a python builtin -> sphinx wants it
+# ]
+# pylint = [
+#   "-*",  # completely disable pylint for sphinx config
+# ]
+[tool.flakeheaven.exceptions."tests/"]
+flake8-bandit = [
+  "-S101",  # asserts are ok
+]
+pylint = [
+  "-C0415",
+#   "-C0115",
+#   "-C0115",
+#   "-C0116",
+#   "-C0116",
+#   "-R0201",
+]
+# flake8-docstrings = [
+#   "-D100",
+#   "-D101",
+#   "-D102",
+#   "-D103",
+#   "-D104",
+# ]
+# flake8-darglint = [
+#   "-DAR101",
+# ]
+
+# [tool.flakeheaven.exceptions."tests/bdd"]
+# pylint = [
+#   "-E0611",  # avoid pylint false positive - eg from behave import when
+# ]
+
+[tool.mypy]
+mypy_path = "stubs"
+show_error_codes = true
+exclude = [
+  'pyds\.pyi$',  # but TOML's single-quoted strings do not
+]
+
+
+# [[tool.mypy.overrides]]
+# module = "fire.*"
+# ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = [
-    "tests",
+    "tests/pytest",
 ]
 addopts = '''
   -ra
-  --cov=src/pythiags
-  --cov-branch
-  --cov-report html:docs/build/coverage
-  --html=docs/build/pytest.html --self-contained-html
+  --cov=src/pythia --cov-branch --cov-report html:docs/_build/html/development/coverage
+  --html=docs/_build/html/development/pytest.html --self-contained-html --css=docs/_static/css/pytest-html.css
   --junit-xml reports/pytest.xml
   --cov-report xml:reports/coverage.xml
 '''
-
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "wip: mark tests as Work In Progress",
+]
 [build-system]
-build-backend = "poetry.core.masonry.api"
 requires = [
-    "pip >= 19.3.1",
-    "Cython >= 0.29.9",
-    "PyGObject >= 3.36.0",
-    "poetry-core>=1.0.0",
+  "poetry-core>=1.0.0",
 ]
+build-backend = "poetry.core.masonry.api"
+# requires = [
+#     "pip >= 19.3.1",
+#     "Cython >= 0.29.9",
+#     "PyGObject >= 3.36.0",
+#     "poetry-core>=1.0.0",
+# ]
 
-[tool.pylint.IMPORTS]
-known-third-party=[
-    "pyds",
-    "pyds_bbox_meta",
-    "pyds_tracker_meta",
+[tool.pylint]
+extension-pkg-allow-list = [
+  "pyds",
+  "cv2",
 ]
+# [tool.pylint.IMPORTS]
+# known-third-party=[
+#     "pyds",
+#     "pyds_bbox_meta",
+#     "pyds_tracker_meta",
+# ]
 
-[tool.flakehell]
-extended_default_ignore=[]  # add this
+
 
 [tool.commitizen]
-name                     = "cz_conventional_commits"
+name = "cz_conventional_commits"
 version = "0.12.1"
-tag_format               = "$version"
+tag_format = "$version"
 # keep this in sync with the bump workflow to avoid
 # re-triggering it after commitizen bump command pushes
-bump_message             = "release: $current_version → $new_version"
+bump_message = "release: $current_version → $new_version"
 update_changelog_on_bump = true
-annotated_tag            = true
+annotated_tag = true
+version_files = [
+    "src/pythia/version.py",
+]
+check_consistency = true

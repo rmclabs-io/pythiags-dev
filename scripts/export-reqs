@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [ "$#" -eq 0 ]; then
+  dev=''
+  output='requirements.txt'
+else
+  dev='--dev'
+  output='requirements.dev.txt'
+fi
+
+set -x
+
+poetry lock --no-update
+
+poetry export -vvv \
+  $dev \
+  --format requirements.txt \
+  --without-hashes \
+  --with-credentials \
+  --output $output

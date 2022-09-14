@@ -3,96 +3,36 @@ repos:
   - repo: local
     hooks:
 
-    - id: echo
-      name: echo 
+    - id: commitizen
+      stages: [commit-msg]
+      name: commitizen
       language: system
-      entry: echo 
-      verbose: true
-      pass_filenames: true
-
-
-    - id: avoid-master-commits
-      name: Avoid Accidentally commiting to master
-      language: system
-      verbose: true
-      entry: |
-        bash -c 'git rev-parse --abbrev-ref HEAD | egrep -v "^master"'
-      pass_filenames: false
+      entry: cz check --commit-msg-file
       always_run: true
 
-
-  - repo: local
-    hooks:
-    - id: docformatter
-      name: docformatter 
+    - id: format
+      name: format
       language: system
-      entry: docformatter --in-place
-      files: \.pyi?$
-      pass_filenames: true
-
-    - id: black
-      name: black
-      language: system
-      entry: dry -q black 
-      files: \.pyi?$
-      pass_filenames: true
-
-    - id: isort
-      name: isort
-      language: system
-      entry: dry -q isort 
-      files: \.pyi?$
-      pass_filenames: true
-
-    - id: flakehell
-      name: flakehell
-      language: system
-      entry: dry -q flakehell lint
-      files: \.pyi?$
-      pass_filenames: true
-
-
-  - repo: local
-    hooks:
-    - id: pytest
-      name: pytest
-      language: system
-      entry: pytest
+      entry: ./scripts/format
       pass_filenames: false
 
-  - repo: local
-    hooks:
-    - id: behave
-      name: behave
+    - id: lint
+      name: lint
       language: system
-      entry: behave tests/bdd
+      entry: ./scripts/lint
       pass_filenames: false
 
-  - repo: local
-    hooks:
+    - id: test
+      name: test
+      language: system
+      entry: ./scripts/test
+      pass_filenames: false
+
     - id: docs-build
       name: Build Documentation
       language: system
-      entry: sphinx-build -a -E -j auto docs/src docs/build
+      entry: ./scripts/docs
       pass_filenames: false
-
-  - repo: local
-    hooks:
-
-    - id: reqs
-      name: Export requeriments.txt
-      language: system
-      pass_filenames: false
-      files: ^(pyproject.toml|poetry.lock)$
-      entry: ./.scripts/export-reqs.sh
-      verbose: true
-
-    - id: devreqs
-      name: Export requeriments.dev.txt
-      language: system
-      pass_filenames: false
-      files: ^(pyproject.toml|poetry.lock|aptitude*.list)$
-      entry: ./.scripts/export-dev-reqs.sh
 
     - id: build
       name: Build package

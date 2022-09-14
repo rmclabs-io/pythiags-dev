@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -o pipefail
+
+check=${1:-''}
+shift
+set -eu
+
+if [ "$#" -eq 0 ]; then
+  paths='src tests scripts docs/conf.py'
+else
+  paths="${@}"
+fi
+
+set -x
+docformatter ${check:-"--in-place"} $paths
+black ${check} $paths
+isort ${check} $paths

@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -euxo pipefail
+
+# this should be equivalent to readthedocs build
+rm -rf \
+  docs/modules.rst \
+  docs/pythia*.rst \
+  docs/apidoc
+
+
+
+pushd docs/
+
+python -m sphinx \
+  -T \
+  -E \
+  -W \
+  --keep-going \
+  -b html \
+  -d _build/doctrees \
+  -D language=en \
+  . \
+  _build/html
+
+
+popd
+
+
+# sphinx-build \
+#   -a \
+#   -E \
+#   -W \
+#   -j auto \
+#   docs/src \
+#   docs/build

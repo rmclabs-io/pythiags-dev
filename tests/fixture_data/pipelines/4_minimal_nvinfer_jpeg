@@ -1,0 +1,10 @@
+uridecodebin uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.jpg
+! nvvideoconvert
+! m.sink_0
+nvstreammux
+  name=m width=1280 height=720 batch-size=1
+! nvinfer
+  config-file-path=/opt/nvidia/deepstream/deepstream/samples/models/peoplesegnet/pgie.conf
+  name=pgie
+  unique-id=1
+! fakesink

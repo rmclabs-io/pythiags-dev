@@ -1,0 +1,47 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.245.0/containers/ubuntu
+{
+  "name": "Ubuntu",
+  "build": {
+    "dockerfile": "../docker/Dockerfile",
+    "context": "..",
+    "target": "dev-code",
+    "args": {
+      "BASE_IMG": "nvcr.io/nvidia/deepstream:6.1-samples",
+      "DOCKER_GROUP_ID": "972"
+      // "PIP_PLATFORM": "linux_x86_64"
+    }
+  },
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [],
+  "workspaceMount": "source=${localWorkspaceFolder},target=/opt/rmclabs/pythia,type=bind",
+  "workspaceFolder": "/opt/rmclabs/pythia",
+  "containerEnv": {
+    "DISPLAY": ":0"
+  },
+  "initializeCommand": "docker network create pythia-network &> /tmp/nw-c || grep -q 'already exists' /tmp/nw-c",
+  "mounts": [
+    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  // "runArgs": ["--privileged"],
+  "runArgs": [
+    "--gpus", "all",
+    "--network=pythia-network"
+  ],
+  // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+  "remoteUser": "rmclabsdev",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "wholroyd.jinja",
+        "bungcip.better-toml",
+        "ms-azuretools.vscode-docker",
+        "joaompinto.vscode-graphviz",
+        "yzhang.markdown-all-in-one",
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ]
+    }
+  }
+}

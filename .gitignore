@@ -15,8 +15,11 @@ tmp/
 .env
 poetry.toml
 dist/
-docs/build
-docs/src/apidoc
+docs/_build
+docs/modules.rst
+docs/pythia*.rst
 .coverage*
 reports/
-WIP
+.CURRENT_TAG
+.bkp
+trt-docker-export/

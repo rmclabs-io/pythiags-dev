@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+stubgen \
+  --output tmp/stubs \
+  --include-private \
+  -p pyds \
+  -p kafka \
+  -p cv2 \
+  -p fire

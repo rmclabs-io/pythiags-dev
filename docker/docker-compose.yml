@@ -1,35 +1,48 @@
-version: "3"
-
-x-common-build: &common-build
-  context: ../
-  dockerfile: docker/${arch}.Dockerfile
-
-x-common: &common
-  image: ghcr.io/rmclabs-io/pythiags-${arch}-production:latest
-  build:
-    <<: *common-build
-  environment:
-    - DISPLAY
-    - DBUS_FATAL_WARNINGS
-  runtime: nvidia
-  volumes:
-    - "/tmp/.X11-unix:/tmp/.X11-unix:rw"
-    - "./dist:/dist"
-    - "./docs/build:/docs"
-  network_mode: host
-
+version: '3'
 services:
 
-  pythiags:
-    <<: *common
+  redis:
+    image: "redis:alpine"
+    # network_mode: "host"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    # ports:
+    #   - 6379:6379
 
-  dev:
-    <<: *common
-    image: ghcr.io/rmclabs-io/pythiags-${arch}-dev:latest
-    build: 
-      <<: *common-build
-      target: dev
-    entrypoint:
-      - tail
-      - -f
-      - /dev/null
+  zookeeper:
+    image: "confluentinc/cp-zookeeper"
+    # network_mode: "host"
+    # ports:
+    #   - 32181:32181
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=32181
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    image: confluentinc/cp-kafka
+    # network_mode: "host"
+    # ports:
+    #   - 9092:9092
+    #   - 29092:29092
+    depends_on:
+      - zookeeper
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:32181
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT_HOST://kafka:29092,PLAINTEXT://kafka:9092
+      - KAFKA_BROKER_ID=1
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --list --bootstrap-server kafka:9092 >> /tmp/healthchecks"]
+      interval: 1s
+      timeout: 50s
+      retries: 55
+
+networks:
+  default:
+    name: pythia-network
+    external: true
