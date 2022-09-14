@@ -157,8 +157,8 @@ jobs:
       - name: Push tagged Docker image to GitHub Packages
         if: ${{ startsWith(github.ref, 'refs/tags') }}
         run: |
-          docker push ${{ env.CURRENT_IMAGE_PROD }}
-          docker push ${{ env.CURRENT_IMAGE }}
+          docker push ${{ env.CURRENT_TAG }}
+          docker push ${{ env.CURRENT_TAG_PROD }}
 
       - name: Upload packaged python package
         if: ${{ startsWith(github.ref, 'refs/tags') }}
