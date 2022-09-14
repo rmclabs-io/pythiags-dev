@@ -1,3 +1,9 @@
+## 1.0.2 (2022-09-14)
+
+### Fix
+
+- publish docker images from ci pipeline
+
 ## 1.0.1 (2022-09-14)
 
 ### Fix
