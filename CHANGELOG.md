@@ -1,3 +1,9 @@
+## 1.0.1 (2022-09-14)
+
+### Fix
+
+- avoid release creation from ci pipeline
+
 ## 1.0.0 (2022-09-14)
 
 ### Refactor
