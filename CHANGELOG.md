@@ -1,3 +1,9 @@
+## 1.0.3 (2022-09-14)
+
+### Fix
+
+- login to ghcr before publishing docker images from ci pipeline
+
 ## 1.0.2 (2022-09-14)
 
 ### Fix
