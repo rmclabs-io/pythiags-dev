@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pythiags"
-version = "1.0.3"
+version = "1.0.4"
 description = "pythonic Deepstream."
 authors = [
     "Pablo Woolvett <pablowoolvett@gmail.com>",
@@ -316,7 +316,7 @@ extension-pkg-allow-list = [
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "1.0.3"
+version = "1.0.4"
 tag_format = "$version"
 # keep this in sync with the bump workflow to avoid
 # re-triggering it after commitizen bump command pushes

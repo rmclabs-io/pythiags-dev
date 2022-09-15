@@ -1,3 +1,9 @@
+## 1.0.4 (2022-09-15)
+
+### Fix
+
+- avoid duplicates from workers
+
 ## 1.0.3 (2022-09-14)
 
 ### Fix
