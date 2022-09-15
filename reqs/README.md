@@ -9,7 +9,7 @@ to be used with aptitude, see usage in `../docker/Dockerfile`:
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 ```
-where stage is one of `dev`, `build`, `runtime`.
+where stage is one of `build`, `runtime`, `devcontainer`.
 
 ```console
 * `apt.build.list`: used by poetry (for development), or pip (to construct and popullate the venv)
