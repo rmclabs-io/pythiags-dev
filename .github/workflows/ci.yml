@@ -57,6 +57,7 @@ jobs:
           docker exec ${{ env.CONTAINER_NAME }} ./scripts/format
 
       - name: Run Code Style - Lint
+        if: ${{ !matrix.runner.platform != 'jetson' }}
         id: lint
         run: |
           docker exec ${{ env.CONTAINER_NAME }} ./scripts/lint
@@ -71,7 +72,7 @@ jobs:
         run: |
           docker exec ${{ env.CONTAINER_NAME }} ./scripts/docs
 
-      - name: Build python poackage - poetry build sdist and wheels
+      - name: Build python package - poetry build sdist and wheels
         run: |
           docker exec ${{ env.CONTAINER_NAME }} poetry build --format wheel
 
@@ -110,7 +111,7 @@ jobs:
           minimum_coverage: 0
 
       - name: Deploy Staging Docs
-        if: ${{ !startsWith(github.ref, 'refs/tags') }}
+        if: ${{ !startsWith(github.ref, 'refs/tags') && (matrix.runner.platform == 'jetson')}}
         uses: JamesIves/github-pages-deploy-action@4.0.0
         with:
           branch: staging
@@ -127,7 +128,7 @@ jobs:
           cat ref
 
       - name: Deploy Production Docs
-        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        if: ${{ startsWith(github.ref, 'refs/tags') && (matrix.runner.platform == 'jetson')}}
         uses: JamesIves/github-pages-deploy-action@4.0.0
         with:
           branch: master
