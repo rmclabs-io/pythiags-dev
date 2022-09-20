@@ -34,14 +34,15 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "wholroyd.jinja",
-        "bungcip.better-toml",
-        "ms-azuretools.vscode-docker",
-        "joaompinto.vscode-graphviz",
-        "yzhang.markdown-all-in-one",
-        "ms-python.python",
-        "ms-python.vscode-pylance"
-      ]
+    		"wholroyd.jinja",
+    		"bungcip.better-toml",
+    		"ms-azuretools.vscode-docker",
+    		"joaompinto.vscode-graphviz",
+    		"yzhang.markdown-all-in-one",
+    		"ms-python.python",
+    		"ms-python.vscode-pylance",
+    		"tintinweb.graphviz-interactive-preview"
+    	]
     }
   }
 }
