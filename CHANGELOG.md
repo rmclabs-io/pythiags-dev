@@ -1,3 +1,13 @@
+## 1.1.0 (2022-09-20)
+
+### Fix
+
+- avoid segfault with uridecodebin+nvjpegenc on subsequent runs
+
+### Feat
+
+- **app**: enable loop customization
+
 ## 1.0.4 (2022-09-15)
 
 ### Fix
