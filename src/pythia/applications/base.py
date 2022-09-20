@@ -48,17 +48,31 @@ GST_DEBUG_DUMP_DOT_DIR = os.environ.get("GST_DEBUG_DUMP_DOT_DIR", None)
 
 
 class RunLoop(Protocol):
+    """Loop wrapper interface."""
+
+    def __init__(self, loop: Optional[Loop], *args, **kwargs) -> None:
+        """Initialize a loop wrapper.
+
+        Args:
+            args: Implementation constructor optional args.
+            loop: The loop to wrap.
+            kwargs: Implementation constructor optional args.
+
+        """
+
     def join(self) -> None:
-        ...
+        """Run and block the loop."""
 
     def start(self) -> None:
-        ...
+        """Ensure the loop is running / activated."""
 
-    def quit(self) -> None:
-        ...
+    def quit(self) -> None:  # noqa: A003
+        """Stop the running loop."""
 
 
 class ForegroundLoop(RunLoop):
+    """Simple Loop wrapper implementation to run a blocking loop."""
+
     def __init__(self, loop: Optional[Loop] = None):
         """Initialize a foreground glib loop.
 
@@ -70,31 +84,28 @@ class ForegroundLoop(RunLoop):
         self._loop = loop
 
     @property
-    def loop(self) -> GLib.MainLoop:
+    def loop(self) -> Loop:
+        """Lazy property for the loop.
+
+        Returns:
+            initialized or pre-existing loop.
+
+        """
         if not self._loop:
-            # frame = inspect.currentframe()
-            # if "typer" not in str(frame.f_back.f_back.f_back.f_back.f_back):
-            # breakpoint();print()  # TODO remove this
             self._loop = GLib.MainLoop()
         return self._loop
 
     def start(self) -> None:
-        self.loop
+        """Ensure the lazy property is accessed at least once."""
+        self.loop  # noqa: W0104
 
     def join(self) -> None:
-        # frame = inspect.currentframe()
-        # if "typer" not in str(frame.f_back.f_back.f_back):
-        #     breakpoint();print()  # TODO remove this
+        """Run the main loop in the foreground."""
         self.loop.run()
 
-    def quit(self) -> None:
-        # frame = inspect.currentframe()
-
-        # if "typer" not in  str(frame.f_back.f_back.f_back.f_back.f_back.f_back.f_back):
-        #     breakpoint();print()  # TODO remove this
-        print(f"{self.loop.is_running()=}\n" * 10, flush=True)
+    def quit(self) -> None:  # noqa: A003
+        """Quit the main loop running the foreground."""
         self.loop.quit()
-        print(f"{self.loop.is_running()=}\n" * 10, flush=True)
 
 
 class BackgroundThreadLoop(Thread, RunLoop):
@@ -162,7 +173,7 @@ class BaseApplication:
 
     """
 
-    loop_cls: RunLoop = BackgroundThreadLoop
+    loop_cls: Type[RunLoop] = BackgroundThreadLoop
 
     def __init__(self, pipeline: BasePipeline) -> None:
         """Construct an application from a pipeline.
@@ -172,7 +183,7 @@ class BaseApplication:
 
         """
         self.pipeline = pipeline
-        self.loop: Optional[BackgroundLoop] = None
+        self.loop: Optional[RunLoop] = None
         self._bus: Optional[Gst.Bus] = None
         self._registered_probes: Probes = defaultdict(
             lambda: defaultdict(list)
@@ -327,18 +338,18 @@ class BaseApplication:
 
         gst_init()
 
-        loop = self._before_pipeline_start(loop)
+        loop_ = self._before_pipeline_start(loop)
         try:
             self.pipeline.start()
         except RuntimeError:
             self.disconnect_bus()
-            loop.quit()
+            loop_.quit()
             raise
         self.after_pipeline_start()
 
         self.before_loop_join()
         try:
-            loop.join()
+            loop_.join()
         finally:
             self.stop()
 
