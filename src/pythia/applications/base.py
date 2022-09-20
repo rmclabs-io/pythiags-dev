@@ -18,6 +18,7 @@ from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import Optional
+from typing import Protocol
 from typing import Type
 from typing import TypeVar
 from typing import Union
@@ -46,7 +47,57 @@ logger = getLogger(__name__)
 GST_DEBUG_DUMP_DOT_DIR = os.environ.get("GST_DEBUG_DUMP_DOT_DIR", None)
 
 
-class BackgroundLoop(Thread):
+class RunLoop(Protocol):
+    def join(self) -> None:
+        ...
+
+    def start(self) -> None:
+        ...
+
+    def quit(self) -> None:
+        ...
+
+
+class ForegroundLoop(RunLoop):
+    def __init__(self, loop: Optional[Loop] = None):
+        """Initialize a foreground glib loop.
+
+        Args:
+            loop: the loop to run. If not set, uses
+                :class:`GLib.MainLoop`
+
+        """
+        self._loop = loop
+
+    @property
+    def loop(self) -> GLib.MainLoop:
+        if not self._loop:
+            # frame = inspect.currentframe()
+            # if "typer" not in str(frame.f_back.f_back.f_back.f_back.f_back):
+            # breakpoint();print()  # TODO remove this
+            self._loop = GLib.MainLoop()
+        return self._loop
+
+    def start(self) -> None:
+        self.loop
+
+    def join(self) -> None:
+        # frame = inspect.currentframe()
+        # if "typer" not in str(frame.f_back.f_back.f_back):
+        #     breakpoint();print()  # TODO remove this
+        self.loop.run()
+
+    def quit(self) -> None:
+        # frame = inspect.currentframe()
+
+        # if "typer" not in  str(frame.f_back.f_back.f_back.f_back.f_back.f_back.f_back):
+        #     breakpoint();print()  # TODO remove this
+        print(f"{self.loop.is_running()=}\n" * 10, flush=True)
+        self.loop.quit()
+        print(f"{self.loop.is_running()=}\n" * 10, flush=True)
+
+
+class BackgroundThreadLoop(Thread, RunLoop):
     """Simple thread to run a loop without blocking."""
 
     def __init__(self, *args, loop: Optional[Loop] = None, **kwargs):
@@ -70,22 +121,6 @@ class BackgroundLoop(Thread):
     def quit(self) -> None:  # noqa: A003
         """Quit the running loop."""
         self._loop.quit()
-
-
-def ensure_loop(loop: Optional[Loop]) -> Loop:
-    """Return an existing loop.
-
-    Args:
-        loop: If set, the loop to return. Else, a new one is provieded.
-
-    Returns:
-        An exisitng loop, either the one received, or a new
-        `GLib.MainLoop`, if one is received.
-
-    """
-    if loop:
-        return loop
-    return GLib.MainLoop()
 
 
 BA = TypeVar("BA", bound="BaseApplication")
@@ -126,6 +161,8 @@ class BaseApplication:
     http://lazka.github.io/pgi-docs/index.html#Gst-1.0/flags.html#Gst.MessageType
 
     """
+
+    loop_cls: RunLoop = BackgroundThreadLoop
 
     def __init__(self, pipeline: BasePipeline) -> None:
         """Construct an application from a pipeline.
@@ -217,7 +254,7 @@ class BaseApplication:
                 raise RuntimeError("Unable to get Pipeline bus")
         return self._bus
 
-    def _before_pipeline_start(self, loop) -> BackgroundLoop:
+    def _before_pipeline_start(self, loop) -> RunLoop:
         """Call hook - run before pipeline start.
 
         Args:
@@ -233,7 +270,7 @@ class BaseApplication:
                 element.connect(signal, callback)
 
         self.connect_bus()
-        self.loop = BackgroundLoop(loop=loop)
+        self.loop = self.loop_cls(loop=loop)
         self.loop.start()
         self.before_pipeline_start()
         return self.loop
