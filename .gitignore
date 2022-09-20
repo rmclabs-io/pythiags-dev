@@ -3,15 +3,12 @@
 *.pyc
 typings/
 .vscode/
-.python-version
 *.jsonl
 .eggs
 assets*/
 data/
 **/*.log
 .eggs/
-tmp/
-2021*/labels
 .env
 poetry.toml
 dist/

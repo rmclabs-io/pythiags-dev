@@ -300,7 +300,7 @@ Alternatively, you could use `ghcr.io/rmclabs-io/pythia-dev` or
 
 Note: If running from docker, make sure you've properly configured the container and its
 environment, see the
-[dockerfile](https://docs.nvidia.com/metropolis/deepstream/dev-guide/text/DS_docker_containers.html#)
+[reference upstream](https://docs.nvidia.com/metropolis/deepstream/dev-guide/text/DS_docker_containers.html#)
 
 For more examples and tutorials, visit the
 [examples section](https://dev.rmclabs.io/pythia/docs/examples.html)
