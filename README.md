@@ -77,7 +77,7 @@ def gen_detections(batch_meta):
 * Create a file `pipeline.txt` with:
 
 ```
-uridecodebin
+uridecodebin3
   uri=file://{input}
 ! identity
   eos-after=30
@@ -363,6 +363,11 @@ Check out ongoing and future development [here](https://github.com/rmclabs-io/py
      ```
 
   * A: Add `--ipc=host` flag to docker run.
+
+* Q: Python segfaults when several applications are run subsequently:
+
+  * A: It seems to be a race condition produced by the `uridecodebin` element using
+    `nvjpegenc` (maybe others?). Try replacing `uridecodebin` with `uridecodebin3`.
 
 ## Contribute
 

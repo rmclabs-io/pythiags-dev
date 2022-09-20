@@ -7,6 +7,10 @@ Contains:
     A sink: display/file.
     At least one PythIA model.
 
+Note:
+    Although a one-shot uridecodebin usage seems to work, there seems to
+        be an issue with quickly subsequent runs, producing segfaults.
+
 """
 
 from __future__ import annotations
@@ -167,7 +171,7 @@ def clean_single_uri(uri: SourceUri) -> Tuple[dict, SourceUri]:
 
 
 class PythiaSource(PythiaSourceBase):
-    """Uridecodebin wrapper building block for a single source."""
+    """Uridecodebin3 wrapper building block for a single source."""
 
     @staticmethod
     def pop_pythia_args_from_uris(
@@ -203,7 +207,7 @@ class PythiaSource(PythiaSourceBase):
 
         return _(
             f"""\
-        uridecodebin
+        uridecodebin3
           uri={self.uris[0]}
         ! queue
         ! nvvideoconvert
@@ -256,7 +260,7 @@ class PythiaMultiSource(PythiaSourceBase):
         return extrema, uris_out
 
     def gst(self) -> str:
-        """Render from several uridecodebin up to nvmuxer.
+        """Render from several uridecodebin3 up to nvmuxer.
 
         Returns:
             Rendered string
@@ -271,7 +275,7 @@ class PythiaMultiSource(PythiaSourceBase):
         )
         text = "\n".join(
             f"""\
-            uridecodebin
+            uridecodebin3
               uri={self.uris[idx]}
             ! queue
             ! nvvideoconvert

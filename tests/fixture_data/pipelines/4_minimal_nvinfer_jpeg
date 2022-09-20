@@ -1,4 +1,5 @@
-uridecodebin uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.jpg
+uridecodebin3 uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.jpg
+! queue
 ! nvvideoconvert
 ! m.sink_0
 nvstreammux

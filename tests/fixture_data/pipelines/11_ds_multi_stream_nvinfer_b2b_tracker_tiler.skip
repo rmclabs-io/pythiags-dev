@@ -27,19 +27,19 @@ nvstreammux
 ! nvdsosd
 ! nvegltransform
 ! nveglglessink
-uridecodebin
+uridecodebin3
   uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.mp4
 ! nvvideoconvert
 ! m.sink_1
-uridecodebin
+uridecodebin3
   uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.mp4
 ! nvvideoconvert
 ! m.sink_2
-uridecodebin
+uridecodebin3
   uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.mp4
 ! nvvideoconvert
 ! m.sink_3
-uridecodebin
+uridecodebin3
   uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.mp4
 ! nvvideoconvert
 ! m.sink_0

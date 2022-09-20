@@ -1,4 +1,4 @@
-uridecodebin
+uridecodebin3
   uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.mp4
 ! m.sink_0
 nvstreammux

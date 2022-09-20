@@ -3,7 +3,7 @@
 from tests.paths import DS_STREAMS
 
 
-def test_temo():
+def temo():
     """Play a playbin pipeline.
 
     >>> from pythia import Demo
