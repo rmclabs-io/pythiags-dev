@@ -1,8 +1,11 @@
 """I want to quickly play an uri."""
 
+import pytest
+
 from tests.paths import DS_STREAMS
 
 
+@pytest.mark.usefixtures("_nvidia_cooldown")
 def test_demo():
     """Play a playbin pipeline.
 

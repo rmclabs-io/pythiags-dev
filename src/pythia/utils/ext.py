@@ -170,3 +170,6 @@ def remove_prefix(input_string: str, prefix: str) -> str:
     if prefix and input_string.startswith(prefix):
         return input_string[len(prefix) :]
     return input_string
+
+
+IS_JETSON = get_arch() == "aarch64"

@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+"""
+this file is meant to be executed from devcontainer build
+it is used to:
+* dynamically define devcontainer build args
+* setup docker in host (eg networks, groups)
+"""
+import os
+from pathlib import Path
+from platform import uname
+import re
+import subprocess as sp
+from shlex import split
+from shutil import copy
+
+def _run(cmd, **kw):
+    return sp.check_call(split(cmd), **kw)
+
+def _run_shell(cmd, **kw):
+    return sp.check_call(cmd, shell=True, **kw)
+
+def _stdout_shell(cmd, **kw):
+    return sp.check_output(cmd, text=True, shell=True, **kw).strip()
+
+HEADER = """\
+# Do not modify this file manually, it is automatically generated
+# from the devcontainer initializeCommand.
+#
+# To customize the dockerfile, modify `repo-root/docker/Dockerfile`
+# instead, then trigger a devcontainer rebuild.
+"""
+def _run_all():
+    kw={"env":{}}
+    _run_shell(
+      "docker network create pythia-network &> /tmp/nw-c "
+      "|| grep -q 'already exists' /tmp/nw-c"
+    )
+    display = ":"+_stdout_shell(
+      "ls /tmp/.X11-unix/X* | grep -Po '(?<=tmp/.X11-unix/X).*'"
+    )
+
+    suffix = "-l4t" if uname()[4] == "aarch64" else ""
+    base_image = f"nvcr.io/nvidia/deepstream{suffix}:6.1-samples"
+
+    docker_group_id = Path("/var/run/docker.sock").stat().st_gid
+
+    _run("xhost +", env={"DISPLAY":display})
+
+    devcontainer = Path(__file__).parent
+    root = devcontainer.parent
+    docker = root / "docker"
+    dst = devcontainer / ".Dockerfile"
+
+    copy(str(docker / "Dockerfile"), str(dst))
+    
+    raw = dst.read_text(encoding="utf-8")
+    for build_arg, value in {
+        "BASE_IMG": base_image,
+        "DOCKER_GROUP_ID": docker_group_id,
+    }.items():
+        # breakpoint();print()  # TODO remove this
+        raw = re.sub(f"(?:^|\\n)ARG {build_arg}\\n",f"\\nARG {build_arg}={value}\n",raw)
+    dst.write_text(
+      f"{HEADER}\n{raw}", encoding="utf-8"
+    )
+
+if __name__ == "__main__":
+    _run_all()

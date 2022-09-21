@@ -1,5 +1,7 @@
 uridecodebin
-  uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.jpg
+  uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.mp4
+! identity
+  eos-after=10
 ! nvvideoconvert
 ! m.sink_0 nvstreammux name=m
   batch-size=1
@@ -9,8 +11,6 @@ uridecodebin
   config-file-path=/opt/nvidia/deepstream/deepstream/samples/configs/deepstream-app/config_infer_primary.txt
   batch-size=1
   unique-id=1
-! identity
-  eos-after=10
 ! nvtracker
   ll-lib-file=/opt/nvidia/deepstream/deepstream/lib/libnvds_nvmultiobjecttracker.so
   ll-config-file=/opt/nvidia/deepstream/deepstream/sources/deepstream_python_apps/apps/deepstream-nvdsanalytics/config_tracker_NvDCF_perf.yml

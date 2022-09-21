@@ -4,12 +4,33 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from time import sleep
 from types import SimpleNamespace
+from typing import Generator
+from typing import Generic
+from typing import Literal
+from typing import Optional
+from typing import TypeVar
 
 import pytest
 
 from tests.paths import PEOPLESEGNET
 from tests.utils import docker_compose
+from tests.utils import IS_JETSON
+
+R = TypeVar("R")
+
+
+class Result(Generic[R]):  # noqa: C0115,R0903
+    def get_result(self) -> R:  # noqa: C0116
+        ...
+
+
+class Item(Generic[R]):  # noqa: C0115,R0903
+    report: Optional[R] = None
+
+
+Outcome = Literal["skipped", "passed", "failed"]
 
 
 @pytest.fixture
@@ -90,3 +111,57 @@ def setup_backend(request):
         if backend != "memory":
             docker_compose("kill")
             docker_compose("down")
+
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(
+    item: Item[Outcome],
+    call: pytest.CallInfo[None],  # noqa: W0613
+) -> Generator[None, Result[Outcome], None]:
+    """Inject test result to item node so its accesable by fixtures.
+
+    Args:
+        item: the current test invocation item.
+        call: Result/Exception info of a function invocation.
+
+    Yields:
+        Execute all other hooks to obtain the report object
+
+    See Also:
+        `_pytest.hookspec.pytest_runtest_makereport`
+        https://docs.pytest.org/en/7.1.x/reference/reference.html#pytest.hookspec.pytest_runtest_makereport
+        https://docs.pytest.org/en/7.1.x/example/simple.html?highlight=pytest_runtest_makereport#making-test-result-information-available-in-fixtures
+
+    """
+    outcome = yield
+    item.report = outcome.get_result()
+
+
+def _do_cooldown():
+    sleep(1)
+    if IS_JETSON:
+        sleep(5)
+
+
+@pytest.fixture
+def _nvidia_cooldown(request) -> Generator[None, None, None]:
+    """Force wait time to avoid segfault.
+
+    Args:
+        request: pytest fixture.
+
+    Yields:
+        None
+
+    Raises:
+        NotImplementedError: test outcome not handled.
+
+    """
+    yield
+    outcome = request.node.report.outcome
+    if outcome in ("skipped",):
+        return
+    if outcome in ("passed", "failed"):
+        _do_cooldown()
+        return
+    raise NotImplementedError

@@ -45,7 +45,7 @@ from pythia.utils.ext import remove_prefix
 from pythia.utils.ext import remove_suffix
 
 from tests.paths import README
-from tests.pytest.integration.producers_test import BackendChecker
+from tests.pytest.c_integration.producers_test import BackendChecker
 
 
 @pytest.fixture(name="readme_tree")
@@ -145,12 +145,12 @@ def test_gst_pylaunch(readme_examples, tmpdir):
 
 DETECTIONS_STREAM_URI = ("kafka:9092", "raw_detections")
 EVENTS_STREAM_URI = ("kafka:9092", "app_events")
-BACKEND_TIMEOUT = [
-    (
+BACKEND_TIMEOUT = {
+    "kafka": (
         "kafka://",
-        20,
+        30,
     ),
-]
+}
 
 
 @dataclass
@@ -159,7 +159,12 @@ class _MockKafkaBackend:
     stream: str
 
 
-@pytest.mark.parametrize("setup_backend", BACKEND_TIMEOUT, indirect=True)
+@pytest.mark.parametrize(
+    "setup_backend",
+    BACKEND_TIMEOUT.values(),
+    ids=BACKEND_TIMEOUT.keys(),
+    indirect=True,
+)
 def test_decorator(
     readme_examples,
     setup_backend: BackendChecker,

@@ -1,4 +1,11 @@
-ARG BASE_IMG
+# Do not modify this file manually, it is automatically generated
+# from the devcontainer initializeCommand.
+#
+# To customize the dockerfile, modify `repo-root/docker/Dockerfile`
+# instead, then trigger a devcontainer rebuild.
+
+
+ARG BASE_IMG=nvcr.io/nvidia/deepstream-l4t:6.1-samples
 
 FROM ${BASE_IMG} as deepstream_python_apps
 
@@ -117,7 +124,7 @@ LABEL org.label-schema.docker.cmd="docker run --rm -it -v /tmp/.X11-unix:/tmp/.X
 
 #region devcode - devconatiner base image
 FROM dev-common as dev-code
-ARG DOCKER_GROUP_ID
+ARG DOCKER_GROUP_ID=133
 COPY ./reqs/apt.devcontainer.list /tmp/deps/apt.devcontainer.list
 RUN apt-get update \
   && apt-get install --no-install-recommends -y \

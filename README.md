@@ -328,8 +328,9 @@ Check out ongoing and future development [here](https://github.com/rmclabs-io/py
      sudo jetson_clocks
      ```
 
-* Q: Program exits with error "Unable to get a Window, abort."
-  A: Make sure x11 is properly configured. This is common when running through ssh
+* Q: Program exits with error `Unable to get a Window, abort.`
+
+  * A: Make sure x11 is properly configured. This is common when running through ssh
      sessions. In most of the cases, this just means you need to have the `DISPLAY`
      environment variable correctly set. To list available displays, run the `w`
      command:
@@ -369,6 +370,17 @@ Check out ongoing and future development [here](https://github.com/rmclabs-io/py
   * A: It seems to be a race condition produced by the `uridecodebin` element using
     `nvjpegenc` (maybe others?). You can either add a timeout between runs (1 sec seems
     to do it), or change `nvjpegenc` - see `pythia.utils.gst:demote_plugin`.
+
+* Q: Python segfaults when several applications are run subsequently:
+
+  * A: It seems to be a race condition produced by the `uridecodebin` element using
+    `nvjpegenc` (maybe others?). You can either add a timeout between runs (1 sec seems
+    to do it), or change `nvjpegenc` - see `pythia.utils.gst:demote_plugin`.
+
+* Q: I am unable to build the devcontainer:
+
+  * A: Make sure to update the `devcontainer.json` with a proper `BASE_IMAGE` and
+    `DOCKER_GROUP_ID`.
 
 ## Contribute
 

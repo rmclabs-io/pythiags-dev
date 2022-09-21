@@ -13,6 +13,4 @@ nvstreammux
   batch-size=1
   unique-id=1
   name=pgie
-! identity
-  eos-after=10
 ! fakesink

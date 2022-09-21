@@ -51,7 +51,7 @@ jobs:
           DISPLAY: :0
 
       - name: Run Code Style - Lint
-        if: ${{ !matrix.runner.platform != 'jetson' }}
+        if: ${{ matrix.runner.platform == 'gpu' }}
         id: lint
         run: |
           docker exec ${{ env.CONTAINER_NAME }} ./scripts/lint
@@ -97,7 +97,7 @@ jobs:
           path: ./reports/coverage.xml
 
       - name: Comment coverage Results
-        if: github.event_name == 'pull_request' && (matrix.runner.platform == 'jetson')
+        if: github.event_name == 'pull_request' && (matrix.runner.platform == 'gpu')
         uses: 5monkeys/cobertura-action@master
         with:
           path: reports/coverage.xml
@@ -105,7 +105,7 @@ jobs:
           minimum_coverage: 0
 
       - name: Deploy Staging Docs
-        if: ${{ !startsWith(github.ref, 'refs/tags') && (matrix.runner.platform == 'jetson')}}
+        if: ${{ !startsWith(github.ref, 'refs/tags') && (matrix.runner.platform == 'gpu')}}
         uses: JamesIves/github-pages-deploy-action@4.0.0
         with:
           branch: staging
@@ -122,7 +122,7 @@ jobs:
           cat ref
 
       - name: Deploy Production Docs
-        if: ${{ startsWith(github.ref, 'refs/tags') && (matrix.runner.platform == 'jetson')}}
+        if: ${{ startsWith(github.ref, 'refs/tags') && (matrix.runner.platform == 'gpu')}}
         uses: JamesIves/github-pages-deploy-action@4.0.0
         with:
           branch: master
@@ -157,7 +157,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Release Asset
-        if: ${{ startsWith(github.ref, 'refs/tags') && (matrix.runner.platform == 'jetson') }}
+        if: ${{ startsWith(github.ref, 'refs/tags') && (matrix.runner.platform == 'gpu') }}
         uses: AButler/upload-release-assets@v2.0
         with:
           files: 'dist/*'
@@ -165,7 +165,7 @@ jobs:
           release-tag: ${{ github.ref_name }}
 
       - name: Publish package to PyPI
-        if: ${{ startsWith(github.ref, 'refs/tags') && (matrix.runner.platform == 'jetson') }}
+        if: ${{ startsWith(github.ref, 'refs/tags') && (matrix.runner.platform == 'gpu') }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_TOKEN }}

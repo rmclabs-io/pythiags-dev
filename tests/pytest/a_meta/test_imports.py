@@ -21,7 +21,10 @@ def pythia_submodules() -> Iterator[Path]:
     return Path(pythia.__file__).parent.glob("**/*.py")
 
 
-@pytest.mark.parametrize("path", pythia_submodules())
+SUBMODULES = {path.stem: path for path in pythia_submodules()}
+
+
+@pytest.mark.parametrize("path", SUBMODULES.values(), ids=SUBMODULES.keys())
 def test_importable(path: Path):
     """Validate python file syntax by importing it as a module.
 

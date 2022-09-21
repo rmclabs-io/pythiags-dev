@@ -1,0 +1,33 @@
+nvstreammux
+  name=m 
+  batch-size=4
+  width=1280
+  height=720
+  batched-push-timeout=66666
+! nvmultistreamtiler
+  rows=2
+  columns=2
+  width=1280
+  height=720
+! fakesink
+uridecodebin
+  uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.mp4
+! nvvideoconvert
+! queue
+! m.sink_1
+uridecodebin
+  uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.mp4
+! nvvideoconvert
+! queue
+! m.sink_2
+uridecodebin
+  uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.mp4
+! nvvideoconvert
+! queue
+! m.sink_3
+uridecodebin
+  uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.mp4
+! identity
+  eos-after=1
+! nvvideoconvert
+! m.sink_0

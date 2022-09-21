@@ -17,11 +17,11 @@ from pythia.utils.gst import gst_init
 
 from tests.paths import FIXTURE_PIPELINES
 
-BACKEND_TIMEOUT = [
-    ("redis://redis:6379?stream=raw_detections", 5),
-    ("kafka://kafka:9092?stream=raw_detections", 20),
-    ("memory://?stream=raw_detections", 0),
-]
+BACKEND_TIMEOUT = {
+    "memory": ("memory://?stream=raw_detections", 0),
+    "redis": ("redis://redis:6379?stream=raw_detections", 5),
+    "kafka": ("kafka://kafka:9092?stream=raw_detections", 30),
+}
 
 
 class BackendChecker(Protocol):  # noqa: R0903, C0115
@@ -32,7 +32,12 @@ class BackendChecker(Protocol):  # noqa: R0903, C0115
         ...
 
 
-@pytest.mark.parametrize("setup_backend", BACKEND_TIMEOUT, indirect=True)
+@pytest.mark.parametrize(
+    "setup_backend",
+    BACKEND_TIMEOUT.values(),
+    indirect=True,
+    ids=BACKEND_TIMEOUT.keys(),
+)
 def test_producer_working(setup_backend: BackendChecker) -> None:
     """Use generator probe to forward messages to event stream backend.
 

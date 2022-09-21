@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TypedDict
 
 import pyds
+import pytest
 
 from pythia import Application
 from pythia.iterators import frames_per_batch
@@ -39,6 +40,7 @@ class _App(Application):
         self.client = _MockClient()
 
 
+@pytest.mark.usefixtures("_nvidia_cooldown")
 def test_decorator_working() -> None:
     """Define a probe using a single."""
     pipeline = (FIXTURE_PIPELINES / "4_minimal_nvinfer_jpeg").read_text()

@@ -1,0 +1,5 @@
+videotestsrc
+   num-buffers=10
+! nvvideoconvert
+! video/x-raw(memory:NVMM)
+! nveglglessink

@@ -1,16 +1,16 @@
 uridecodebin
   uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.mp4
+! identity
+  eos-after=30
 ! m.sink_0
 nvstreammux
   name=m
   width=1280
   height=720
   batch-size=1
-  nvbuf-memory-type=3
-! identity
-  eos-after=30
 ! nvinfer
   config-file-path=/opt/nvidia/deepstream/deepstream/samples/models/peoplesegnet/pgie.conf
+  unique-id=1
 ! nvvideoconvert
 ! nvdsosd
   display-mask=1
@@ -20,4 +20,4 @@ nvstreammux
 ! x264enc
 ! mp4mux
 ! filesink
-  location=video.mp4
+  location=/tmp/video.mp4

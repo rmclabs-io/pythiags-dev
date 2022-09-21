@@ -1,4 +1,3 @@
 videotestsrc
-! identity
-  eos-after=10
+  num-buffers=10
 ! fakesink

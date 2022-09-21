@@ -5,12 +5,12 @@ import pytest
 
 from pythia.cli.app import EXTRACTOR_PARSER
 
-test_strings = [
-    "my_module:my_function@pgie.src",
-    "my_module.py:my_function@pgie.sink",
-    "my.module:my_function@pgie.src",
-    "my/module.py:my_function@pgie.src",
-]
+TEST_STRINGS = {
+    "module": "my_module:my_function@pgie.src",
+    "path": "my_module.py:my_function@pgie.sink",
+    "submodule": "my.module:my_function@pgie.src",
+    "subpath": "my/module.py:my_function@pgie.src",
+}
 
 
 @pytest.fixture(name="extractor_parser_re")
@@ -24,7 +24,9 @@ def extractor_parser_re_() -> re.Pattern:
     return re.compile(EXTRACTOR_PARSER, flags=re.MULTILINE)
 
 
-@pytest.mark.parametrize("test_str", test_strings)
+@pytest.mark.parametrize(
+    "test_str", TEST_STRINGS.values(), ids=TEST_STRINGS.keys()
+)
 def test_parse_extractors_good_from_cli(extractor_parser_re, test_str) -> None:
     """Check correctly defined cli extractors.
 

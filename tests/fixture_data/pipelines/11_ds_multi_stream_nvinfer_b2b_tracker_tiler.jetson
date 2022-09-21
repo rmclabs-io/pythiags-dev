@@ -3,6 +3,7 @@ nvstreammux
   batch-size=4
   width=1280
   height=720
+  batched-push-timeout=66666
 ! nvinfer
   config-file-path=/opt/nvidia/deepstream/deepstream/samples/configs/deepstream-app/config_infer_primary.txt
   batch-size=4
