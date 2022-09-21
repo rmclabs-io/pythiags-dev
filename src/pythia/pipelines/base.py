@@ -171,7 +171,7 @@ def clean_single_uri(uri: SourceUri) -> Tuple[dict, SourceUri]:
 
 
 class PythiaSource(PythiaSourceBase):
-    """Uridecodebin3 wrapper building block for a single source."""
+    """Uridecodebin wrapper building block for a single source."""
 
     @staticmethod
     def pop_pythia_args_from_uris(
@@ -207,7 +207,7 @@ class PythiaSource(PythiaSourceBase):
 
         return _(
             f"""\
-        uridecodebin3
+        uridecodebin
           uri={self.uris[0]}
         ! queue
         ! nvvideoconvert
@@ -260,7 +260,7 @@ class PythiaMultiSource(PythiaSourceBase):
         return extrema, uris_out
 
     def gst(self) -> str:
-        """Render from several uridecodebin3 up to nvmuxer.
+        """Render from several uridecodebin up to nvmuxer.
 
         Returns:
             Rendered string
@@ -275,7 +275,7 @@ class PythiaMultiSource(PythiaSourceBase):
         )
         text = "\n".join(
             f"""\
-            uridecodebin3
+            uridecodebin
               uri={self.uris[idx]}
             ! queue
             ! nvvideoconvert

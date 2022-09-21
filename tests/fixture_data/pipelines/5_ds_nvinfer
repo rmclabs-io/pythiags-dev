@@ -1,4 +1,4 @@
-uridecodebin3
+uridecodebin
   uri=file:///opt/nvidia/deepstream/deepstream/samples/streams/sample_720p.jpg
 ! nvvideoconvert
 ! m.sink_0

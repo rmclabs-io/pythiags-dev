@@ -8,7 +8,9 @@ class _Demo(CliApplication):
     @classmethod
     def _play(cls, uri: str, *, background: bool = False) -> None:
         gst_init()
-        app = cls.from_pipeline_string(f"playbin uri={uri}")
+        app = cls.from_pipeline_string(
+            f"uridecodebin uri={uri} ! nveglglessink"
+        )
         if background:
             raise NotImplementedError("background mode not yet supported")
         app()

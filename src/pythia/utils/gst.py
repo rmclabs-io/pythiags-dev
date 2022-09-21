@@ -171,6 +171,31 @@ def element_repr(element: Gst.Object) -> str:
     return string
 
 
+def demote_plugin(element: str):
+    """Lower a plugin's rank after the last one.
+
+    Use this to enforce playback elements (eg `uridecodebin`) to use
+    another element instead of the one its currently choosing
+
+    Args:
+        element: name of the `Gst.Element` to demote its rank.
+
+    Raises:
+        NameError: Unable to retrieve element factory.
+
+    """
+    gst_init()
+    target_element = Gst.ElementFactory.find(element)
+    if not target_element:
+        raise NameError(f"Unable to fins {element} factory")
+    factories = Gst.ElementFactory.list_get_elements(
+        Gst.ELEMENT_FACTORY_TYPE_ANY,  # type: ignore[arg-type]
+        Gst.Rank.MARGINAL,  # type: ignore[arg-type]
+    )
+    lowest_rank = min(factories, key=lambda f: f.get_rank()).get_rank()
+    target_element.set_rank(lowest_rank - 1)
+
+
 __all__ = [
     "GLib",
     "Gst",

@@ -28,7 +28,7 @@ from tests.utils import IS_JETSON
 from tests.utils import roundup
 
 PIPELINE = f"""
-uridecodebin3 uri=file://{DS_SAMPLES}/streams/sample_720p.jpg
+uridecodebin uri=file://{DS_SAMPLES}/streams/sample_720p.jpg
 ! m.sink_0
 nvstreammux
   name=m width=1280 height=720 batch-size=1

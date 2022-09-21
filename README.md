@@ -77,7 +77,7 @@ def gen_detections(batch_meta):
 * Create a file `pipeline.txt` with:
 
 ```
-uridecodebin3
+uridecodebin
   uri=file://{input}
 ! identity
   eos-after=30
@@ -367,7 +367,8 @@ Check out ongoing and future development [here](https://github.com/rmclabs-io/py
 * Q: Python segfaults when several applications are run subsequently:
 
   * A: It seems to be a race condition produced by the `uridecodebin` element using
-    `nvjpegenc` (maybe others?). Try replacing `uridecodebin` with `uridecodebin3`.
+    `nvjpegenc` (maybe others?). You can either add a timeout between runs (1 sec seems
+    to do it), or change `nvjpegenc` - see `pythia.utils.gst:demote_plugin`.
 
 ## Contribute
 
