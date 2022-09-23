@@ -1,3 +1,9 @@
+## 1.2.2 (2022-09-23)
+
+### Fix
+
+- **event_stream/log**: default stream to Path if not in stdin/stdout
+
 ## 1.2.1 (2022-09-23)
 
 ## 1.2.0 (2022-09-23)
