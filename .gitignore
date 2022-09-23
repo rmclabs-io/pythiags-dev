@@ -20,3 +20,4 @@ reports/
 .CURRENT_TAG
 .bkp
 trt-docker-export/
+.mypy_cache
