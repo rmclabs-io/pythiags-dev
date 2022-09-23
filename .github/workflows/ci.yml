@@ -77,6 +77,7 @@ jobs:
           rm -rf docs
           docker cp ${{ env.CONTAINER_NAME }}:/opt/rmclabs/pythia/docs docs
           touch docs/_build/html/.nojekyll
+          rm docs/_build/html/development/coverage/.gitignore
           docker cp ${{ env.CONTAINER_NAME }}:/opt/rmclabs/pythia/reports reports
           docker cp ${{ env.CONTAINER_NAME }}:/opt/rmclabs/pythia/dist dist
           export WHEEL=`ls dist | grep whl | tail -n1` \
