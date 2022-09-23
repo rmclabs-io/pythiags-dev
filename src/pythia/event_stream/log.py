@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from pythia.applications.annotation import _DumpLogger
 from pythia.applications.annotation import _make_logger
 from pythia.event_stream.base import Backend as Base
@@ -26,6 +28,8 @@ class Backend(Base):
 
     def connect(self) -> None:
         """Fetch stream-specific deque from global container."""
+        if self.stream not in ("stdout", "stderr"):
+            self.stream = Path(self.stream)
         self._logger = _make_logger(type(self).__qualname__, self.stream)
 
     def post(self, data) -> None:
