@@ -1,9 +1,7 @@
 # Developers corner
 
-asdjhf aksdf'asd 
-fa scrollingd faasd
-f 
-asd 
+Welcome to the developers corner! Here you'll find information about the setup,
+development, testing, and design for pythia.
 
 ```{toctree}
 development/pytest_.rst

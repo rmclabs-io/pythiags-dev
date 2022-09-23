@@ -289,9 +289,22 @@ examples.
 
 #### docker
 
+* `docker login ghcr.io` (See instructions [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry))
 * `docker pull ghcr.io/rmclabs-io/pythia` or `ghcr.io/rmclabs-io/pythia-l4t`
 * Build your image using `FROM ghcr.io/rmclabs-io/pythia` or
   `FROM ghcr.io/rmclabs-io/pythia-l4t`
+
+NOTE: `latest` tag is deliberately not published.
+
+* run docker with the following flags at least:
+
+  ```console
+  $ docker run \
+    --gpus=all \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e DISPLAY \
+    ghcr.io/rmclabs-io/pythia-dev:1.2.1
+  ```
 
 Alternatively, you could use `ghcr.io/rmclabs-io/pythia-dev` or
 `FROM ghcr.io/rmclabs-io/pythia-l4t-dev`.
