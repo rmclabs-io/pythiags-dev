@@ -50,12 +50,6 @@ jobs:
         env:
           DISPLAY: :0
 
-      - name: Run Code Style - Format
-        id: format
-        run: |
-          docker exec ${{ env.CONTAINER_NAME }} pre-commit clean
-          docker exec ${{ env.CONTAINER_NAME }} ./scripts/format
-
       - name: Run Code Style - Lint
         if: ${{ !matrix.runner.platform != 'jetson' }}
         id: lint
