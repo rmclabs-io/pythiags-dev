@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from py._path.local import LocalPath
 
 from pythia import AnnotateFramesBase
@@ -133,11 +134,12 @@ EXPECTED_BASE_JETSON = [{0: [{'person': 0.8086320161819458}, {'person': 0.978913
 # fmt: on
 
 
+@pytest.mark.usefixtures("_nvidia_cooldown")
 def test_annotate_frames_base(
     tmpdir: LocalPath | Path,
     peoplesegnet: Path,
-):  # noqa: DAR101
-    """Check if the base annotator is able to call the probe."""
+):
+    """Check if the base annotator is able to call the probe."""  # noqa: DAR101,C0301
 
     input_frame = Path(DS_STREAMS / "sample_720p.jpg")
     src = f"file://{input_frame}?muxer_width=1280&muxer_height=720"
