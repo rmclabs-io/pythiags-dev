@@ -1,3 +1,9 @@
+## 1.2.3 (2022-09-23)
+
+### Fix
+
+- **docker**: include peoplesegnet & trt patch
+
 ## 1.2.2 (2022-09-23)
 
 ### Fix
