@@ -26,6 +26,7 @@ RUN cd /opt/nvidia/deepstream/deepstream/sources/ \
   \
   && scripts/install trt \
   && scripts/install peoplesegnet
+
 #region common - shared between prod-builder and dev
 FROM deepstream_python_apps as common 
 
@@ -46,21 +47,43 @@ ENV VIRTUAL_ENV="/opt/rmclabs/pythia-venv" \
 WORKDIR /opt/rmclabs/pythia
 #endregion common
 
-#region build - intermadiate stage for production
-FROM common as build
+#endregion poetry
+FROM common as poetry
 
-COPY ./reqs/apt.build.list /tmp/deps/apt.build.list
-RUN apt-get update \
-  && apt-get install --no-install-recommends -y \
-  $(cat /tmp/deps/apt.build.list | tr '\n' ' ') \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+ARG POETRY_HOME=/opt/poetry
+ARG POETRY_NO_INTERACTION=1
+
+ENV PATH="$POETRY_HOME/bin:$PATH"
+
+RUN curl -sSL https://install.python-poetry.org | python3
+
+#region poetry
+
+#region build - intermediate stage for production
+
+FROM poetry as reqsprod
+COPY ./pyproject.toml ./poetry.lock  ./
+RUN poetry export \
+  --format=requirements.txt \
+  --without-hashes \
+  -E cli \
+  -E jinja \
+  -E opencv \
+  -E redis \
+  -E kafka \
+  -o /tmp/requirements.prod.txt
+
+
+FROM common as build
 
 WORKDIR /opt/rmclabs/pythia
 
-ADD ./src/ ./pyproject.toml ./poetry.lock README.md ./
+COPY --from=reqsprod /tmp/requirements.prod.txt /tmp/requirements.prod.txt
+RUN pip install -r /tmp/requirements.prod.txt
+
+ADD pyproject.toml poetry.lock README.md ./
 ADD ./src ./src
-RUN pip install --no-cache-dir .[cli]
+RUN pip install --no-cache-dir .[cli,jinja,opencv,redis,kafka]
 
 #endregion build
 
@@ -91,22 +114,32 @@ LABEL org.label-schema.docker.cmd="docker run --rm -it -v /tmp/.X11-unix:/tmp/.X
 #endregion prod
 
 #region dev - development image
-FROM common as dev-common
 
-ARG POETRY_HOME=/opt/poetry
-ARG POETRY_NO_INTERACTION=1
-
-ENV PATH="$POETRY_HOME/bin:$PATH"
-
-RUN curl -sSL https://install.python-poetry.org | python3
+FROM poetry as reqsdev
 COPY ./pyproject.toml ./poetry.lock  ./
+RUN poetry export \
+  --format=requirements.txt \
+  --without-hashes \
+  --with=dev \
+  -E cli \
+  -E jinja \
+  -E opencv \
+  -E redis \
+  -E kafka \
+  -o /tmp/requirements.withextras.txt
 
-RUN poetry install --no-root
+FROM poetry as dev-common
+COPY --from=reqsdev /tmp/requirements.withextras.txt /tmp/requirements.withextras.txt
+RUN pip install -r /tmp/requirements.withextras.txt
 
-ADD ./pyproject.toml ./poetry.lock README.md ./
-ADD ./src ./src
-RUN poetry install -E cli -E jinja -E opencv -E redis -E kafka
+ADD ./pyproject.toml ./poetry.lock  ./
+RUN mkdir -p src/pythia \
+  && touch src/pythia/__init__.py \
+  && touch README.md \
+  && poetry install --all-extras
+
 COPY . .
+RUN poetry install --all-extras
 
 FROM dev-common as dev
 ARG VCS_REF
