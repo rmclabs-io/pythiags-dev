@@ -42,12 +42,16 @@ jobs:
             poetry==1.2.0
 
       - name: "Bump: commit and tag"
+        id: bump_commit
         run: |
           ./scripts/bump \
           && export INCOMING_TAG=`cz version --project` \
-          && echo "INCOMING_TAG=${INCOMING_TAG}" >> "$GITHUB_ENV"
+          && echo "INCOMING_TAG=${INCOMING_TAG}" >> "$GITHUB_ENV" \
+          && echo "::set-output name=should_bump::yes" \
+          || echo "::set-output name=should_bump::no"
 
       - name: "Bump: Push"
+        if: ${{ steps.bump_commit.outputs.should_bump == 'yes'}}
         run: |
           export REMOTE_REPO="https://${{ github.actor }}:${{ secrets.CR_PAT }}@github.com/${{ github.repository }}.git" \
           && export CURRENT_BRANCH="$(git branch --show-current)" \
@@ -55,6 +59,7 @@ jobs:
           && git push "$REMOTE_REPO" "HEAD:${CURRENT_BRANCH}" --tags
 
       - name: Release
+        if: ${{ steps.bump_commit.outputs.should_bump == 'yes'}}
         uses: softprops/action-gh-release@v1
         with:
           body_path: "incoming-changelog.md"
