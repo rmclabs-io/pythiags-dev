@@ -10,6 +10,22 @@ LABEL org.label-schema.vcs-url="https://github.com/rmclabs-io/pythiags"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+COPY ./reqs/apt.dpa.list /tmp/deps/apt.dpa.list
+RUN apt-get update \
+  && apt-get install --no-install-recommends -y \
+  $(cat /tmp/deps/apt.dpa.list | tr '\n' ' ') \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* \
+  && rm -rf /tmp/deps
+RUN cd /opt/nvidia/deepstream/deepstream/sources/ \
+  && git clone \
+  -b feat/iterators \
+  https://github.com/rmclabs-io/deepstream_python_apps \
+  && cd deepstream_python_apps \
+  && git checkout e93472f9b9e7cfeaaa45ad32a0b2fe6ba7f7bf05 \
+  \
+  && scripts/install trt \
+  && scripts/install peoplesegnet
 #region common - shared between prod-builder and dev
 FROM deepstream_python_apps as common 
 
@@ -76,16 +92,6 @@ LABEL org.label-schema.docker.cmd="docker run --rm -it -v /tmp/.X11-unix:/tmp/.X
 
 #region dev - development image
 FROM common as dev-common
-
-RUN cd /opt/nvidia/deepstream/deepstream/sources/ \
-  && git clone \
-  -b feat/iterators \
-  https://github.com/rmclabs-io/deepstream_python_apps \
-  && cd deepstream_python_apps \
-  && git checkout e93472f9b9e7cfeaaa45ad32a0b2fe6ba7f7bf05 \
-  \
-  && scripts/install trt \
-  && scripts/install peoplesegnet
 
 ARG POETRY_HOME=/opt/poetry
 ARG POETRY_NO_INTERACTION=1

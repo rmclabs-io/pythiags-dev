@@ -10,10 +10,10 @@ readme = "README.md"
 packages = [
     { include = "pythia", from = "src" },
 ]
+
 repository = "https://github.com/rmclabs-io/pythia"
 homepage = "https://dev.rmclabs.io/pythia"
 documentation = "https://rmclabs-io.github.io/pythia-docs/"
-
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/rmclabs-io/pythia/issues"
@@ -41,8 +41,6 @@ jinja = ["Jinja2"]
 opencv = ["opencv-python"]
 kafka = ["kafka-python"]
 redis = ["redis"]
-
-
 
 [tool.poetry.scripts]
 gst-pylaunch = "pythia.cli.app:app"
