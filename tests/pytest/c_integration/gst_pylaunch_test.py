@@ -18,12 +18,6 @@ ALL_PIPELINES = sorted(
     (
         p
         for p in FIXTURE_PIPELINES.rglob("[0-9]*_*")
-        if p.stem[:3]
-        in (
-            "10_",
-            "11_",
-            "12_",
-        )
     ),
     key=_natural_sort_path,  # type: ignore[arg-type]
 )
@@ -51,7 +45,9 @@ def test_run_pipeline_test(monkeypatch, pipeline_file: Path):
     skip_known_description = KNOWN_ISSUES.get(pipeline_file.name, False)
     if skip_known_description:
         pytest.skip(
-            "Known pipeline with issues. " f"Reason: {skip_known_description}"
+            f"Known pipeline with issues '{pipeline_file.name}'. "
+            f"Reason: {skip_known_description}"
+
         )
     if not IS_JETSON and (pipeline_file.suffix == ".jetson"):
         pytest.skip(
