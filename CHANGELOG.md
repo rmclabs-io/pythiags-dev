@@ -1,3 +1,9 @@
+## 1.2.4 (2022-09-28)
+
+### Fix
+
+- **tracker**: allow pipelines with nvtracker to run
+
 ## 1.2.3 (2022-09-23)
 
 ### Fix
