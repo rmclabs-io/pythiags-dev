@@ -278,7 +278,7 @@ examples.
 * One of
   - recent docker (with support `--gpus=all`)
   - `nvidia-docker` installed,
-  - environment with deepstream 6.1 and [these bindings](https://github.com/rmclabs.io/deepstream_python_apps)
+  - environment with deepstream 6.1.1 and [these bindings](https://github.com/rmclabs.io/deepstream_python_apps)
 
 
 ### Install

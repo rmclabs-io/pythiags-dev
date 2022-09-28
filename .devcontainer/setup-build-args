@@ -40,7 +40,7 @@ def _run_all():
     )
 
     suffix = "-l4t" if uname()[4] == "aarch64" else ""
-    base_image = f"nvcr.io/nvidia/deepstream{suffix}:6.1-samples"
+    base_image = f"nvcr.io/nvidia/deepstream{suffix}:6.1.1-samples"
 
     docker_group_id = Path("/var/run/docker.sock").stat().st_gid
 

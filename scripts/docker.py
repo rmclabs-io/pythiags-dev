@@ -45,7 +45,7 @@ docker run \
   -v {pwd}/docker/trt-oss-install.sh:/tmp/entrypoint \
   -v {pwd}/trt-docker-export:/docker-export \
   --entrypoint /tmp/entrypoint \
-  nvcr.io/nvidia/deepstream:6.1-devel
+  nvcr.io/nvidia/deepstream:6.1.1-devel
 "
 """.format(
     pwd=PROJECT_ROOT, container="trt-oss-installer"
@@ -272,7 +272,7 @@ def get_args() -> argparse.Namespace:
     args, extra = parser.parse_known_args()
 
     args.BASE_IMG = (
-        "nvcr.io/nvidia/deepstream{arch}:6.1-samples".format(  # noqa: C0209
+        "nvcr.io/nvidia/deepstream{arch}:6.1.1-samples".format(  # noqa: C0209
             arch=(args.arch != "x86_64") and "-l4t" or ""
         )
     )

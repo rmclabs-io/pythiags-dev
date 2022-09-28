@@ -1,4 +1,6 @@
 """Test external cli funcionality."""
+from __future__ import annotations
+
 from pathlib import Path
 
 import pytest
@@ -15,16 +17,12 @@ def _natural_sort_path(path: Path) -> int:
 
 
 ALL_PIPELINES = sorted(
-    (
-        p
-        for p in FIXTURE_PIPELINES.rglob("[0-9]*_*")
-    ),
+    (p for p in FIXTURE_PIPELINES.rglob("[0-9]*_*")),
     key=_natural_sort_path,  # type: ignore[arg-type]
 )
 
-KNOWN_ISSUES = {
-    "10_ds_single_stream_nvinfer_b2b_tracker_tiler.jetson": "tracker not working in jetson",  # noqa: C0301
-    "11_ds_multi_stream_nvinfer_b2b_tracker_tiler.jetson": "tracker not working in jetson",  # noqa: C0301
+KNOWN_ISSUES: dict[str, str] = {
+    # example: "10_ds_single_stream_nvinfer_b2b_tracker_tiler.jetson": "tracker not working in jetson",  # noqa: C0301
 }
 
 
@@ -47,7 +45,6 @@ def test_run_pipeline_test(monkeypatch, pipeline_file: Path):
         pytest.skip(
             f"Known pipeline with issues '{pipeline_file.name}'. "
             f"Reason: {skip_known_description}"
-
         )
     if not IS_JETSON and (pipeline_file.suffix == ".jetson"):
         pytest.skip(
