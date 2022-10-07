@@ -1,3 +1,9 @@
+## 1.3.0 (2022-10-07)
+
+### Feat
+
+- support for analytics and tracker
+
 ## 1.2.4 (2022-09-28)
 
 ### Fix
