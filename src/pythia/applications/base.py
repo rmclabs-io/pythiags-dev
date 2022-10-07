@@ -542,6 +542,7 @@ def _build_probe(probe, backend_uri: Optional[EventStreamUri] = None):
                 " Defaulting to '%s'",
                 backend_uri,
             )
+
     is_bound = hasattr(probe, "__self__")
 
     batch_meta_idx = _get_probe_batch_meta_idx(signature)

@@ -566,7 +566,7 @@ class BasePipeline(HasConnections, abc.ABC):
                     f"Analytics requires at least 1 InferenceEngine."
                     f" Found {len(self.models)}."
                 )
-            if self.analytics.requires_tracker and (self.tracker is None):
+            if self.analytics.requires_tracker() and (self.tracker is None):
                 raise IncompatiblePipelineError(
                     "Current Analytics spec requires at least Tracker, "
                     "but none found."
@@ -627,6 +627,7 @@ class BasePipeline(HasConnections, abc.ABC):
             RuntimeError: Unable to play the pipeline.
 
         """
+        self.validate()
         result = self.pipeline.set_state(Gst.State.PLAYING)
         if result is Gst.StateChangeReturn.FAILURE:
             self.stop()
@@ -752,10 +753,14 @@ class Pipeline(BasePipeline):
             )
 
         sink = self.sink.gst()
+        tracker = self.tracker.gst() if self.tracker else None
+        analytics = self.analytics.gst() if self.analytics else None
         return _(
             f"""
             {source}
-            {'! '+models if models else ''}
+            {'! ' + models if models else ''}
+            {'! ' + tracker if tracker else ''}
+            {'! ' + analytics if analytics else ''}
             ! {sink}
         """
         )

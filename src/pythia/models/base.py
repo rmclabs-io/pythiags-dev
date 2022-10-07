@@ -426,25 +426,24 @@ class Tracker(HasConnections):
             _default_props=props,
         )
 
-    def gst(self, name: str, **kw: str) -> str:
+    def gst(self, **kwargs: str) -> str:
         """Render nvtracker element with `gst-launch`-like syntax.
 
         Args:
-            name: gst element name
-            kw: property name and value for the gst element
+            kwargs: Additional gst element properties.
 
         Returns:
             Rendered string.
 
         Raises:
-            FileNotFoundError: Tracker ll-config-file not found.
+            FileNotFoundError: Tracker `ll-config-file` not found.
 
         See Also:
             https://docs.nvidia.com/metropolis/deepstream/dev-guide/text/DS_plugin_gst-nvtracker.html#gst-properties
 
         """
         inline_props = json.loads(json.dumps(self._default_props))
-        inline_props.update(kw)
+        inline_props.update(kwargs)
         props = "\n".join(
             f"{k.replace('_', '-')}={v}" for k, v in inline_props.items()
         )
@@ -459,7 +458,6 @@ class Tracker(HasConnections):
             nvtracker
               ll-config-file={self.config_file}
               ll-lib-file={self.low_level_library}
-              name={name}
               {props}
         """
         )
@@ -475,12 +473,11 @@ class Analytics(HasConnections):
     _default_props: Dict[str, str] = field(default_factory=dict)
     CONNECTIONS: Con = field(default_factory=dict)  # noqa: C0103
 
-    def gst(self, name: str = "analytics", **kw: str) -> str:
+    def gst(self, **kwargs: str) -> str:
         """Render string as `gst-launch`-like parseable string.
 
         Args:
-            name: Gst element name.
-            kw: Mapping to define additional properties.
+            kwargs: Additional gst element properties.
 
         Returns:
             Rendered `nvdsanalytics`.
@@ -490,7 +487,7 @@ class Analytics(HasConnections):
 
         """
         inline_props = json.loads(json.dumps(self._default_props))
-        inline_props.update(kw)
+        inline_props.update(kwargs)
         props = "\n".join(
             f"{k.replace('_', '-')}={v}" for k, v in inline_props.items()
         )
@@ -498,10 +495,10 @@ class Analytics(HasConnections):
             f"""\
             nvdsanalytics
               config-file={self.config_file}
-              name={name}
               {props}
         """
         )
+
         return self._string
 
     def requires_tracker(self) -> bool:
@@ -512,7 +509,18 @@ class Analytics(HasConnections):
                 direction andata.
 
         """
-        return True
+        config = configparser.ConfigParser()
+        config.read(str(self.config_file))
+        for section_name in config.sections():
+            if any(
+                section_name.startswith(pattern)
+                for pattern in (
+                    "line-crossing",
+                    "direction-detection",
+                )
+            ):
+                return True
+        return False
 
     @classmethod
     def from_file(cls: Type[A], config_file: Path) -> A:
