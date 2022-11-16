@@ -15,7 +15,7 @@ jobs:
 
     # avoid re-triggering on bump commits
     # NOTE: keep in sync with tool.commitizen.bump_message in pyproject.toml!!!
-    if: "!startsWith(github.event.head_commit.message, 'release:')"
+    if: "(github.repository  == 'rmclabs-io/pythiags') && !startsWith(github.event.head_commit.message, 'release:')"
 
     steps:
       - name: Check out

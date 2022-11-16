@@ -8,6 +8,7 @@ on:
 
 jobs:
   build-test-report-publish:
+    if: ${{ github.repository  == 'rmclabs-io/pythiags' }}
     strategy:
       matrix:
         runner:

@@ -1,0 +1,28 @@
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  pr-from-master:
+    if: ${{ github.repository  == 'rmclabs-io/pythiags-dev' }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout public
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: 'master'
+
+    - name: Override public master with private on push
+      run: |
+        gh pr create \
+          --title "Update public develop branch from master" \
+          --body "There is fresh upstream code. Please rebase" \
+          --base develop \
+          --head master \
+        |& tee pr.log \
+        || grep "already exists" pr.log \
+        || (echo "Failed creating PR" ; exit 1 )
+      env:
+        GH_TOKEN: ${{ github.token }}

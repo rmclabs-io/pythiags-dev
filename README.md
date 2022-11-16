@@ -397,6 +397,8 @@ Check out ongoing and future development [here](https://github.com/rmclabs-io/py
 
 ## Contribute
 
+The workflow is slightly different for internal and external constributors. The general steps, however, remain the same:
+
 1. fork
 2. clone
 3. Pull Request from new branch
@@ -408,7 +410,7 @@ Check out ongoing and future development [here](https://github.com/rmclabs-io/py
 8. Commit using
   [Conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summary).
 9. push, wait for ci and/or maintainers feedback
-10. repeat 6-8 until success!
+10. repeat 6-9 until success!
 
 For more instructions, visit the
 [Developers section](https://rmclabs-io.github.io/pythia-docs/development)

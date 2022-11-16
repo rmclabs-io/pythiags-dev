@@ -1,0 +1,23 @@
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  push-private-to-public:
+    if: ${{ github.repository  == 'rmclabs-io/pythiags' }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout private
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: 'master'
+
+    - name: Override public master with private on push
+      run: |
+        git remote add public https://$GITHUB_TOKEN@github.com/rmclabs-io/pythiags-dev.git \
+        && git config --unset-all http.https://github.com/.extraheader \
+        && git push --force -u public master
+      env:
+          GITHUB_TOKEN: ${{ secrets.CR_PAT }}

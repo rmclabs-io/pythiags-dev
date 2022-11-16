@@ -1,0 +1,108 @@
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+jobs:
+  fetch-pythiags-dev-from-pythiags:
+    if: ${{ github.repository  == 'rmclabs-io/pythiags' }}
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: checkout pythiags
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        branch: master
+
+    - name: Generate diff
+      run: |
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git config user.name "github-actions[bot]"
+
+        git remote add pythiags-dev https://github.com/rmclabs-io/pythiags-dev.git
+        git fetch pythiags-dev develop
+        git checkout -b external_pythiags-dev_develop --track pythiags-dev/develop
+        git rebase master
+        git log master..external_pythiags-dev_develop > commits.log
+        git checkout master
+
+    - name: Generate diffs from remote develop
+      id: generate-diff
+      run: |
+        # if commits.log is not empty
+        # then something has changed so we should create an issue
+        # unless there is an issue with same contents...
+        if [ -s commits.log ]; then
+
+          # save preexisting issue body into issues.log
+          # or save empty file if not preexisting
+          # or error message if failed
+          gh issue list \
+            --label sync \
+            --label incoming \
+            --limit 10 \
+            --state open \
+            --json body \
+            --jq .[].body \
+            |& grep -Ev 'commit\s+\w+' | tee issues.log
+
+          # if all of commits.log is contained within issues.log
+          # then nothing has changed so we shouldnt create an issue
+          [ -z $(comm -13 <(sort -u issues.log) <(sort -u commits.log) | grep -Ev 'commit\s+\w+' | tr -d '\n') ] \
+            && echo "INCOMING_COMMITS=nope" | tee -a $GITHUB_OUTPUT \
+            || echo "INCOMING_COMMITS=commits.log" | tee -a $GITHUB_OUTPUT
+        else
+          echo "INCOMING_COMMITS=nope" | tee -a $GITHUB_OUTPUT
+        fi
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Disable previous issues
+      if: ${{ steps.generate-diff.outputs.INCOMING_COMMITS != 'nope' }}
+      run: |
+        export ISSUE_NUMS=$(\
+          gh issue list \
+            --label sync \
+            --label incoming \
+            --state open \
+            --json number \
+            --jq .[].number) \
+        && for issue_number in $ISSUE_NUMS; do
+          gh issue unpin $issue_number 
+          gh issue close $issue_number --reason='not planned' --comment='obsolete'
+        done \
+        || echo "no previous issues found"
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: Create issue body
+      id: issue-file
+      if: ${{ steps.generate-diff.outputs.INCOMING_COMMITS != 'nope' }}
+      run: |
+        python3 -c '\
+        from pathlib import Path
+        print(Path().resolve())
+        Path(
+          ".github/ISSUE_TEMPLATE/public_merge_filled.md"
+        ).write_text(
+          Path(".github/ISSUE_TEMPLATE/public_merge.md").read_text().replace(
+            "{{logs}}", Path("commits.log").read_text()
+          )
+        )
+        '
+
+    - name: Create incoming issue
+      if: ${{ steps.generate-diff.outputs.INCOMING_COMMITS != 'nope' }}
+      run: |
+        gh issue create \
+          --assignee pwoolvett \
+          --label incoming \
+          --label sync \
+          --body-file='.github/ISSUE_TEMPLATE/public_merge_filled.md' \
+          --title='SYNC: Merge required from https://github.com/rmclabs-io/pythiags-dev/tree/develop' \
+        |& tee newissue
+        export ISSUE_NUM=$(grep -Po "(?<=issues/)[0-9]+" newissue)
+        gh issue pin $ISSUE_NUM
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
