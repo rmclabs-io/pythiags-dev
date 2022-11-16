@@ -1,3 +1,5 @@
+name: CRON Create issue to merge pythiags-dev
+
 on:
   workflow_dispatch:
   schedule:
