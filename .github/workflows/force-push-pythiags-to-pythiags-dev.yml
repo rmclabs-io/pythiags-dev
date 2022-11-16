@@ -1,3 +1,5 @@
+name: SYNC outgoing to pythiags-dev
+
 on:
   push:
     branches:

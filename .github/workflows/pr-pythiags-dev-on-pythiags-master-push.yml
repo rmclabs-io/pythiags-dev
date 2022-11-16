@@ -1,3 +1,4 @@
+name: SYNC master to develop on pythiags-dev
 on:
   push:
     branches:
@@ -22,7 +23,6 @@ jobs:
           --base develop \
           --head master \
         |& tee pr.log \
-        || grep "already exists" pr.log \
-        || (echo "Failed creating PR" ; exit 1 )
+        || ( grep "already exists" pr.log || (echo "Failed creating PR" ; exit 1 ) )
       env:
         GH_TOKEN: ${{ github.token }}
