@@ -3,7 +3,7 @@ name: CRON Create issue to merge pythiags-dev
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '0 8 * * *'
 
 jobs:
   fetch-pythiags-dev-from-pythiags:
